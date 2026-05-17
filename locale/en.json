@@ -1,0 +1,89 @@
+{
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "username": "Username",
+    "password": "Password",
+    "loginButton": "Login",
+    "loginError": {
+      "empty": "Please enter username and password",
+      "invalid": "Invalid username or password",
+      "generic": "Login failed, please try again"
+    }
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "sales": "Sales",
+    "purchases": "Purchases",
+    "contacts": "Contacts",
+    "inventory": "Inventory",
+    "production": "Production",
+    "logistics": "Logistics",
+    "settings": "Settings"
+  },
+  "sales": {
+    "quotes": "Quotes",
+    "salesOrders": "Sales Orders",
+    "invoices": "Invoices",
+    "payments": "Payments",
+    "creditNotes": "Credit Notes"
+  },
+  "purchases": {
+    "purchaseOrders": "Purchase Orders",
+    "goodsReceipts": "Goods Receipts",
+    "bills": "Bills",
+    "vendorPayments": "Vendor Payments",
+    "vendorCredits": "Vendor Credits"
+  },
+  "inventory": {
+    "products": "Products",
+    "warehouses": "Warehouses",
+    "adjustments": "Stock Adjustments"
+  },
+  "production": {
+    "orders": "Production Orders"
+  },
+  "logistics": {
+    "outboundOrders": "Outbound Orders",
+    "shipments": "Shipments"
+  },
+  "dashboard": {
+    "welcome": "Welcome back, {{name}}"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "loading": "Loading...",
+    "noData": "No data",
+    "confirm": "Confirm",
+    "back": "Back"
+  },
+  "status": {
+    "draft": "Draft",
+    "sent": "Sent",
+    "accepted": "Accepted",
+    "declined": "Declined",
+    "expired": "Expired",
+    "confirmed": "Confirmed",
+    "closed": "Closed",
+    "cancelled": "Cancelled",
+    "open": "Open",
+    "partiallyPaid": "Partially Paid",
+    "paid": "Paid",
+    "overdue": "Overdue",
+    "voided": "Voided",
+    "issued": "Issued",
+    "received": "Received",
+    "inProgress": "In Progress",
+    "completed": "Completed",
+    "shipped": "Shipped",
+    "delivered": "Delivered",
+    "failed": "Failed"
+  }
+}

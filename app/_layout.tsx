@@ -1,0 +1,31 @@
+import '../global.css';
+import { useEffect } from 'react';
+import { Stack, useRouter, useSegments } from 'expo-router';
+import { useAuthStore } from '@/stores/authStore';
+import { useLocaleStore } from '@/stores/localeStore';
+
+export default function RootLayout() {
+  const { isAuthenticated, isLoading, initialize } = useAuthStore();
+  const initLocale = useLocaleStore((s) => s.initialize);
+  const router = useRouter();
+  const segments = useSegments();
+
+  useEffect(() => {
+    initialize();
+    initLocale();
+  }, []);
+
+  useEffect(() => {
+    if (isLoading) return;
+    const inAuth = segments[0] === '(auth)';
+    if (!isAuthenticated && !inAuth) router.replace('/(auth)/login');
+    if (isAuthenticated && inAuth) router.replace('/(app)');
+  }, [isAuthenticated, isLoading, segments]);
+
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(auth)" />
+      <Stack.Screen name="(app)" />
+    </Stack>
+  );
+}

@@ -1,0 +1,89 @@
+{
+  "auth": {
+    "login": "登录",
+    "logout": "退出登录",
+    "username": "用户名",
+    "password": "密码",
+    "loginButton": "登录",
+    "loginError": {
+      "empty": "请输入用户名和密码",
+      "invalid": "用户名或密码错误",
+      "generic": "登录失败，请重试"
+    }
+  },
+  "nav": {
+    "dashboard": "首页",
+    "sales": "销售",
+    "purchases": "采购",
+    "contacts": "联系人",
+    "inventory": "库存",
+    "production": "生产",
+    "logistics": "物流",
+    "settings": "设置"
+  },
+  "sales": {
+    "quotes": "报价单",
+    "salesOrders": "销售订单",
+    "invoices": "发票",
+    "payments": "收款记录",
+    "creditNotes": "贷项通知单"
+  },
+  "purchases": {
+    "purchaseOrders": "采购订单",
+    "goodsReceipts": "收货单",
+    "bills": "账单",
+    "vendorPayments": "付款记录",
+    "vendorCredits": "供应商贷项"
+  },
+  "inventory": {
+    "products": "产品",
+    "warehouses": "仓库",
+    "adjustments": "库存调整"
+  },
+  "production": {
+    "orders": "生产订单"
+  },
+  "logistics": {
+    "outboundOrders": "出库单",
+    "shipments": "配送单"
+  },
+  "dashboard": {
+    "welcome": "欢迎回来，{{name}}"
+  },
+  "common": {
+    "save": "保存",
+    "cancel": "取消",
+    "delete": "删除",
+    "edit": "编辑",
+    "create": "新建",
+    "search": "搜索",
+    "filter": "筛选",
+    "export": "导出",
+    "loading": "加载中...",
+    "noData": "暂无数据",
+    "confirm": "确认",
+    "back": "返回"
+  },
+  "status": {
+    "draft": "草稿",
+    "sent": "已发送",
+    "accepted": "已接受",
+    "declined": "已拒绝",
+    "expired": "已过期",
+    "confirmed": "已确认",
+    "closed": "已关闭",
+    "cancelled": "已取消",
+    "open": "待付款",
+    "partiallyPaid": "部分付款",
+    "paid": "已付款",
+    "overdue": "已逾期",
+    "voided": "已作废",
+    "issued": "已发出",
+    "received": "已收货",
+    "inProgress": "生产中",
+    "completed": "已完工",
+    "shipped": "已发货",
+    "delivered": "已签收",
+    "failed": "异常"
+  }
+}

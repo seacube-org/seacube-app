@@ -124,6 +124,24 @@ export function getViewSet(baseUrl: string): ViewSet {
   };
 }
 
+export async function uploadFormData<T>(url: string, formData: FormData): Promise<T> {
+  return request<T>(url, { method: 'POST', body: formData });
+}
+
+export async function downloadBlob(url: string, retry = true): Promise<Blob> {
+  const access = tokenStore ? await tokenStore.getAccessToken() : null;
+  const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
+  const headers: Record<string, string> = access ? { Authorization: `Bearer ${access}` } : {};
+  const res = await fetch(fullUrl, { method: 'POST', headers });
+  if (res.status === 401 && retry && tokenStore) {
+    const newAccess = await refreshAccessToken();
+    if (newAccess) return downloadBlob(url, false);
+    throw new AuthError();
+  }
+  if (!res.ok) throw new ApiError(res.status, null, `${res.status} ${res.statusText}`);
+  return res.blob();
+}
+
 export class AuthService {
   static async login(username: string, password: string) {
     const data = await request<{ access: string; refresh: string }>(

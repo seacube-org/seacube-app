@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { useAuthStore } from '@/stores/authStore';
 import { useLocaleStore } from '@/stores/localeStore';
+import ThemeProvider from '@/components/providers/ThemeProvider';
 
 export default function RootLayout() {
   const { isAuthenticated, isLoading, initialize } = useAuthStore();
@@ -22,9 +23,11 @@ export default function RootLayout() {
   }, [isAuthenticated, isLoading, segments, router]);
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(auth)" />
-      <Stack.Screen name="(app)" />
-    </Stack>
+    <ThemeProvider>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="(app)" />
+      </Stack>
+    </ThemeProvider>
   );
 }

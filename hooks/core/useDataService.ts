@@ -29,5 +29,5 @@ export function useDataService() {
     };
   }, [handleError]);
 
-  return { getViewSet: getViewSetSafe, endpoints: API_ENDPOINTS };
+  return { getViewSet: getViewSetSafe, handleError, endpoints: API_ENDPOINTS };
 }

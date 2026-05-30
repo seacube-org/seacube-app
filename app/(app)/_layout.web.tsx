@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
-import { Slot, useRouter, useSegments } from 'expo-router';
+import { Slot, useRouter, useSegments, type Href } from 'expo-router';
 import { useAuthStore } from '@/stores/authStore';
+import { useLocaleStore } from '@/stores/localeStore';
 import i18n from '@/locale/i18n';
 
 type NavItem = {
@@ -30,6 +31,7 @@ const NAV_ITEMS: NavItem[] = [
       { key: 'goodsReceipts', label: () => i18n.t('purchases.goodsReceipts'), route: '/(app)/(purchases)/goods-receipts' },
       { key: 'bills', label: () => i18n.t('purchases.bills'), route: '/(app)/(purchases)/bills' },
       { key: 'vendorPayments', label: () => i18n.t('purchases.vendorPayments'), route: '/(app)/(purchases)/vendor-payments' },
+      { key: 'vendorCredits', label: () => i18n.t('purchases.vendorCredits'), route: '/(app)/(purchases)/vendor-credits' },
     ],
   },
   { key: 'contacts', label: () => i18n.t('nav.contacts'), route: '/(app)/(contacts)' },
@@ -46,12 +48,10 @@ const NAV_ITEMS: NavItem[] = [
   { key: 'settings', label: () => i18n.t('nav.settings'), route: '/(app)/(settings)' },
 ];
 
-function SidebarItem({ item }: { item: NavItem }) {
+function SidebarItem({ item, currentPath }: { item: NavItem; currentPath: string }) {
   const router = useRouter();
-  const segments = useSegments();
   const [expanded, setExpanded] = useState(false);
 
-  const currentPath = '/' + segments.join('/');
   const isActive = currentPath.startsWith(item.route);
 
   if (item.children) {
@@ -72,7 +72,7 @@ function SidebarItem({ item }: { item: NavItem }) {
             <TouchableOpacity
               key={child.key}
               style={[styles.subNavItem, childActive && styles.navItemActive]}
-              onPress={() => router.push(child.route as any)}
+              onPress={() => router.push(child.route as Href)}
             >
               <Text style={[styles.subNavLabel, childActive && styles.navLabelActive]}>
                 {child.label()}
@@ -87,7 +87,7 @@ function SidebarItem({ item }: { item: NavItem }) {
   return (
     <TouchableOpacity
       style={[styles.navItem, isActive && styles.navItemActive]}
-      onPress={() => router.push(item.route as any)}
+      onPress={() => router.push(item.route as Href)}
     >
       <Text style={[styles.navLabel, isActive && styles.navLabelActive]}>
         {item.label()}
@@ -97,8 +97,11 @@ function SidebarItem({ item }: { item: NavItem }) {
 }
 
 export default function WebAppLayout() {
+  useLocaleStore(s => s.locale); // re-render when locale resolves
   const logout = useAuthStore((s) => s.logout);
   const user = useAuthStore((s) => s.user);
+  const segments = useSegments();
+  const currentPath = '/' + segments.join('/');
 
   return (
     <View style={styles.root}>
@@ -108,7 +111,7 @@ export default function WebAppLayout() {
         </View>
         <ScrollView style={styles.nav} showsVerticalScrollIndicator={false}>
           {NAV_ITEMS.map((item) => (
-            <SidebarItem key={item.key} item={item} />
+            <SidebarItem key={item.key} item={item} currentPath={currentPath} />
           ))}
         </ScrollView>
         <View style={styles.footer}>

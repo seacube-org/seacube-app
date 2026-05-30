@@ -11,16 +11,15 @@ export default function RootLayout() {
   const segments = useSegments();
 
   useEffect(() => {
-    initialize();
-    initLocale();
-  }, []);
+    Promise.all([initialize(), initLocale()]);
+  }, [initialize, initLocale]);
 
   useEffect(() => {
     if (isLoading) return;
     const inAuth = segments[0] === '(auth)';
     if (!isAuthenticated && !inAuth) router.replace('/(auth)/login');
     if (isAuthenticated && inAuth) router.replace('/(app)');
-  }, [isAuthenticated, isLoading, segments]);
+  }, [isAuthenticated, isLoading, segments, router]);
 
   return (
     <Stack screenOptions={{ headerShown: false }}>

@@ -1,5 +1,4 @@
 import { API_BASE_URL } from '@/constants/Constants';
-import { devError } from '@/utils/logger';
 
 export class AuthError extends Error {
   constructor() { super('Authentication required'); this.name = 'AuthError'; }
@@ -19,14 +18,16 @@ type TokenStore = {
 };
 
 let tokenStore: TokenStore | null = null;
+let _refreshPromise: Promise<string | null> | null = null;
 
 export function configureDataService(store: TokenStore) {
   tokenStore = store;
 }
 
-async function refreshAccessToken(): Promise<string | null> {
-  if (!tokenStore) return null;
-  const refresh = await tokenStore.getRefreshToken();
+async function _doRefresh(): Promise<string | null> {
+  const store = tokenStore;
+  if (!store) return null;
+  const refresh = await store.getRefreshToken();
   if (!refresh) return null;
 
   const res = await fetch(`${API_BASE_URL}/api/auth/token/refresh/`, {
@@ -36,13 +37,19 @@ async function refreshAccessToken(): Promise<string | null> {
   });
 
   if (!res.ok) {
-    await tokenStore.clearTokens();
+    await store.clearTokens();
     return null;
   }
 
   const data = await res.json();
-  await tokenStore.setTokens(data.access, data.refresh ?? refresh);
+  await store.setTokens(data.access, data.refresh ?? refresh);
   return data.access;
+}
+
+function refreshAccessToken(): Promise<string | null> {
+  if (_refreshPromise) return _refreshPromise;
+  _refreshPromise = _doRefresh().finally(() => { _refreshPromise = null; });
+  return _refreshPromise;
 }
 
 async function request<T>(
@@ -125,7 +132,7 @@ export class AuthService {
       false,
     );
     if (tokenStore) await tokenStore.setTokens(data.access, data.refresh);
-    return data;
+    return AuthService.getMe();
   }
 
   static async logout() {

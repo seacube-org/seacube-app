@@ -1,12 +1,15 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { useAuthStore } from '@/stores/authStore';
+import i18n from '@/locale/i18n';
+import { useLocaleStore } from '@/stores/localeStore';
 
 export default function Dashboard() {
+  useLocaleStore(s => s.locale); // re-render when locale resolves
   const user = useAuthStore((s) => s.user);
   return (
     <View style={styles.container}>
       <Text style={styles.title}>SeaCube ERP</Text>
-      <Text style={styles.subtitle}>欢迎回来，{user?.first_name || user?.username}</Text>
+      <Text style={styles.subtitle}>{i18n.t('dashboard.welcome', { name: user?.first_name || user?.username })}</Text>
     </View>
   );
 }

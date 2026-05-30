@@ -1,21 +1,10 @@
 import { create } from 'zustand';
-import { Platform } from 'react-native';
-import * as SecureStore from 'expo-secure-store';
 import i18n from '@/locale/i18n';
+import { storageGet, storageSet } from '@/utils/storage';
 
 const LOCALE_KEY = 'seacube_locale';
 const SUPPORTED = ['zh-Hans', 'en'] as const;
 type Locale = typeof SUPPORTED[number];
-
-async function getStored(): Promise<string | null> {
-  if (Platform.OS === 'web') return localStorage.getItem(LOCALE_KEY);
-  return SecureStore.getItemAsync(LOCALE_KEY);
-}
-
-async function setStored(locale: string): Promise<void> {
-  if (Platform.OS === 'web') { localStorage.setItem(LOCALE_KEY, locale); return; }
-  await SecureStore.setItemAsync(LOCALE_KEY, locale);
-}
 
 type LocaleState = {
   locale: Locale;
@@ -31,12 +20,13 @@ export const useLocaleStore = create<LocaleState>((set) => ({
   initialize: async () => {
     set({ isLoading: true });
     try {
-      const stored = await getStored();
+      const stored = await storageGet(LOCALE_KEY);
       if (stored && SUPPORTED.includes(stored as Locale)) {
         i18n.locale = stored;
         set({ locale: stored as Locale });
       } else {
-        i18n.locale = 'zh-Hans';
+        const matched = SUPPORTED.includes(i18n.locale as Locale) ? i18n.locale as Locale : 'zh-Hans';
+        set({ locale: matched });
       }
     } finally {
       set({ isLoading: false });
@@ -45,7 +35,7 @@ export const useLocaleStore = create<LocaleState>((set) => ({
 
   changeLocale: async (locale) => {
     i18n.locale = locale;
-    await setStored(locale);
+    await storageSet(LOCALE_KEY, locale);
     set({ locale });
   },
 }));

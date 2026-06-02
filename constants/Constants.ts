@@ -7,7 +7,6 @@ export const API_ENDPOINTS = {
   token: '/api/auth/token/',
   tokenRefresh: '/api/auth/token/refresh/',
   tokenVerify: '/api/auth/token/verify/',
-  register: '/api/auth/register/',
   me: '/api/auth/me/',
   users: '/api/auth/users/',
 

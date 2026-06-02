@@ -15,6 +15,8 @@ type TokenStore = {
   getRefreshToken: () => Promise<string | null>;
   setTokens: (access: string, refresh: string) => Promise<void>;
   clearTokens: () => Promise<void>;
+  /** Active organization id for multi-tenant request scoping (X-Organization-Id). */
+  getActiveOrgId?: () => number | null;
 };
 
 let tokenStore: TokenStore | null = null;
@@ -22,6 +24,11 @@ let _refreshPromise: Promise<string | null> | null = null;
 
 export function configureDataService(store: TokenStore) {
   tokenStore = store;
+}
+
+function activeOrgHeader(): Record<string, string> {
+  const id = tokenStore?.getActiveOrgId?.() ?? null;
+  return id != null ? { 'X-Organization-Id': String(id) } : {};
 }
 
 async function _doRefresh(): Promise<string | null> {
@@ -62,6 +69,7 @@ async function request<T>(
   const headers: Record<string, string> = {
     ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
     ...(access ? { Authorization: `Bearer ${access}` } : {}),
+    ...activeOrgHeader(),
     ...(options.headers as Record<string, string> ?? {}),
   };
 
@@ -131,7 +139,10 @@ export async function uploadFormData<T>(url: string, formData: FormData): Promis
 export async function downloadBlob(url: string, retry = true): Promise<Blob> {
   const access = tokenStore ? await tokenStore.getAccessToken() : null;
   const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
-  const headers: Record<string, string> = access ? { Authorization: `Bearer ${access}` } : {};
+  const headers: Record<string, string> = {
+    ...(access ? { Authorization: `Bearer ${access}` } : {}),
+    ...activeOrgHeader(),
+  };
   const res = await fetch(fullUrl, { method: 'POST', headers });
   if (res.status === 401 && retry && tokenStore) {
     const newAccess = await refreshAccessToken();

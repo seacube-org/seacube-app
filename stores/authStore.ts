@@ -2,19 +2,44 @@ import { create } from 'zustand';
 import { configureDataService, AuthService } from '@/services/DataService';
 import { storageGet, storageSet, storageDel } from '@/utils/storage';
 
-const TOKEN_KEYS = { access: 'seacube_access', refresh: 'seacube_refresh' };
+const TOKEN_KEYS = { access: 'seacube_access', refresh: 'seacube_refresh', activeOrg: 'seacube_active_org' };
 
-type User = { id: number; username: string; email: string; first_name: string; last_name: string; role?: unknown };
+export type Membership = {
+  id: number;
+  organization: { id: number; name: string };
+  role?: { id: number; name: string; role_type: string } | null;
+  profile?: { module_permissions: Record<string, string[]> } | null;
+  is_default: boolean;
+};
+
+type User = {
+  id: number;
+  username: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  is_staff: boolean;
+  memberships?: Membership[];
+};
 
 type AuthState = {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  activeOrgId: number | null;
   initialize: () => Promise<void>;
   login: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   fetchMe: () => Promise<void>;
+  setActiveOrg: (id: number) => Promise<void>;
 };
+
+/** Pick the active org id: persisted value if still a valid membership, else the default membership. */
+function resolveActiveOrg(memberships: Membership[] | undefined, persisted: number | null): number | null {
+  if (!memberships || memberships.length === 0) return null;
+  if (persisted != null && memberships.some((m) => m.organization.id === persisted)) return persisted;
+  return (memberships.find((m) => m.is_default) ?? memberships[0]).organization.id;
+}
 
 export const useAuthStore = create<AuthState>((set, get) => {
   configureDataService({
@@ -28,12 +53,21 @@ export const useAuthStore = create<AuthState>((set, get) => {
       await storageDel(TOKEN_KEYS.access);
       await storageDel(TOKEN_KEYS.refresh);
     },
+    getActiveOrgId: () => get().activeOrgId,
   });
+
+  const applyUser = async (user: User) => {
+    const persisted = Number(await storageGet(TOKEN_KEYS.activeOrg)) || null;
+    const activeOrgId = resolveActiveOrg(user.memberships, persisted);
+    if (activeOrgId != null) await storageSet(TOKEN_KEYS.activeOrg, String(activeOrgId));
+    set({ user, isAuthenticated: true, activeOrgId });
+  };
 
   return {
     user: null,
     isAuthenticated: false,
     isLoading: true,
+    activeOrgId: null,
 
     initialize: async () => {
       set({ isLoading: true });
@@ -41,7 +75,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
         const access = await storageGet(TOKEN_KEYS.access);
         if (access) {
           const user = await AuthService.getMe() as User;
-          set({ user, isAuthenticated: true });
+          await applyUser(user);
         }
       } catch {
         await get().logout();
@@ -52,17 +86,23 @@ export const useAuthStore = create<AuthState>((set, get) => {
 
     login: async (username, password) => {
       const user = await AuthService.login(username, password) as User;
-      set({ user, isAuthenticated: true });
+      await applyUser(user);
     },
 
     logout: async () => {
       await AuthService.logout();
-      set({ user: null, isAuthenticated: false });
+      await storageDel(TOKEN_KEYS.activeOrg);
+      set({ user: null, isAuthenticated: false, activeOrgId: null });
     },
 
     fetchMe: async () => {
       const user = await AuthService.getMe() as User;
-      set({ user });
+      await applyUser(user);
+    },
+
+    setActiveOrg: async (id) => {
+      await storageSet(TOKEN_KEYS.activeOrg, String(id));
+      set({ activeOrgId: id });
     },
   };
 });

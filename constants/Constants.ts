@@ -12,6 +12,7 @@ export const API_ENDPOINTS = {
 
   // Core
   organizations: '/api/core/organizations/',
+  addresses: '/api/core/addresses/',
   contentTypes: '/api/core/content-types/',
 
   // Infrastructure

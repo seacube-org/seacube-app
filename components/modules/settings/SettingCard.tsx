@@ -8,6 +8,8 @@ type Props = {
   extra?: ReactNode;
   /** Optional body rendered below the title/description row. */
   children?: ReactNode;
+  /** When set, the whole card becomes clickable (hover affordance + handler). */
+  onClick?: () => void;
 };
 
 /**
@@ -15,9 +17,11 @@ type Props = {
  * left, an action on the right, with an optional body underneath. Pages stack
  * these in a single column.
  */
-export function SettingCard({ title, description, extra, children }: Props) {
+export function SettingCard({ title, description, extra, children, onClick }: Props) {
   return (
     <Card
+      hoverable={onClick != null}
+      onClick={onClick}
       style={{
         marginBottom: 16,
         borderRadius: 10,

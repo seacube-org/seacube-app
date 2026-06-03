@@ -115,19 +115,25 @@ function buildQuery(params?: Record<string, string | number | boolean>): string 
   return qs ? `?${qs}` : '';
 }
 
+// FormData passes through untouched (multipart, e.g. file uploads); everything
+// else is JSON-encoded. request() sets the matching Content-Type either way.
+function serializeBody(body: unknown): BodyInit {
+  return body instanceof FormData ? body : JSON.stringify(body);
+}
+
 export function getViewSet(baseUrl: string): ViewSet {
   const base = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
 
   return {
     list: (opts) => request(`${base}${buildQuery(opts?.params)}`),
     retrieve: ({ id, ...opts }) => request(`${base}${id}/${buildQuery(opts?.params)}`),
-    create: ({ body }) => request(base, { method: 'POST', body: JSON.stringify(body) }),
-    update: ({ id, body }) => request(`${base}${id}/`, { method: 'PATCH', body: JSON.stringify(body) }),
+    create: ({ body }) => request(base, { method: 'POST', body: serializeBody(body) }),
+    update: ({ id, body }) => request(`${base}${id}/`, { method: 'PATCH', body: serializeBody(body) }),
     delete: ({ id }) => request(`${base}${id}/`, { method: 'DELETE' }),
     options: () => request(base, { method: 'OPTIONS' }),
     action: ({ id, action, method = 'POST', body, params }) => {
       const url = id ? `${base}${id}/${action}/${buildQuery(params)}` : `${base}${action}/${buildQuery(params)}`;
-      return request(url, { method, ...(body ? { body: JSON.stringify(body) } : {}) });
+      return request(url, { method, ...(body !== undefined ? { body: serializeBody(body) } : {}) });
     },
   };
 }

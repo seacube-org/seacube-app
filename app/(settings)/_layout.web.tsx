@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Menu, Modal, Typography, theme } from "antd";
-import { ArrowLeftOutlined, UserOutlined, SafetyOutlined, BankOutlined, TeamOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, UserOutlined, SafetyOutlined, BankOutlined, TeamOutlined, EnvironmentOutlined } from "@ant-design/icons";
 import { Slot, useRouter, useSegments } from "expo-router";
 import type { Href } from "expo-router";
 import { useAuthStore, useActiveMembership, useIsActiveAdmin } from "@/stores/authStore";
@@ -22,6 +22,7 @@ const SECTIONS = [
   { key: "general", route: "/(settings)/general", icon: UserOutlined, label: () => i18n.t("settings.general", { defaultValue: "基础设置" }) },
   { key: "security", route: "/(settings)/security", icon: SafetyOutlined, label: () => i18n.t("settings.security", { defaultValue: "安全设置" }) },
   { key: "organizations", route: "/(settings)/organizations", icon: BankOutlined, label: () => i18n.t("settings.organizations", { defaultValue: "我的机构" }) },
+  { key: "addresses", route: "/(settings)/addresses", icon: EnvironmentOutlined, label: () => i18n.t("settings.addresses", { defaultValue: "地址簿" }) },
   { key: "access", route: "/(settings)/access", icon: TeamOutlined, adminOnly: true, label: () => i18n.t("settings.access", { defaultValue: "用户与权限" }) },
 ];
 

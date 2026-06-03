@@ -47,7 +47,7 @@ export const ITEM_ROUTES: Record<string, string> = {
   adjustments: "/(app)/(inventory)/adjustments",
   production: "/(app)/(production)",
   logistics: "/(app)/(logistics)",
-  settings: "/(app)/(settings)",
+  settings: "/(settings)",
 };
 
 export const PAGE_TO_KEY: Record<string, string> = {

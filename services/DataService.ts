@@ -171,4 +171,12 @@ export class AuthService {
   static async getMe() {
     return request('/api/auth/me/');
   }
+
+  static async updateMe(body: Record<string, unknown>) {
+    return request('/api/auth/me/', { method: 'PATCH', body: JSON.stringify(body) });
+  }
+
+  static async changePassword(body: Record<string, unknown>) {
+    return request('/api/auth/change-password/', { method: 'PUT', body: JSON.stringify(body) });
+  }
 }

@@ -13,7 +13,6 @@ export default function AppLayout() {
       <Tabs.Screen name="(inventory)" options={{ title: i18n.t('nav.inventory'), href: null }} />
       <Tabs.Screen name="(production)" options={{ title: i18n.t('nav.production'), href: null }} />
       <Tabs.Screen name="(logistics)" options={{ title: i18n.t('nav.logistics'), href: null }} />
-      <Tabs.Screen name="(settings)" options={{ title: i18n.t('nav.settings'), href: null }} />
     </Tabs>
   );
 }

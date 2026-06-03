@@ -1,17 +1,9 @@
-import type { MouseEvent } from "react";
 import { Layout, Avatar, Typography } from "antd";
 import { SettingOutlined, BankOutlined, DownOutlined } from "@ant-design/icons";
 import { colors } from "@/constants/theme";
 import i18n from "@/locale/i18n";
 import { HEADER_HEIGHT, SIDER_WIDTH, SIDER_COLLAPSED_WIDTH } from "./constants";
-
-/** Returns onMouseEnter/Leave handlers that apply the given inline styles on hover. */
-function hover(enter: Record<string, string>, leave: Record<string, string>) {
-  return {
-    onMouseEnter: (e: MouseEvent<HTMLElement>) => Object.assign(e.currentTarget.style, enter),
-    onMouseLeave: (e: MouseEvent<HTMLElement>) => Object.assign(e.currentTarget.style, leave),
-  };
-}
+import { hover } from "./hover";
 
 type Props = {
   collapsed: boolean;

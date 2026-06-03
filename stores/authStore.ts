@@ -18,6 +18,7 @@ type User = {
   email: string;
   first_name: string;
   last_name: string;
+  phone: string;
   is_staff: boolean;
   memberships?: Membership[];
 };
@@ -31,6 +32,7 @@ type AuthState = {
   login: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   fetchMe: () => Promise<void>;
+  updateProfile: (body: Partial<Pick<User, 'email' | 'first_name' | 'last_name' | 'phone'>>) => Promise<void>;
   setActiveOrg: (id: number) => Promise<void>;
 };
 
@@ -97,6 +99,11 @@ export const useAuthStore = create<AuthState>((set, get) => {
 
     fetchMe: async () => {
       const user = await AuthService.getMe() as User;
+      await applyUser(user);
+    },
+
+    updateProfile: async (body) => {
+      const user = await AuthService.updateMe(body) as User;
       await applyUser(user);
     },
 

@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { App, Button, Popconfirm, Space, Table, Tag, Typography } from "antd";
+import { App, Button, Space, Table, Tag, Typography } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useAuthStore } from "@/stores/authStore";
 import { useLocaleStore } from "@/stores/localeStore";
 import i18n from "@/locale/i18n";
-import { useAccessViewSets, rows, fetchManifest, type Profile, type ManifestModule } from "./shared";
+import { useAccessViewSets, rows, fetchManifest, FETCH_ALL, ACCESS_PAGINATION, type Profile, type ManifestModule } from "./shared";
 import ProfilePermissionEditor from "./ProfilePermissionEditor";
+import { ConfirmDeleteButton } from "./ConfirmDeleteButton";
 
 export default function ProfilesTab() {
   const locale = useLocaleStore((s) => s.locale);
@@ -21,7 +22,7 @@ export default function ProfilesTab() {
   const reload = useCallback(async () => {
     setLoading(true);
     try {
-      setProfiles(rows<Profile>(await profilesVS.list()));
+      setProfiles(rows<Profile>(await profilesVS.list({ params: FETCH_ALL })));
     } catch {
       message.error(i18n.t("access.loadFailed", { defaultValue: "加载失败" }));
     } finally {
@@ -65,14 +66,12 @@ export default function ProfilesTab() {
               {i18n.t("access.editPermissions", { defaultValue: "编辑权限" })}
             </Button>
             {!p.is_system && (
-              <Popconfirm
+              <ConfirmDeleteButton
+                link
                 title={i18n.t("access.deleteProfileConfirm", { defaultValue: "确认删除此权限方案？" })}
                 onConfirm={() => remove(p.id)}
-                okText={i18n.t("common.confirm", { defaultValue: "确认" })}
-                cancelText={i18n.t("common.cancel", { defaultValue: "取消" })}
-              >
-                <Button type="link" danger style={{ padding: 0 }}>{i18n.t("access.delete", { defaultValue: "删除" })}</Button>
-              </Popconfirm>
+                label={i18n.t("access.delete", { defaultValue: "删除" })}
+              />
             )}
           </Space>
         ) },
@@ -88,7 +87,7 @@ export default function ProfilesTab() {
           {i18n.t("access.newProfile", { defaultValue: "新建权限方案" })}
         </Button>
       </div>
-      <Table rowKey="id" loading={loading} columns={columns} dataSource={profiles} pagination={false} />
+      <Table rowKey="id" loading={loading} columns={columns} dataSource={profiles} pagination={ACCESS_PAGINATION} />
       <ProfilePermissionEditor
         open={editorOpen}
         profile={editing}

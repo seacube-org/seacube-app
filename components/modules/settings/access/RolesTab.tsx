@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { App, Button, Drawer, Form, Input, Popconfirm, Select, Space, Switch, Table, Tag, Typography } from "antd";
+import { App, Button, Drawer, Form, Input, Select, Space, Switch, Table, Tag, Typography } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useAuthStore } from "@/stores/authStore";
 import { useLocaleStore } from "@/stores/localeStore";
 import i18n from "@/locale/i18n";
 import { applyFieldErrors } from "@/components/modules/settings/formErrors";
-import { useAccessViewSets, rows, roleTypeLabel, ROLE_TYPE_OPTIONS, type Role } from "./shared";
+import { useAccessViewSets, rows, roleTypeLabel, roleTypeColor, ROLE_TYPE_OPTIONS, FETCH_ALL, ACCESS_PAGINATION, type Role } from "./shared";
+import { ConfirmDeleteButton } from "./ConfirmDeleteButton";
 
 function RoleDrawer({
   open, role, roles, onClose, onSaved,
@@ -119,7 +120,7 @@ export default function RolesTab() {
   const reload = useCallback(async () => {
     setLoading(true);
     try {
-      setRoles(rows<Role>(await rolesVS.list()));
+      setRoles(rows<Role>(await rolesVS.list({ params: FETCH_ALL })));
     } catch {
       message.error(i18n.t("access.loadFailed", { defaultValue: "加载失败" }));
     } finally {
@@ -149,7 +150,7 @@ export default function RolesTab() {
       { title: i18n.t("access.roleName", { defaultValue: "角色名称" }), dataIndex: "name", key: "name",
         render: (v: string) => <Typography.Text strong>{v}</Typography.Text> },
       { title: i18n.t("access.roleType", { defaultValue: "类型" }), key: "role_type",
-        render: (_: unknown, r: Role) => <Tag color={r.role_type === "ADMIN" ? "gold" : r.role_type === "MANAGER" ? "blue" : "default"}>{roleTypeLabel(r.role_type)}</Tag> },
+        render: (_: unknown, r: Role) => <Tag color={roleTypeColor(r.role_type)}>{roleTypeLabel(r.role_type)}</Tag> },
       { title: i18n.t("access.parentRole", { defaultValue: "上级角色" }), key: "parent",
         render: (_: unknown, r: Role) => r.parent ? (nameById.get(r.parent) ?? `#${r.parent}`) : <Typography.Text type="secondary">—</Typography.Text> },
       { title: i18n.t("access.peerVisible", { defaultValue: "同级互相可见" }), key: "peer", width: 120,
@@ -162,14 +163,12 @@ export default function RolesTab() {
             <Button type="link" style={{ padding: 0 }} onClick={() => { setEditing(r); setModalOpen(true); }}>
               {i18n.t("common.edit", { defaultValue: "编辑" })}
             </Button>
-            <Popconfirm
+            <ConfirmDeleteButton
+              link
               title={i18n.t("access.deleteRoleConfirm", { defaultValue: "确认删除此角色？" })}
               onConfirm={() => remove(r.id)}
-              okText={i18n.t("common.confirm", { defaultValue: "确认" })}
-              cancelText={i18n.t("common.cancel", { defaultValue: "取消" })}
-            >
-              <Button type="link" danger style={{ padding: 0 }}>{i18n.t("access.delete", { defaultValue: "删除" })}</Button>
-            </Popconfirm>
+              label={i18n.t("access.delete", { defaultValue: "删除" })}
+            />
           </Space>
         ) },
     ],
@@ -184,7 +183,7 @@ export default function RolesTab() {
           {i18n.t("access.newRole", { defaultValue: "新建角色" })}
         </Button>
       </div>
-      <Table rowKey="id" loading={loading} columns={columns} dataSource={roles} pagination={false} />
+      <Table rowKey="id" loading={loading} columns={columns} dataSource={roles} pagination={ACCESS_PAGINATION} />
       <RoleDrawer open={modalOpen} role={editing} roles={roles} onClose={() => setModalOpen(false)} onSaved={afterMutation} />
     </>
   );

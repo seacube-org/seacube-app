@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { App, Button, Drawer, Form, Input, Select, Space, Tag, Typography, theme } from "antd";
+import { App, Button, Checkbox, Drawer, Dropdown, Form, Input, Space, Switch, Tag, Typography, theme } from "antd";
+import { DownOutlined } from "@ant-design/icons";
 import { useLocaleStore } from "@/stores/localeStore";
 import i18n from "@/locale/i18n";
 import { applyFieldErrors } from "@/components/modules/settings/formErrors";
 import {
-  useAccessViewSets, permLevelLabel, actionsToLevel, levelToActions, PERM_LEVELS,
-  type Profile, type ManifestModule, type PermLevel,
+  useAccessViewSets, PERM_ACTIONS, actionLabel, actionsSummary,
+  sectionLabel, moduleLabel,
+  type Profile, type ManifestModule,
 } from "./shared";
 
 type Section = { section: string; modules: ManifestModule[] };
@@ -21,8 +23,6 @@ function groupSections(manifest: ManifestModule[]): Section[] {
   }
   return out;
 }
-
-const levelOptions = () => PERM_LEVELS.map((l) => ({ value: l, label: permLevelLabel(l) }));
 
 export default function ProfilePermissionEditor({
   open, profile, manifest, onClose, onSaved,
@@ -50,14 +50,17 @@ export default function ProfilePermissionEditor({
 
   const sections = useMemo(() => groupSections(manifest), [manifest]);
 
-  const setModuleLevel = (key: string, level: PermLevel) =>
-    setPerms((prev) => ({ ...prev, [key]: levelToActions(level) }));
+  // Module on/off: enabling grants full access (then the admin unchecks actions).
+  const toggleModule = (key: string, on: boolean) =>
+    setPerms((prev) => ({ ...prev, [key]: on ? [...PERM_ACTIONS] : [] }));
 
-  const setSectionLevel = (section: Section, level: PermLevel) =>
+  const setModuleActions = (key: string, vals: string[]) =>
     setPerms((prev) => {
-      const next = { ...prev };
-      for (const m of section.modules) next[m.key] = levelToActions(level);
-      return next;
+      const set = new Set(vals);
+      // 'view' is implied by any write action — the menu only exposes view-able
+      // modules, so write-without-view would be unreachable yet over-permissive.
+      if (set.has("create") || set.has("update") || set.has("delete")) set.add("view");
+      return { ...prev, [key]: PERM_ACTIONS.filter((a) => set.has(a)) };
     });
 
   const save = async () => {
@@ -141,37 +144,49 @@ export default function ProfilePermissionEditor({
       </Typography.Title>
 
       {sections.map((sec) => (
-        <div key={sec.section} style={{ marginBottom: 8 }}>
-          <div
-            style={{
-              display: "flex", alignItems: "center", justifyContent: "space-between",
-              padding: "8px 0", borderBottom: `1px solid ${token.colorBorderSecondary}`,
-            }}
-          >
-            <Typography.Text strong type="secondary" style={{ textTransform: "uppercase", fontSize: 12, letterSpacing: 0.5 }}>
-              {sec.section}
+        <div key={sec.section} style={{ marginBottom: 16 }}>
+          <div style={{ padding: "8px 0", borderBottom: `1px solid ${token.colorBorderSecondary}`, marginBottom: 4 }}>
+            <Typography.Text strong style={{ fontSize: 14 }}>
+              {sectionLabel(sec.section)}
             </Typography.Text>
-            <Select
-              size="small"
-              style={{ width: 120 }}
-              placeholder={i18n.t("access.setAll", { defaultValue: "全部设为" })}
-              value={undefined}
-              options={levelOptions()}
-              onChange={(lvl: PermLevel) => setSectionLevel(sec, lvl)}
-            />
           </div>
-          {sec.modules.map((m) => (
-            <div key={m.key} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0" }}>
-              <Typography.Text>{m.label}</Typography.Text>
-              <Select
-                size="small"
-                style={{ width: 150 }}
-                value={actionsToLevel(perms[m.key])}
-                options={levelOptions()}
-                onChange={(lvl: PermLevel) => setModuleLevel(m.key, lvl)}
-              />
-            </div>
-          ))}
+          {sec.modules.map((m) => {
+            const acts = perms[m.key] ?? [];
+            const on = acts.length > 0;
+            return (
+              <div key={m.key} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0" }}>
+                <Typography.Text>{moduleLabel(m.key, m.label)}</Typography.Text>
+                <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                  <Switch size="small" checked={on} onChange={(checked) => toggleModule(m.key, checked)} />
+                  {on && (
+                    <Dropdown
+                      trigger={["click"]}
+                      popupRender={() => (
+                        <div style={{ background: token.colorBgElevated, borderRadius: 8, boxShadow: token.boxShadowSecondary, padding: "10px 14px", minWidth: 140 }}>
+                          <Checkbox.Group
+                            value={acts}
+                            options={PERM_ACTIONS.map((a) => ({
+                              label: actionLabel(a),
+                              value: a,
+                              // Lock 'view' on while any write action is selected.
+                              disabled: a === "view" && acts.some((x) => x !== "view"),
+                            }))}
+                            onChange={(vals) => setModuleActions(m.key, vals as string[])}
+                            style={{ display: "flex", flexDirection: "column", gap: 8 }}
+                          />
+                        </div>
+                      )}
+                    >
+                      <span style={{ cursor: "pointer", color: token.colorPrimary, display: "inline-flex", alignItems: "center", gap: 4, fontSize: 13 }}>
+                        {actionsSummary(acts)}
+                        <DownOutlined style={{ fontSize: 10 }} />
+                      </span>
+                    </Dropdown>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
       ))}
     </Drawer>

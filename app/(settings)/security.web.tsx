@@ -35,7 +35,7 @@ function PasswordForm({ onDone }: { onDone: () => void }) {
   };
 
   return (
-    <Form form={form} layout="vertical" onFinish={onFinish} requiredMark={false}>
+    <Form form={form} layout="vertical" onFinish={onFinish}>
       <Form.Item
         name="old_password"
         label={i18n.t("account.currentPassword", { defaultValue: "当前密码" })}

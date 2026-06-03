@@ -3,7 +3,7 @@ import { Layout, Menu, Modal, theme } from "antd";
 import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
 import { Slot, useRouter, useSegments } from "expo-router";
 import type { Href } from "expo-router";
-import { useAuthStore } from "@/stores/authStore";
+import { useAuthStore, useActiveMembership, useIsActiveAdmin } from "@/stores/authStore";
 import { useLocaleStore } from "@/stores/localeStore";
 import { AppHeader } from "@/components/modules/layout/AppHeader";
 import { UserDrawer } from "@/components/modules/layout/UserDrawer";
@@ -25,13 +25,13 @@ export default function WebAppLayout() {
   const { token } = theme.useToken();
 
   const memberships = user?.memberships ?? [];
-  const activeMembership = memberships.find((m) => m.organization.id === activeOrgId);
+  const activeMembership = useActiveMembership();
   const activeOrgName = activeMembership?.organization.name ?? "SeaCube";
   // Permissions are per-organization: drive the menu from the active membership's profile.
   const perms = activeMembership?.profile?.module_permissions;
   // is_staff / superuser / active ADMIN role bypass profile checks on the backend,
   // so they get the full menu even when the membership profile is null.
-  const elevated = !!user?.is_staff || activeMembership?.role?.role_type === "ADMIN";
+  const elevated = useIsActiveAdmin();
 
   const [collapsed, setCollapsed] = useState(false);
   const [userDrawerOpen, setUserDrawerOpen] = useState(false);

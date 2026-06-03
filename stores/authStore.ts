@@ -113,3 +113,15 @@ export const useAuthStore = create<AuthState>((set, get) => {
     },
   };
 });
+
+/** The membership for the user's currently active organization (or null). */
+export const useActiveMembership = () =>
+  useAuthStore((s) => s.user?.memberships?.find((m) => m.organization.id === s.activeOrgId) ?? null);
+
+/** Whether the active user is an admin of the active org (or platform staff) — mirrors backend IsAdminRole. */
+export const useIsActiveAdmin = () =>
+  useAuthStore((s) => {
+    if (s.user?.is_staff) return true;
+    const m = s.user?.memberships?.find((mm) => mm.organization.id === s.activeOrgId);
+    return m?.role?.role_type === "ADMIN";
+  });

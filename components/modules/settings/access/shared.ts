@@ -30,6 +30,10 @@ export function useAccessViewSets() {
 
 type ListViewSet = { list: () => Promise<unknown> };
 
+// Canonical DRF list-unwrap lives in utils; re-exported here so existing
+// `import { rows } from ".../access/shared"` call sites keep working.
+export { rows } from "@/utils/pagination";
+
 // Fetch all rows in one page: roles/profiles also feed the drawer dropdowns, so
 // they must be complete, and the users table shouldn't silently truncate to 20.
 // Capped by the backend's max_page_size (1000).
@@ -70,13 +74,6 @@ export type Member = {
 };
 
 export type ManifestModule = { key: string; label: string; section: string };
-
-/** DRF list endpoints are paginated ({results}); a few aren't. Unwrap either. */
-export function rows<T>(res: unknown): T[] {
-  if (Array.isArray(res)) return res as T[];
-  const r = (res as { results?: T[] } | null)?.results;
-  return Array.isArray(r) ? r : [];
-}
 
 export async function fetchManifest(manifestVS: ListViewSet): Promise<ManifestModule[]> {
   const data = (await manifestVS.list()) as { modules?: ManifestModule[] };

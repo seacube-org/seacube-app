@@ -125,3 +125,16 @@ export const useIsActiveAdmin = () =>
     const m = s.user?.memberships?.find((mm) => mm.organization.id === s.activeOrgId);
     return m?.role?.role_type === "ADMIN";
   });
+
+/**
+ * Whether the active user may perform `action` (view/create/update/delete) on a
+ * module. Elevated users (staff / active ADMIN) bypass profile checks — mirrors
+ * backend HasModulePermission. Use to hide mutation controls a user can't use.
+ */
+export const useCan = (moduleKey: string, action: string) =>
+  useAuthStore((s) => {
+    if (s.user?.is_staff) return true;
+    const m = s.user?.memberships?.find((mm) => mm.organization.id === s.activeOrgId);
+    if (m?.role?.role_type === "ADMIN") return true;
+    return (m?.profile?.module_permissions?.[moduleKey] ?? []).includes(action);
+  });

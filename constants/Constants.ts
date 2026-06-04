@@ -25,6 +25,11 @@ export const API_ENDPOINTS = {
   accounts: '/api/accounting/accounts/',
   journalEntries: '/api/accounting/journal-entries/',
 
+  // Preferences (per-user personalization: saved views/filters, UI state)
+  savedViews: '/api/preferences/views/',
+  savedViewFields: '/api/preferences/fields/',
+  uiState: '/api/preferences/ui-state/',
+
   // Contacts
   contacts: '/api/contacts/contacts/',
 

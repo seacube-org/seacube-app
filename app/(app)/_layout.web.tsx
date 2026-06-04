@@ -56,7 +56,9 @@ export default function WebAppLayout() {
     const mod = segs[1]?.replace(/[()]/g, "");
     const page = segs[2];
     if (!mod) return { selectedKeys: ["dashboard"], activeModule: null };
-    if (!page) return { selectedKeys: [mod], activeModule: mod };
+    // A dynamic detail segment (e.g. (contacts)/[id]) still belongs to its module,
+    // so keep the parent menu item highlighted instead of de-selecting everything.
+    if (!page || page.startsWith("[")) return { selectedKeys: [mod], activeModule: mod };
     return { selectedKeys: [PAGE_TO_KEY[page] ?? page], activeModule: mod };
   }, [segments]);
 
@@ -133,26 +135,51 @@ export default function WebAppLayout() {
           width={SIDER_WIDTH}
           collapsedWidth={SIDER_COLLAPSED_WIDTH}
           theme="light"
-          style={{ borderInlineEnd: `1px solid ${token.colorBorderSecondary}`, overflow: "auto" }}
-          trigger={
-            <div style={{ borderTop: `1px solid ${token.colorBorderSecondary}`, color: token.colorTextSecondary, fontSize: 14 }}>
-              {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-            </div>
-          }
+          trigger={null}
+          style={{
+            borderInlineEnd: `1px solid ${token.colorBorderSecondary}`,
+            background: token.colorBgContainer,
+            display: "flex",
+            flexDirection: "column",
+            minHeight: 0,
+            overflow: "hidden",
+          }}
         >
-          <Menu
-            mode="inline"
-            theme="light"
-            selectedKeys={selectedKeys}
-            openKeys={collapsed ? [] : openKeys}
-            onOpenChange={(keys) => setUserOpenKeys(keys as string[])}
-            onSelect={({ key }) => {
-              const route = ITEM_ROUTES[key];
-              if (route) router.push(route as Href);
-            }}
-            items={menuItems}
-            style={{ borderInlineEnd: 0 }}
-          />
+          <div style={{ height: "100%", minHeight: 0, display: "flex", flexDirection: "column" }}>
+            <div style={{ flex: 1, minHeight: 0, overflow: "auto" }}>
+              <Menu
+                mode="inline"
+                theme="light"
+                selectedKeys={selectedKeys}
+                openKeys={collapsed ? [] : openKeys}
+                onOpenChange={(keys) => setUserOpenKeys(keys as string[])}
+                onSelect={({ key }) => {
+                  const route = ITEM_ROUTES[key];
+                  if (route) router.push(route as Href);
+                }}
+                items={menuItems}
+                style={{ borderInlineEnd: 0 }}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => setCollapsed((v) => !v)}
+              title={collapsed ? i18n.t("common.expand", { defaultValue: "展开" }) : i18n.t("common.collapse", { defaultValue: "收起" })}
+              style={{
+                height: 38,
+                width: "100%",
+                flexShrink: 0,
+                border: 0,
+                borderTop: `1px solid ${token.colorBorderSecondary}`,
+                background: token.colorBgContainer,
+                color: token.colorTextSecondary,
+                cursor: "pointer",
+                fontSize: 14,
+              }}
+            >
+              {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+            </button>
+          </div>
         </Layout.Sider>
 
         <Layout.Content

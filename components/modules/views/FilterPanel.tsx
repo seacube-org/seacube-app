@@ -77,9 +77,8 @@ export default function FilterPanel({
       open={open}
       onClose={onClose}
       placement="left"
-      width={400}
       title={i18n.t("views.filterTitle", { defaultValue: "筛选" })}
-      styles={{ body: { paddingTop: 12 }, footer: { padding: 12 } }}
+      styles={{ wrapper: { width: 400 }, body: { paddingTop: 12 }, footer: { padding: 12 } }}
       footer={
         <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
           <Button onClick={() => { setCriteria([]); }}>{i18n.t("views.clear", { defaultValue: "清除" })}</Button>
@@ -139,7 +138,8 @@ export default function FilterPanel({
           value={sortField || undefined}
           onChange={(f) => setSort(f, sortDesc)}
           placeholder={i18n.t("views.sortField", { defaultValue: "排序字段" })}
-          options={allColumns.map((c) => ({ value: c.key, label: c.label }))}
+          // Sort options are the *sortable* fields (≠ the listable column set).
+          options={fields.filter((f) => f.sortable !== false).map((f) => ({ value: f.name, label: labelFor(f) }))}
         />
         <Segmented
           value={sortDesc ? "desc" : "asc"}

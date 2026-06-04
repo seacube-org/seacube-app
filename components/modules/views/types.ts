@@ -11,9 +11,13 @@ export type FieldDef = {
   label: string;
   type: FieldType;
   operators: OperatorDef[];        // value + value-arity, server-driven
-  choices?: { value: string; label: string }[] | null;
+  choices?: { value: string; label: string; color?: string }[] | null;  // color: optional Tag color (from OptionSet meta)
   sortable?: boolean;
   searchable?: boolean;
+  // List-column metadata (schema-driven table) — see docs/schema-driven-columns.md.
+  listable?: boolean;              // may be a table column (ColumnPicker)
+  width?: number | null;           // default column width (px)
+  align?: "left" | "right" | "center" | null;
 };
 
 export type Visibility = "private" | "shared";
@@ -26,7 +30,10 @@ export function arityOf(field: FieldDef | undefined, operator: string): Operator
 export type Criterion = { field: string; operator: string; value: unknown };
 export type ViewMatch = "all" | "any";
 
-/** A stored, user-created view (backend SavedView). */
+/**
+ * A stored view (backend SavedView). Built-in views are `is_system` rows seeded
+ * globally — same shape, just non-editable; their `name` arrives localized.
+ */
 export type SavedView = {
   id: number;
   entity: string;
@@ -41,24 +48,9 @@ export type SavedView = {
   is_favorite: boolean;
   is_default: boolean;
   is_mine: boolean;
+  is_system: boolean;   // seeded built-in (All/Customers/...) — non-editable
+  system_key: string;   // stable id for system rows ('all' | 'customers' | ...)
 };
-
-/** A virtual built-in view — frontend-only, never stored. */
-export type SystemView = {
-  key: string;            // 'all' | 'customers' | 'vendors'
-  name: string;
-  match: ViewMatch;
-  criteria: Criterion[];
-};
-
-/** The thing the toolbar/page treats as "currently applied". */
-export type ActiveView =
-  | { kind: "system"; view: SystemView }
-  | { kind: "saved"; view: SavedView };
-
-export function activeViewId(active: ActiveView): string {
-  return active.kind === "system" ? `sys:${active.view.key}` : `view:${active.view.id}`;
-}
 
 /** What a list page applies to its table: filter criteria + columns + sort. */
 export type FilterValue = {
@@ -70,7 +62,9 @@ export type FilterValue = {
 
 /** Project a stored view onto the comparable FilterValue (drops view-only metadata). */
 export function viewToFilter(v: SavedView): FilterValue {
-  return { match: v.match, criteria: v.criteria ?? [], columns: v.columns ?? [], ordering: v.ordering || "name" };
+  // Empty ordering = no explicit sort (the backend still name-orders via Meta);
+  // this keeps the column header sort cancellable instead of snapping back to name.
+  return { match: v.match, criteria: v.criteria ?? [], columns: v.columns ?? [], ordering: v.ordering || "" };
 }
 
 /** Stable equality for two FilterValues (fixed key order via the projection). */

@@ -1,8 +1,8 @@
 import { type ReactNode } from "react";
-import { Button, Typography } from "antd";
+import { Button, Card } from "antd";
 import { MinusCircleOutlined } from "@ant-design/icons";
 
-/** Bordered card with a "<title>" header + remove button — one row of a Form.List. */
+/** A single row of a Form.List, rendered as a compact antd Card with a title and remove action. */
 export default function NestedItemCard({
   title,
   onRemove,
@@ -13,12 +13,13 @@ export default function NestedItemCard({
   children: ReactNode;
 }) {
   return (
-    <div style={{ border: "1px solid #f0f0f0", borderRadius: 8, padding: 12, marginBottom: 12 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-        <Typography.Text type="secondary">{title}</Typography.Text>
-        <Button type="text" size="small" danger icon={<MinusCircleOutlined />} onClick={onRemove} />
-      </div>
+    <Card
+      size="small"
+      title={title}
+      extra={<Button type="text" size="small" danger icon={<MinusCircleOutlined />} onClick={onRemove} />}
+      style={{ marginBottom: 12 }}
+    >
       {children}
-    </div>
+    </Card>
   );
 }

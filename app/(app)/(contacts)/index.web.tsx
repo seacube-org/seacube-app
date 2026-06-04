@@ -6,8 +6,8 @@ import {
   AppstoreOutlined, FilterOutlined, MoreOutlined, PlusOutlined, SearchOutlined, UnorderedListOutlined,
 } from "@ant-design/icons";
 import { useAuthStore, useCan, useIsActiveAdmin } from "@/stores/authStore";
-import { useLocaleStore } from "@/stores/localeStore";
 import DataTable from "@/components/modules/base/DataTable";
+import { useEntityColumns, type ColumnOverride } from "@/hooks/core/useEntityColumns";
 import i18n from "@/locale/i18n";
 import ContactFormDrawer from "@/components/modules/contacts/ContactFormDrawer";
 import { CONTACTS_URL, typeColor, typeLabel, type ContactRow, type ContactType } from "@/components/modules/contacts/shared";
@@ -19,7 +19,7 @@ import { useUiState } from "@/components/modules/views/useUiState";
 import type { SaveViewMeta } from "@/components/modules/views/SaveViewModal";
 import {
   canEditView, filtersEqual, viewToFilter,
-  type ActiveView, type FieldDef, type FilterValue, type SavedView, type SystemView,
+  type FieldDef, type FilterValue, type SavedView,
 } from "@/components/modules/views/types";
 
 const ENTITY = "contact";
@@ -29,14 +29,13 @@ function initials(name: string): string {
 }
 
 type Applied = FilterValue & { pageSize: number };
-const BASE_APPLIED: Applied = { match: "all", criteria: [], columns: [], ordering: "name", pageSize: 20 };
+const BASE_APPLIED: Applied = { match: "all", criteria: [], columns: [], ordering: "", pageSize: 20 };
 
 function fromSaved(v: SavedView): Applied {
   return { ...viewToFilter(v), pageSize: v.page_size || 20 };
 }
 
 export default function ContactsPage() {
-  const locale = useLocaleStore((s) => s.locale);
   const activeOrgId = useAuthStore((s) => s.activeOrgId);
   const userId = useAuthStore((s) => s.user?.id);
   const isAdmin = useIsActiveAdmin();
@@ -53,15 +52,12 @@ export default function ContactsPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [tick, setTick] = useState(0); // bump to refetch after a contact save
 
-  const systemViews = useMemo<SystemView[]>(() => [
-    { key: "all", name: i18n.t("contacts.allContacts", { defaultValue: "全部联系人" }), match: "all", criteria: [] },
-    { key: "customers", name: typeLabel("CUSTOMER"), match: "all", criteria: [{ field: "type", operator: "is", value: "CUSTOMER" }] },
-    { key: "vendors", name: typeLabel("VENDOR"), match: "all", criteria: [{ field: "type", operator: "is", value: "VENDOR" }] },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  ], [locale]);
-
-  const [active, setActive] = useState<ActiveView>(() => ({ kind: "system", view: systemViews[0] }));
+  const [active, setActive] = useState<SavedView | null>(null);
   const [applied, setApplied] = useState<Applied>(BASE_APPLIED);
+
+  // All views (incl. built-ins) are SavedView rows now, so favorites are simply
+  // the ids the backend marks is_favorite (per-user via UiState).
+  const favoriteIds = useMemo(() => new Set(views.filter((v) => v.is_favorite).map((v) => v.id)), [views]);
 
   // Filter panel
   const [panelOpen, setPanelOpen] = useState(false);
@@ -74,55 +70,51 @@ export default function ContactsPage() {
     return () => clearTimeout(t);
   }, [search]);
 
-  // Select a view (system or saved) + persist the choice as UI state.
-  const select = useCallback((next: ActiveView, app: Applied) => {
-    setActive(next);
+  // The seeded "All" built-in — fallback when nothing else is selected/resolved.
+  const fallbackView = useCallback(
+    () => views.find((v) => v.is_system && v.system_key === "all") ?? views.find((v) => v.is_system) ?? views[0] ?? null,
+    [views],
+  );
+
+  // Select a view + persist the choice (and current applied filter) as UI state.
+  const select = useCallback((v: SavedView, app: Applied) => {
+    setActive(v);
     setApplied(app);
-    uiState.save({
-      active_view: next.kind === "saved" ? next.view.id : null,
-      active_view_key: next.kind === "system" ? next.view.key : "",
-      state: app,
-    }).catch(() => {});
+    uiState.save({ active_view: v.id, active_view_key: "", state: app }).catch(() => {});
   }, [uiState]);
 
-  const selectSystem = useCallback((v: SystemView) =>
-    select({ kind: "system", view: v }, { ...BASE_APPLIED, match: v.match, criteria: v.criteria }), [select]);
-  const selectSaved = useCallback((v: SavedView) =>
-    select({ kind: "saved", view: v }, fromSaved(v)), [select]);
+  const selectView = useCallback((v: SavedView) => select(v, fromSaved(v)), [select]);
 
-  // Restore last session (or default view) once views have loaded.
+  // Restore last session (or default / All) once views have loaded.
   const restored = useRef(false);
   useEffect(() => {
-    if (viewsLoading || restored.current) return;
+    if (viewsLoading || restored.current || !views.length) return;
     restored.current = true;
     (async () => {
       const saved = await uiState.load().catch(() => null);
-      if (saved) {
-        if (saved.active_view != null) {
-          const v = views.find((x) => x.id === saved.active_view);
-          if (v) { setActive({ kind: "saved", view: v }); setApplied(fromSaved(v)); return; }
-        }
-        // A system view supplies the base filter; persisted ad-hoc state (if any)
-        // overlays it. BASE_APPLIED already carries match/criteria/ordering.
-        const sys = systemViews.find((s) => s.key === saved.active_view_key);
-        const st = (saved.state as Partial<Applied>) ?? {};
-        if (sys || st.criteria || st.ordering) {
-          const base = sys ? { ...BASE_APPLIED, match: sys.match, criteria: sys.criteria } : BASE_APPLIED;
-          setActive(sys ? { kind: "system", view: sys } : active);
-          setApplied({ ...base, ...st });
-          return;
-        }
-      }
-      const def = views.find((v) => v.is_default);
-      if (def) { setActive({ kind: "saved", view: def }); setApplied(fromSaved(def)); }
+      const target =
+        (saved?.active_view != null ? views.find((v) => v.id === saved.active_view) : undefined)
+        ?? views.find((v) => v.is_default)
+        ?? fallbackView();
+      if (!target) return;
+      setActive(target);
+      // Overlay persisted ad-hoc filter state only when resuming that same view.
+      const st = (saved?.active_view === target.id ? saved?.state : undefined) as Partial<Applied> | undefined;
+      setApplied(st && Object.keys(st).length ? { ...fromSaved(target), ...st } : fromSaved(target));
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [viewsLoading]);
+  }, [viewsLoading, views.length]);
+
+  // Keep `active` pointing at the freshest row after any reload (e.g. a locale
+  // switch re-localizes system names; an edit changes flags) — match by id.
+  useEffect(() => {
+    setActive((cur) => (cur ? views.find((v) => v.id === cur.id) ?? cur : cur));
+  }, [views]);
 
   // ---- Filter panel actions ----
   const openPanel = () => {
     setPanelSeed({ match: applied.match, criteria: applied.criteria, columns: applied.columns, ordering: applied.ordering });
-    setPanelEditing(active.kind === "saved" ? active.view : null);
+    setPanelEditing(active && !active.is_system ? active : null);
     setPanelOpen(true);
   };
   const openNewView = () => {
@@ -131,14 +123,14 @@ export default function ContactsPage() {
     setPanelOpen(true);
   };
   const openEditView = (v: SavedView) => {
-    selectSaved(v);
+    selectView(v);
     setPanelSeed(fromSaved(v));
     setPanelEditing(v);
     setPanelOpen(true);
   };
 
   const applyAdhoc = (v: FilterValue) => {
-    select(active, { ...v, pageSize: applied.pageSize });
+    if (active) select(active, { ...v, pageSize: applied.pageSize });
     setPanelOpen(false);
   };
 
@@ -152,7 +144,7 @@ export default function ContactsPage() {
         visibility: meta.is_shared ? "shared" : "private",
       })) as SavedView;
       await reloadViews();
-      selectSaved(created);
+      selectView(created);
       message.success(i18n.t("views.saved", { defaultValue: "已保存视图" }));
     } catch (e) {
       message.error(i18n.t("contacts.saveFailed", { defaultValue: "保存失败，请重试" }));
@@ -161,11 +153,11 @@ export default function ContactsPage() {
   };
 
   const updateActiveView = async (v: FilterValue) => {
-    if (active.kind !== "saved") return;
+    if (!active || active.is_system) return;
     try {
-      const updated = (await updateView(active.view.id, v)) as SavedView;
+      const updated = (await updateView(active.id, v)) as SavedView;
       await reloadViews();
-      selectSaved(updated);
+      selectView(updated);
       setPanelOpen(false);
       message.success(i18n.t("views.updated", { defaultValue: "视图已更新" }));
     } catch {
@@ -176,7 +168,7 @@ export default function ContactsPage() {
   const removeView = async (v: SavedView) => {
     try {
       await deleteView(v.id);
-      if (active.kind === "saved" && active.view.id === v.id) selectSystem(systemViews[0]);
+      if (active?.id === v.id) { const fb = fallbackView(); if (fb) selectView(fb); }
       await reloadViews();
     } catch {
       message.error(i18n.t("contacts.deleteFailed", { defaultValue: "删除失败" }));
@@ -187,15 +179,16 @@ export default function ContactsPage() {
     try { await setDefault(v.id); await reloadViews(); } catch { /* noop */ }
   };
 
-  const toggleFavorite = async (v: SavedView) => {
-    try { await setFavorite(v.id, !v.is_favorite); await reloadViews(); } catch { /* noop */ }
+  // Favorite/unfavorite is per-user (backend UiState); works for any view (incl. system).
+  const toggleFavorite = (v: SavedView) => {
+    setFavorite(v.id, !v.is_favorite).then(() => reloadViews()).catch(() => {});
   };
 
-  // ---- Dirty state: applied filter diverges from the active saved view's definition ----
+  // ---- Dirty state: applied filter diverges from the active view's definition ----
   const appliedFilter: FilterValue = { match: applied.match, criteria: applied.criteria, columns: applied.columns, ordering: applied.ordering };
-  const isDirty = active.kind === "saved" && !filtersEqual(appliedFilter, viewToFilter(active.view));
-  const canUpdateActive = active.kind === "saved" && canEditView(active.view, isAdmin);
-  const revertActive = () => { if (active.kind === "saved") selectSaved(active.view); };
+  const isDirty = !!active && !filtersEqual(appliedFilter, viewToFilter(active));
+  const canUpdateActive = !!active && !active.is_system && canEditView(active, isAdmin);
+  const revertActive = () => { if (active) selectView(active); };
 
   // ---- Table params / columns ----
   const params = useMemo(() => {
@@ -205,52 +198,37 @@ export default function ContactsPage() {
     return out;
   }, [applied.match, applied.criteria, debouncedSearch]);
 
-  const baseColumns = useMemo(
-    () => [
-      {
-        title: i18n.t("contacts.name", { defaultValue: "名称" }), dataIndex: "name", key: "name", width: 260, ellipsis: true, sorter: true,
-        render: (v: string, r: ContactRow) => (
-          <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
-            <Avatar size={30} style={{ background: typeColor(r.type) === "purple" ? "#722ed1" : token.colorPrimary, flexShrink: 0 }}>{initials(v)}</Avatar>
-            <Typography.Text strong ellipsis>{v}</Typography.Text>
-          </div>
-        ),
-      },
-      { title: i18n.t("contacts.type", { defaultValue: "类型" }), dataIndex: "type", key: "type", width: 150, sorter: true,
-        render: (t: ContactType) => <Tag color={typeColor(t)}>{typeLabel(t)}</Tag> },
-      { title: i18n.t("contacts.email", { defaultValue: "邮箱" }), dataIndex: "email", key: "email", width: 260, ellipsis: true, sorter: true,
-        render: (v: string) => v || <Typography.Text type="secondary">—</Typography.Text> },
-      { title: i18n.t("contacts.phone", { defaultValue: "电话" }), dataIndex: "phone", key: "phone", width: 170, ellipsis: true, sorter: true,
-        render: (v: string) => v || <Typography.Text type="secondary">—</Typography.Text> },
-      { title: i18n.t("contacts.currency", { defaultValue: "币种" }), dataIndex: "currency", key: "currency", width: 110, sorter: true },
-    ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [locale, token],
-  );
+  // Columns come from the backend field schema (label/type/sortable/width); only
+  // the domain cells (avatar name, colored type tag, raw currency code) override
+  // the by-type default renderer. See docs/schema-driven-columns.md.
+  const columnOverrides = useMemo<Record<string, ColumnOverride>>(() => ({
+    name: {
+      render: (v, r) => (
+        <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+          <Avatar size={30} style={{ background: typeColor((r as ContactRow).type) === "purple" ? "#722ed1" : token.colorPrimary, flexShrink: 0 }}>{initials(String(v ?? ""))}</Avatar>
+          <Typography.Text strong ellipsis>{String(v ?? "")}</Typography.Text>
+        </div>
+      ),
+    },
+    type: { render: (v) => <Tag color={typeColor(v as ContactType)}>{typeLabel(v as ContactType)}</Tag> },
+    currency: { render: (v) => (v ? String(v) : <Typography.Text type="secondary">—</Typography.Text>) },
+  }), [token]);
+
+  const allColumns = useEntityColumns(fields, columnOverrides);
 
   const allColumnOptions = useMemo(
-    () => baseColumns.map((c) => ({ key: String(c.key), label: String(c.title) })),
-    [baseColumns],
+    () => fields.filter((f) => f.listable !== false).map((f) => ({ key: f.name, label: f.label })),
+    [fields],
   );
 
   const visibleColumns = useMemo(() => {
-    if (!applied.columns.length) return baseColumns;
-    const byKey = new Map(baseColumns.map((c) => [String(c.key), c]));
-    return applied.columns.map((k) => byKey.get(k)).filter(Boolean) as typeof baseColumns;
-  }, [baseColumns, applied.columns]);
+    if (!applied.columns.length) return allColumns;
+    const byKey = new Map(allColumns.map((c) => [String(c.key), c]));
+    return applied.columns.map((k) => byKey.get(k)).filter(Boolean) as typeof allColumns;
+  }, [allColumns, applied.columns]);
 
-  const fieldLabel = useCallback((f: FieldDef) => {
-    const m: Record<string, string> = {
-      name: i18n.t("contacts.name", { defaultValue: "名称" }),
-      type: i18n.t("contacts.type", { defaultValue: "类型" }),
-      email: i18n.t("contacts.email", { defaultValue: "邮箱" }),
-      phone: i18n.t("contacts.phone", { defaultValue: "电话" }),
-      currency: i18n.t("contacts.currency", { defaultValue: "币种" }),
-      payment_terms: i18n.t("contacts.paymentTerms", { defaultValue: "付款账期（天）" }),
-      created_at: i18n.t("contacts.created", { defaultValue: "创建时间" }),
-    };
-    return m[f.name] ?? f.label;
-  }, []);
+  // Field labels (filter builder) now come straight from the schema (localized).
+  const fieldLabel = useCallback((f: FieldDef) => f.label, []);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", width: "100%", background: token.colorBgContainer }}>
@@ -274,11 +252,10 @@ export default function ContactsPage() {
             />
           </Tooltip>
           <ViewSelect
-            systemViews={systemViews}
             views={views}
             active={active}
-            onSelectSystem={selectSystem}
-            onSelectSaved={selectSaved}
+            favorites={favoriteIds}
+            onSelect={selectView}
             onNewView={openNewView}
             onEditView={openEditView}
             onDeleteView={removeView}
@@ -312,10 +289,11 @@ export default function ContactsPage() {
         </div>
       </div>
 
-      {/* The active saved view has unsaved tweaks (Zoho-style). */}
-      {isDirty && active.kind === "saved" && (
+      {/* The active view has unsaved tweaks (Zoho-style). System views can't be
+          updated in place, so the banner offers save-as / revert only. */}
+      {isDirty && active && (
         <ViewDirtyBanner
-          viewName={active.view.name}
+          viewName={active.name}
           canUpdate={canUpdateActive}
           onUpdate={() => updateActiveView(appliedFilter)}
           onSaveAs={openPanel}

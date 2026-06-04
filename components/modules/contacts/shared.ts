@@ -4,7 +4,8 @@ import i18n from "@/locale/i18n";
 
 export const CONTACTS_URL = "/api/contacts/contacts/";
 
-export type ContactType = "CUSTOMER" | "VENDOR" | "BOTH";
+// Derived server-side from the contact's sales/purchase documents (read-only).
+export type ContactType = "CUSTOMER" | "VENDOR" | "BOTH" | "UNCLASSIFIED";
 
 export type ContactAddress = {
   attention?: string;
@@ -77,6 +78,8 @@ export function typeLabel(t: ContactType): string {
       return i18n.t("contacts.typeCustomer", { defaultValue: "客户" });
     case "VENDOR":
       return i18n.t("contacts.typeVendor", { defaultValue: "供应商" });
+    case "UNCLASSIFIED":
+      return i18n.t("contacts.typeUnclassified", { defaultValue: "未分类" });
     default:
       return i18n.t("contacts.typeBoth", { defaultValue: "客户兼供应商" });
   }
@@ -88,16 +91,12 @@ export function typeColor(t: ContactType): string {
       return "blue";
     case "VENDOR":
       return "purple";
+    case "UNCLASSIFIED":
+      return "default";
     default:
       return "geekblue";
   }
 }
-
-export const TYPE_OPTIONS: { value: ContactType }[] = [
-  { value: "CUSTOMER" },
-  { value: "VENDOR" },
-  { value: "BOTH" },
-];
 
 const ADDRESS_KEYS: (keyof ContactAddress)[] = [
   "address_line1",

@@ -74,7 +74,7 @@ app/(app)/
 | 数据 | 性质 | 存储（唯一权威） | 写入时机 |
 |------|------|-----------------|---------|
 | **列宽** | 设备相关（屏幕宽度不同）· 高频 | `localStorage`（`seacube:colw:<entity>:<user>:<org>`） | 拖拽结束**防抖 500ms** 写本地 |
-| **恢复态** `active_view`/`active_view_key` + `state` 快照 | 个人 · 点击级低频 | 服务端 UiState | 选视图 / 应用临时筛选（**diff-guard**） |
+| **恢复态** `active_view` + `state` 快照 | 个人 · 点击级低频 | 服务端 UiState | 选视图 / 应用临时筛选（**diff-guard**） |
 | **默认视图 / 收藏** | 个人 · 跨设备 | 服务端 UiState | `ViewSelect` 的 set_default / favorite action |
 | **视图定义** `criteria`/列/排序 | 命名(可共享)工件 | 服务端 SavedView | **显式**：更新视图 / 另存为 |
 
@@ -83,7 +83,7 @@ app/(app)/
 - **localStorage 与服务端存的是不同数据**，谁也不覆盖谁，所以挂载时无需 reconcile。
 
 ### 页面状态三件套（职责分明）
-- **`active: ActiveView`** — 当前选中的视图*身份*（系统 / 保存），驱动下拉显示。
+- **`active: SavedView | null`** — 当前选中的视图（内建视图也是 `is_system` 的 SavedView 行，故统一一种类型），驱动下拉显示。
 - **`applied: Applied`** — 下发给 `DataTable` 的*物化筛选* `{match, criteria, columns, ordering, pageSize}`。临时筛选（Apply 未保存）后会与 active 的定义分歧。
 - **`search`** — 搜索框，**瞬态 · 防抖 · 不持久化**（刷新即清）。
 
@@ -97,9 +97,8 @@ app/(app)/
 挂载（视图列表 loaded 后，一次性，restored ref 守卫）
   列宽 ← loadColumnWidths(localStorage)        （同步、无闪烁）
   GET /ui-state/?entity=  → 有恢复态？
-   ├─ active_view 命中保存视图 → active=该视图, applied=fromSaved(view)
-   ├─ active_view_key 命中系统视图 / 有 state 快照 → active=系统视图, applied={…系统基线, …state}
-   └─ 无 → 回退：用户默认视图(is_default) → 否则系统"全部"
+   ├─ active_view 命中某视图（系统视图也是 SavedView 行）→ active=该视图, applied=fromSaved(view)（恢复同一视图时叠加 state 快照）
+   └─ 无 → 回退：用户默认视图(is_default) → 否则系统"全部"(system_key='all')
 运行中：
   选视图 / 应用筛选 → setActive+setApplied + ui.save(...)（diff-guard，fire-and-forget）
   拖列宽            → useResizableColumns 防抖写 localStorage（不碰服务端）
@@ -132,7 +131,7 @@ app/(app)/
 ```ts
 const ui = useUiState(ENTITY);
 // 挂载：const saved = await ui.load();   // null → default/系统视图回退
-// 变更：ui.save({ active_view, active_view_key, state: applied }).catch(() => {});
+// 变更：ui.save({ active_view, state: applied }).catch(() => {});
 // DataTable 传 widthStorageKey={`${ENTITY}:${userId}:${orgId}`} 即获列宽持久化；
 // dirty 用 filtersEqual/viewToFilter/canEditView + <ViewDirtyBanner>（均在 views/）。
 ```

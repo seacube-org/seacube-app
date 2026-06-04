@@ -149,7 +149,7 @@ export default function DataTable({
     if (!el || typeof ResizeObserver === "undefined") return;
     const measure = () => {
       const header = el.querySelector(".ant-table-header") as HTMLElement | null;
-      const headerH = header?.offsetHeight ?? 47;
+      const headerH = header?.offsetHeight ?? 33;
       setScrollY(Math.max(120, el.clientHeight - headerH));
     };
     const ro = new ResizeObserver(measure);
@@ -198,26 +198,35 @@ export default function DataTable({
         .seacube-data-table .ant-table-container {
           border-top: 1px solid ${token.colorBorderSecondary};
         }
+        .seacube-data-table .ant-table-thead > tr {
+          height: 32px !important;
+        }
         .seacube-data-table .ant-table-thead > tr > th {
-          height: 32px;
-          padding: 0 16px;
+          height: 32px !important;
+          padding: 0 12px !important;
           background: #fbfcfd;
           border-bottom: 1px solid #dfe7ef;
           border-inline-end: 1px solid #dfe7ef;
           color: #1f2937;
-          font-size: 13px;
+          font-size: 12.5px;
           font-weight: 600;
+          line-height: 32px !important;
         }
         .seacube-data-table .ant-table-thead > tr > th::before {
           display: none;
         }
+        .seacube-data-table .ant-table-tbody > tr {
+          height: 32px !important;
+        }
         .seacube-data-table .ant-table-tbody > tr > td {
-          height: 40px;
-          padding: 0 16px;
+          height: 32px !important;
+          padding: 0 12px !important;
           border-bottom: 1px solid #edf1f5;
           border-inline-end: 1px solid #edf1f5;
           color: #2f3542;
-          font-size: 13.5px;
+          font-size: 13px;
+          line-height: 32px !important;
+          vertical-align: middle;
         }
         .seacube-data-table .ant-table-tbody > tr:hover > td {
           background: #f6fbff;
@@ -228,8 +237,8 @@ export default function DataTable({
           border-inline-end: 0;
         }
         .seacube-data-table .ant-table-selection-column {
-          width: 46px;
-          min-width: 46px;
+          width: 40px;
+          min-width: 40px;
           padding-inline: 0 !important;
           text-align: center;
         }
@@ -238,7 +247,30 @@ export default function DataTable({
           border-color: #b8c2cc;
         }
         .seacube-data-table .ant-table-column-sorters {
-          padding: 0;
+          min-height: 32px !important;
+          height: 32px !important;
+          padding: 0 !important;
+          align-items: center;
+        }
+        .seacube-data-table .ant-table-column-title {
+          line-height: 32px;
+        }
+        .seacube-data-table .ant-table-column-sorter {
+          display: inline-flex;
+          align-items: center;
+          height: 32px;
+          margin-inline-start: 6px;
+        }
+        .seacube-data-table .ant-table-column-sorter-inner {
+          display: inline-flex !important;
+          flex-direction: column;
+          justify-content: center;
+          height: 18px;
+          line-height: 1;
+        }
+        .seacube-data-table .ant-table-column-sorter-up,
+        .seacube-data-table .ant-table-column-sorter-down {
+          line-height: 1;
         }
         .seacube-data-table .ant-empty {
           margin: 0;
@@ -263,7 +295,7 @@ export default function DataTable({
           rowSelection={selectable ? {
             selectedRowKeys,
             onChange: (keys) => setSelectedRowKeys(keys),
-            columnWidth: 46,
+            columnWidth: 40,
           } : undefined}
           onChange={handleChange}
           onRow={(record) => ({

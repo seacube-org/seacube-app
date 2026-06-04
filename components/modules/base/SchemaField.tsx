@@ -26,9 +26,6 @@ export type FieldConfig = {
   valuePropName?: string;
 };
 
-/** Config for a field that should fill its share of a flex row (two-column layouts). */
-export const FLEX_ITEM: FieldConfig = { itemProps: { style: { flex: 1 } } };
-
 type Props = {
   schema: FieldSchema;
   /** Field name used to look up schema metadata (type/required/maxLength). */

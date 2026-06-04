@@ -1,6 +1,7 @@
-import { Space } from "antd";
-import SchemaField, { FLEX_ITEM } from "@/components/modules/base/SchemaField";
+import SchemaField from "@/components/modules/base/SchemaField";
 import { type FieldSchema } from "@/hooks/core/useFieldMeta";
+import PhoneInput from "./PhoneInput";
+import { FIELD_GRID_STYLE, FIELD_ITEM_STYLE, FULL_WIDTH_ITEM_STYLE } from "./layout";
 
 /**
  * Billing / shipping address sub-fields (a JSONField on the backend). Schema-driven:
@@ -16,19 +17,33 @@ export default function AddressFields({
 }) {
   const s = schema.nested(prefix);
   return (
-    <>
-      <SchemaField schema={s} name="attention" namePath={[prefix, "attention"]} />
-      <SchemaField schema={s} name="address_line1" namePath={[prefix, "address_line1"]} />
-      <SchemaField schema={s} name="address_line2" namePath={[prefix, "address_line2"]} />
-      <Space style={{ display: "flex" }} size="middle">
-        <SchemaField schema={s} name="city" namePath={[prefix, "city"]} config={FLEX_ITEM} />
-        <SchemaField schema={s} name="state" namePath={[prefix, "state"]} config={FLEX_ITEM} />
-      </Space>
-      <Space style={{ display: "flex" }} size="middle">
-        <SchemaField schema={s} name="postal_code" namePath={[prefix, "postal_code"]} config={FLEX_ITEM} />
-        <SchemaField schema={s} name="country" namePath={[prefix, "country"]} config={FLEX_ITEM} />
-      </Space>
-      <SchemaField schema={s} name="phone" namePath={[prefix, "phone"]} />
-    </>
+    <div style={FIELD_GRID_STYLE}>
+      <SchemaField schema={s} name="attention" namePath={[prefix, "attention"]} config={{ itemProps: { style: FULL_WIDTH_ITEM_STYLE } }} />
+      <SchemaField
+        schema={s}
+        name="address_line1"
+        namePath={[prefix, "address_line1"]}
+        config={{ itemProps: { style: FULL_WIDTH_ITEM_STYLE } }}
+      />
+      <SchemaField
+        schema={s}
+        name="address_line2"
+        namePath={[prefix, "address_line2"]}
+        config={{ itemProps: { style: FULL_WIDTH_ITEM_STYLE } }}
+      />
+      <SchemaField schema={s} name="city" namePath={[prefix, "city"]} config={{ itemProps: { style: FIELD_ITEM_STYLE } }} />
+      <SchemaField schema={s} name="state" namePath={[prefix, "state"]} config={{ itemProps: { style: FIELD_ITEM_STYLE } }} />
+      <SchemaField schema={s} name="postal_code" namePath={[prefix, "postal_code"]} config={{ itemProps: { style: FIELD_ITEM_STYLE } }} />
+      <SchemaField schema={s} name="country" namePath={[prefix, "country"]} config={{ itemProps: { style: FIELD_ITEM_STYLE } }} />
+      <SchemaField
+        schema={s}
+        name="phone"
+        namePath={[prefix, "phone"]}
+        config={{
+          itemProps: { style: FULL_WIDTH_ITEM_STYLE },
+          control: (meta) => <PhoneInput maxLength={meta?.max_length} />,
+        }}
+      />
+    </div>
   );
 }

@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react";
 import { Button, Form, Input, Select, App } from "antd";
 import { useDataService } from "@/hooks/core/useDataService";
+import { useReferenceOptions } from "@/hooks/core/useReferenceOptions";
 import { useAuthStore } from "@/stores/authStore";
 import i18n from "@/locale/i18n";
-import { CURRENCY_OPTIONS, TIMEZONE_OPTIONS } from "./constants";
+import { TIMEZONE_OPTIONS } from "./constants";
 import type { Organization } from "./types";
 
 type Props = {
@@ -22,6 +23,7 @@ export function OrgCreateForm({ onCreated, submitLabel }: Props) {
   const { getViewSet, endpoints } = useDataService();
   const orgViewSet = useMemo(() => getViewSet(endpoints.organizations), [getViewSet, endpoints]);
   const fetchMe = useAuthStore((s) => s.fetchMe);
+  const currencyOptions = useReferenceOptions("currency");
   const [submitting, setSubmitting] = useState(false);
 
   const handleFinish = async (values: Record<string, unknown>) => {
@@ -54,7 +56,7 @@ export function OrgCreateForm({ onCreated, submitLabel }: Props) {
       </Form.Item>
 
       <Form.Item name="currency" label={i18n.t("org.currency", { defaultValue: "本位币" })}>
-        <Select size="large" options={CURRENCY_OPTIONS} showSearch optionFilterProp="label" />
+        <Select size="large" options={currencyOptions} showSearch optionFilterProp="label" />
       </Form.Item>
 
       <Form.Item name="timezone" label={i18n.t("org.timezone", { defaultValue: "时区" })}>

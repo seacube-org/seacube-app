@@ -14,6 +14,8 @@ export const API_ENDPOINTS = {
   organizations: '/api/core/organizations/',
   addresses: '/api/core/addresses/',
   contentTypes: '/api/core/content-types/',
+  currencies: '/api/core/currencies/',
+  optionSets: '/api/core/option-sets/',
 
   // Infrastructure
   attachments: '/api/attachments/',

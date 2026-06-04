@@ -1,4 +1,5 @@
 import { API_BASE_URL } from '@/constants/Constants';
+import i18n from '@/locale/i18n';
 
 export class AuthError extends Error {
   constructor() { super('Authentication required'); this.name = 'AuthError'; }
@@ -31,6 +32,13 @@ function activeOrgHeader(): Record<string, string> {
   return id != null ? { 'X-Organization-Id': String(id) } : {};
 }
 
+// Sends the active UI locale so Django's LocaleMiddleware returns localized
+// labels/choices (e.g. OPTIONS schema, translated error messages). i18n.locale
+// is the source of truth, kept in sync by localeStore on change.
+function languageHeader(): Record<string, string> {
+  return i18n.locale ? { 'Accept-Language': i18n.locale } : {};
+}
+
 async function _doRefresh(): Promise<string | null> {
   const store = tokenStore;
   if (!store) return null;
@@ -39,7 +47,7 @@ async function _doRefresh(): Promise<string | null> {
 
   const res = await fetch(`${API_BASE_URL}/api/auth/token/refresh/`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...languageHeader() },
     body: JSON.stringify({ refresh }),
   });
 
@@ -70,6 +78,7 @@ async function request<T>(
     ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
     ...(access ? { Authorization: `Bearer ${access}` } : {}),
     ...activeOrgHeader(),
+    ...languageHeader(),
     ...(options.headers as Record<string, string> ?? {}),
   };
 
@@ -148,6 +157,7 @@ export async function downloadBlob(url: string, retry = true): Promise<Blob> {
   const headers: Record<string, string> = {
     ...(access ? { Authorization: `Bearer ${access}` } : {}),
     ...activeOrgHeader(),
+    ...languageHeader(),
   };
   const res = await fetch(fullUrl, { method: 'POST', headers });
   if (res.status === 401 && retry && tokenStore) {

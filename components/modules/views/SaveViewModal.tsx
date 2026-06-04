@@ -42,7 +42,7 @@ export default function SaveViewModal({ open, isAdmin, saving, initial, onClose,
         <Form.Item
           name="name"
           label={i18n.t("views.viewName", { defaultValue: "视图名称" })}
-          rules={[{ required: true, message: i18n.t("contacts.required", { defaultValue: "必填" }) }]}
+          rules={[{ required: true, message: i18n.t("common.required", { defaultValue: "必填" }) }]}
         >
           <Input autoFocus />
         </Form.Item>

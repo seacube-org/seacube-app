@@ -6,7 +6,8 @@ import { useDataService } from "@/hooks/core/useDataService";
 import { useAuthStore, type Membership } from "@/stores/authStore";
 import i18n from "@/locale/i18n";
 import { InfoRow } from "@/components/modules/layout/InfoRow";
-import { CURRENCY_OPTIONS, TIMEZONE_OPTIONS } from "@/components/modules/layout/constants";
+import { useReferenceOptions } from "@/hooks/core/useReferenceOptions";
+import { TIMEZONE_OPTIONS } from "@/components/modules/layout/constants";
 import type { Organization } from "@/components/modules/layout/types";
 import { rows, FETCH_ALL } from "@/components/modules/settings/access/shared";
 import { addressOptionLabel, formatAddressLine, type Address } from "@/components/modules/settings/address/shared";
@@ -44,6 +45,7 @@ export function OrgDetailDrawer({ open, membership, canEdit, onClose }: Props) {
   const orgViewSet = useMemo(() => getViewSet(endpoints.organizations), [getViewSet, endpoints]);
   const addressVS = useMemo(() => getViewSet(endpoints.addresses), [getViewSet, endpoints]);
   const fetchMe = useAuthStore((s) => s.fetchMe);
+  const currencyOptions = useReferenceOptions("currency");
   const [form] = Form.useForm();
   const [detail, setDetail] = useState<Organization | null>(null);
   const [orgAddresses, setOrgAddresses] = useState<Address[]>([]);
@@ -233,7 +235,7 @@ export function OrgDetailDrawer({ open, membership, canEdit, onClose }: Props) {
               />
             </Form.Item>
             <Form.Item name="currency" label={i18n.t("org.currency", { defaultValue: "本位币" })}>
-              <Select options={CURRENCY_OPTIONS} showSearch optionFilterProp="label" />
+              <Select options={currencyOptions} showSearch optionFilterProp="label" />
             </Form.Item>
             <Form.Item name="timezone" label={i18n.t("org.timezone", { defaultValue: "时区" })}>
               <Select options={TIMEZONE_OPTIONS} showSearch optionFilterProp="label" />
@@ -269,7 +271,7 @@ export function OrgDetailDrawer({ open, membership, canEdit, onClose }: Props) {
             <div style={{ gridColumn: "1 / -1" }}>
               <InfoRow label={i18n.t("org.address", { defaultValue: "地址" })} value={formatAddressLine(detail.address_detail)} placeholder={DASH} />
             </div>
-            <InfoRow label={i18n.t("org.currency", { defaultValue: "本位币" })} value={optionLabel(CURRENCY_OPTIONS, detail.currency)} placeholder={DASH} />
+            <InfoRow label={i18n.t("org.currency", { defaultValue: "本位币" })} value={optionLabel(currencyOptions, detail.currency)} placeholder={DASH} />
             <InfoRow label={i18n.t("org.timezone", { defaultValue: "时区" })} value={optionLabel(TIMEZONE_OPTIONS, detail.timezone)} placeholder={DASH} />
             <InfoRow label={i18n.t("org.createdAt", { defaultValue: "创建时间" })} value={formatDate(detail.created_at)} placeholder={DASH} />
             <InfoRow label={i18n.t("org.myRole", { defaultValue: "我的角色" })} value={membership?.role?.name} placeholder={DASH} />

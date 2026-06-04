@@ -63,6 +63,7 @@ app/(app)/
 
 ### 3. 新建 / 编辑
 - 滑入式 `Drawer` 表单（如 `ContactFormDrawer`），保存后 bump 一个 tick 触发 `DataTable` 重取。
+- **字段 schema**：choice 值集来自后端（`type`←OPTIONS、`currency`←Currency 表）；`required`/布局等的 schema 驱动方案与分阶段计划见 [`docs/schema-driven-forms.md`](../../docs/schema-driven-forms.md)。
 
 ---
 

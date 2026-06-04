@@ -2,20 +2,8 @@ export const SIDER_WIDTH = 220;
 export const SIDER_COLLAPSED_WIDTH = 56;
 export const HEADER_HEIGHT = 52;
 
-// Org-creation locale options — mirror apps/core/models/choices.Currency and
-// Organization.Timezone on the backend (kept curated, Zoho-Books style).
-export const CURRENCY_OPTIONS = [
-  { value: "CNY", label: "Chinese Yuan (CNY)" },
-  { value: "USD", label: "US Dollar (USD)" },
-  { value: "EUR", label: "Euro (EUR)" },
-  { value: "GBP", label: "British Pound (GBP)" },
-  { value: "JPY", label: "Japanese Yen (JPY)" },
-  { value: "HKD", label: "Hong Kong Dollar (HKD)" },
-  { value: "SGD", label: "Singapore Dollar (SGD)" },
-  { value: "AUD", label: "Australian Dollar (AUD)" },
-  { value: "CAD", label: "Canadian Dollar (CAD)" },
-];
-
+// Currencies now come from the core Currency master table (useReferenceOptions),
+// not a hardcoded list. Timezone stays a curated client list (Zoho-Books style).
 export const TIMEZONE_OPTIONS = [
   { value: "Asia/Shanghai", label: "Asia/Shanghai (UTC+8)" },
   { value: "Asia/Hong_Kong", label: "Asia/Hong_Kong (UTC+8)" },

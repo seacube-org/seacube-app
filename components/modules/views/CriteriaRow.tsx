@@ -96,7 +96,7 @@ export default function CriteriaRow({ fields, value, labelFor, onChange, onRemov
   };
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+    <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
       <Select
         value={value.field || undefined}
         onChange={setField}

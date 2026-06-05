@@ -49,8 +49,19 @@ export function useEntityColumns(
         case "boolean":
           return (v) => (v ? <span style={{ color: token.colorSuccess }}>✓</span> : dash);
         case "number":
-        default: // text
           return (v) => (blank(v) ? dash : String(v));
+        default: // text
+          // Truncate to the column width and surface the full value in a tooltip
+          // — but only when it's actually ellipsized (antd measures internally).
+          return (v) => {
+            if (blank(v)) return dash;
+            const text = String(v);
+            return (
+              <Typography.Text ellipsis={{ tooltip: text }} style={{ display: "block" }}>
+                {text}
+              </Typography.Text>
+            );
+          };
       }
     };
 
@@ -64,7 +75,9 @@ export function useEntityColumns(
           key: f.name,
           width: o.width ?? f.width ?? TYPE_WIDTH[f.type] ?? 160,
           align: o.align ?? f.align ?? undefined,
-          ellipsis: f.type === "text",
+          // showTitle:false suppresses the native browser title so it doesn't
+          // double up with the Typography tooltip in the text renderer.
+          ellipsis: f.type === "text" ? { showTitle: false } : false,
           sorter: f.sortable !== false,
           render: o.render ?? byType(f),
         };

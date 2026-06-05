@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { App, Empty, Pagination, Table, theme } from "antd";
 import type { TableProps } from "antd";
+import { ArrowDownOutlined, ArrowUpOutlined } from "@ant-design/icons";
 import { useDataService } from "@/hooks/core/useDataService";
 import { useResizableColumns } from "@/components/modules/base/resizableColumns";
 import { rows } from "@/utils/pagination";
@@ -21,7 +22,8 @@ type DataTableProps = {
   rowKey?: string;
   /** Filter/search params merged into every request; changing them resets to page 1. */
   params?: Record<string, string | number | boolean | undefined>;
-  /** DRF `ordering` value, e.g. "name" or "-created_at". */
+  /** DRF `ordering` value, e.g. "name" or "-created_at". Seeds the uncontrolled
+   *  sort; when `onSortChange` is given, sorting is controlled by this value. */
   defaultOrdering?: string;
   defaultPageSize?: number;
   pageSizeOptions?: number[];
@@ -34,6 +36,16 @@ type DataTableProps = {
   selectable?: boolean;
   /** Persist per-device column widths under this key (localStorage); omit to disable. */
   widthStorageKey?: string;
+  /** Enable header drag-to-reorder; called with the new key order. Order isn't
+   *  owned here (it's a view concern), so the caller persists it. */
+  onReorderColumns?: (orderedKeys: string[]) => void;
+  /** Make sorting controlled (view-level): called with the new DRF ordering
+   *  string. When set, `defaultOrdering` is read as the controlled value. */
+  onSortChange?: (ordering: string) => void;
+  /** Header-menu "Filter": open a filter for the column (caller-owned). */
+  onFilterColumn?: (key: string) => void;
+  /** Header-menu "Remove": hide the column (caller-owned). */
+  onRemoveColumn?: (key: string) => void;
 };
 
 /** "ascend"/"descend" + field ⇆ DRF ordering string ("name" / "-name"). */
@@ -63,6 +75,10 @@ export default function DataTable({
   emptyText,
   selectable = false,
   widthStorageKey,
+  onReorderColumns,
+  onSortChange,
+  onFilterColumn,
+  onRemoveColumn,
 }: DataTableProps) {
   const { message } = App.useApp();
   const { token } = theme.useToken();
@@ -74,8 +90,20 @@ export default function DataTable({
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(defaultPageSize);
-  const [ordering, setOrdering] = useState(defaultOrdering);
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+
+  // Sorting is controlled (view-level) when `onSortChange` is provided — the
+  // parent owns `ordering` via `defaultOrdering`; otherwise we keep it local.
+  const [internalOrdering, setInternalOrdering] = useState(defaultOrdering);
+  const isControlledSort = onSortChange != null;
+  const ordering = isControlledSort ? defaultOrdering : internalOrdering;
+  const applyOrdering = useCallback(
+    (o: string) => { if (onSortChange) onSortChange(o); else setInternalOrdering(o); },
+    [onSortChange],
+  );
+
+  // DOM container — measured for the empty-state height and AutoFit.
+  const areaRef = useRef<HTMLDivElement>(null);
 
   // Stable identity for the merged filter params so effects fire on value change.
   const paramsKey = useMemo(() => JSON.stringify(params ?? {}), [params]);
@@ -121,28 +149,44 @@ export default function DataTable({
   }, [page, paramsKey, ordering, pageSize, reloadKey, fetchPage]);
 
   const sort = parseOrdering(ordering);
-  const sortedColumns = useMemo(
-    () => columns.map((col) =>
-      col.sorter
-        ? { ...col, sortOrder: sort && String(col.key) === sort.field ? sort.order : null }
-        : col,
-    ),
-    [columns, sort],
-  );
-  const { columns: resizableColumns, components } = useResizableColumns(sortedColumns, widthStorageKey);
+  // antd's own sorter icon is hidden (sort lives in the header menu); instead we
+  // tuck a single arrow next to the title of the actively-sorted column, Bigin-style.
+  const sortedColumns = useMemo(() => {
+    const arrowStyle = { fontSize: 11, color: token.colorPrimary };
+    return columns.map((col) => {
+      if (!col.sorter) return col;
+      const order = sort && String(col.key) === sort.field ? sort.order : null;
+      return {
+        ...col,
+        sortOrder: order,
+        title: order ? (
+          <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+            {col.title as ReactNode}
+            {order === "ascend" ? <ArrowUpOutlined style={arrowStyle} /> : <ArrowDownOutlined style={arrowStyle} />}
+          </span>
+        ) : col.title,
+      };
+    });
+  }, [columns, sort, token]);
+  const { columns: resizableColumns, components } = useResizableColumns(sortedColumns, widthStorageKey, {
+    onReorder: onReorderColumns,
+    containerRef: areaRef,
+    onSort: (key, dir) => applyOrdering(dir === "desc" ? `-${key}` : key),
+    onFilterColumn,
+    onRemoveColumn,
+  });
 
   const handleChange: TableProps<Record<string, unknown>>["onChange"] = (_p, _f, sorter) => {
     const s = Array.isArray(sorter) ? sorter[0] : sorter;
     const field = s?.columnKey != null ? String(s.columnKey) : s?.field ? String(s.field) : "";
-    if (s?.order && field) setOrdering(s.order === "descend" ? `-${field}` : field);
-    else setOrdering(defaultOrdering);
+    if (s?.order && field) applyOrdering(s.order === "descend" ? `-${field}` : field);
+    else applyOrdering(isControlledSort ? "" : defaultOrdering);
   };
 
   // Size the table body to the available area so the header stays fixed and the
   // empty/loading placeholder centers in the full height (antd centers the
   // placeholder within scroll.y). Measured rather than CSS-chained because
   // antd v6's Spin/Table internals don't expose a stable full-height class path.
-  const areaRef = useRef<HTMLDivElement>(null);
   const [scrollY, setScrollY] = useState<number>();
   useEffect(() => {
     const el = areaRef.current;
@@ -189,6 +233,20 @@ export default function DataTable({
           border-radius: 0;
           background: ${token.colorBgContainer};
         }
+        /* scroll.y only caps the body's max height, so with a few rows the body
+           stays short and its horizontal scrollbar floats under the last row.
+           Floor it to the measured height so the scrollbar pins to the bottom. */
+        .seacube-data-table .ant-table-body {
+          min-height: ${scrollY ?? 0}px;
+        }
+        /* Column header menu caret: revealed on header hover (or when open). */
+        .seacube-data-table .ant-table-thead > tr > th .seacube-col-menu {
+          opacity: 0;
+          transition: opacity 0.12s;
+        }
+        .seacube-data-table .ant-table-thead > tr > th:hover .seacube-col-menu {
+          opacity: 1;
+        }
         .seacube-data-table .ant-table-container,
         .seacube-data-table .ant-table-container table,
         .seacube-data-table .ant-table-thead > tr > th:first-child,
@@ -215,25 +273,29 @@ export default function DataTable({
         .seacube-data-table .ant-table-thead > tr > th::before {
           display: none;
         }
-        .seacube-data-table .ant-table-tbody > tr {
-          height: 32px !important;
+        /* Scope to .ant-table-row only: antd v6 renders a hidden
+           .ant-table-measure-row as the first tbody child (height:0) to size
+           columns. An unscoped child-tr selector + !important would override its
+           inline zero-height and show it as an empty row above the data. */
+        .seacube-data-table .ant-table-tbody > tr.ant-table-row {
+          height: 44px !important;
         }
-        .seacube-data-table .ant-table-tbody > tr > td {
-          height: 32px !important;
+        .seacube-data-table .ant-table-tbody > tr.ant-table-row > td {
+          height: 44px !important;
           padding: 0 12px !important;
           border-bottom: 1px solid #edf1f5;
           border-inline-end: 1px solid #edf1f5;
           color: #2f3542;
           font-size: 13px;
-          line-height: 32px !important;
+          line-height: 44px !important;
           vertical-align: middle;
         }
-        .seacube-data-table .ant-table-tbody > tr:hover > td {
+        .seacube-data-table .ant-table-tbody > tr.ant-table-row:hover > td {
           background: #f6fbff;
         }
         .seacube-data-table .ant-table-cell-scrollbar,
         .seacube-data-table .ant-table-thead > tr > th:last-child,
-        .seacube-data-table .ant-table-tbody > tr > td:last-child {
+        .seacube-data-table .ant-table-tbody > tr.ant-table-row > td:last-child {
           border-inline-end: 0;
         }
         .seacube-data-table .ant-table-selection-column {
@@ -255,22 +317,10 @@ export default function DataTable({
         .seacube-data-table .ant-table-column-title {
           line-height: 32px;
         }
+        /* Sort lives in the column header menu now, so hide antd's arrow icon
+           (sortability + click-to-sort stay enabled via the column's sorter). */
         .seacube-data-table .ant-table-column-sorter {
-          display: inline-flex;
-          align-items: center;
-          height: 32px;
-          margin-inline-start: 6px;
-        }
-        .seacube-data-table .ant-table-column-sorter-inner {
-          display: inline-flex !important;
-          flex-direction: column;
-          justify-content: center;
-          height: 18px;
-          line-height: 1;
-        }
-        .seacube-data-table .ant-table-column-sorter-up,
-        .seacube-data-table .ant-table-column-sorter-down {
-          line-height: 1;
+          display: none;
         }
         .seacube-data-table .ant-empty {
           margin: 0;

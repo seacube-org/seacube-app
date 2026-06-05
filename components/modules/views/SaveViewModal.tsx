@@ -1,19 +1,23 @@
 import { useEffect } from "react";
 import { Checkbox, Form, Input, Modal } from "antd";
 import i18n from "@/locale/i18n";
+import type { Visibility } from "./types";
 
-export type SaveViewMeta = { name: string; is_favorite: boolean; is_shared: boolean };
+/** Page-facing payload: name + favorite (modal) plus visibility (from the panel). */
+export type SaveViewMeta = { name: string; is_favorite: boolean; visibility: Visibility };
+
+/** What the modal itself collects — visibility is chosen in the panel's section. */
+type ModalMeta = Pick<SaveViewMeta, "name" | "is_favorite">;
 
 type Props = {
   open: boolean;
-  isAdmin: boolean;
   saving?: boolean;
-  initial?: Partial<SaveViewMeta>;
+  initial?: Partial<ModalMeta>;
   onClose: () => void;
-  onSave: (meta: SaveViewMeta) => void;
+  onSave: (meta: ModalMeta) => void;
 };
 
-export default function SaveViewModal({ open, isAdmin, saving, initial, onClose, onSave }: Props) {
+export default function SaveViewModal({ open, saving, initial, onClose, onSave }: Props) {
   const [form] = Form.useForm();
 
   useEffect(() => {
@@ -21,7 +25,6 @@ export default function SaveViewModal({ open, isAdmin, saving, initial, onClose,
       form.setFieldsValue({
         name: initial?.name ?? "",
         is_favorite: initial?.is_favorite ?? false,
-        is_shared: initial?.is_shared ?? false,
       });
     }
   }, [open, initial, form]);
@@ -38,7 +41,7 @@ export default function SaveViewModal({ open, isAdmin, saving, initial, onClose,
       width={420}
       destroyOnHidden
     >
-      <Form form={form} layout="vertical" onFinish={(v) => onSave(v as SaveViewMeta)}>
+      <Form form={form} layout="vertical" onFinish={(v) => onSave(v as ModalMeta)}>
         <Form.Item
           name="name"
           label={i18n.t("views.viewName", { defaultValue: "视图名称" })}
@@ -46,14 +49,9 @@ export default function SaveViewModal({ open, isAdmin, saving, initial, onClose,
         >
           <Input autoFocus />
         </Form.Item>
-        <Form.Item name="is_favorite" valuePropName="checked" style={{ marginBottom: 8 }}>
+        <Form.Item name="is_favorite" valuePropName="checked" style={{ marginBottom: 0 }}>
           <Checkbox>{i18n.t("views.markFavorite", { defaultValue: "标记为收藏" })}</Checkbox>
         </Form.Item>
-        {isAdmin && (
-          <Form.Item name="is_shared" valuePropName="checked" style={{ marginBottom: 0 }}>
-            <Checkbox>{i18n.t("views.shareWithOrg", { defaultValue: "共享给机构（所有成员可见）" })}</Checkbox>
-          </Form.Item>
-        )}
       </Form>
     </Modal>
   );

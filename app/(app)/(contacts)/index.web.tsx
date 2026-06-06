@@ -8,11 +8,7 @@ import i18n from "@/locale/i18n";
 import EntityListView from "@/components/modules/views/EntityListView";
 import type { ColumnOverride } from "@/hooks/core/useEntityColumns";
 import ContactFormDrawer from "@/components/modules/contacts/ContactFormDrawer";
-import { CONTACTS_URL, typeColor, typeLabel, type ContactRow, type ContactType } from "@/components/modules/contacts/shared";
-
-function initials(name: string): string {
-  return name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join("") || "?";
-}
+import { avatarColor, CONTACTS_URL, initials, typeColor, typeLabel, type ContactRow, type ContactType } from "@/components/modules/contacts/shared";
 
 export default function ContactsPage() {
   const router = useRouter();
@@ -26,7 +22,7 @@ export default function ContactsPage() {
     name: {
       render: (v, r) => (
         <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
-          <Avatar size={30} style={{ background: typeColor((r as ContactRow).type) === "purple" ? "#722ed1" : token.colorPrimary, flexShrink: 0 }}>{initials(String(v ?? ""))}</Avatar>
+          <Avatar size={30} style={{ background: avatarColor((r as ContactRow).type, token.colorPrimary), flexShrink: 0 }}>{initials(String(v ?? ""))}</Avatar>
           <Typography.Text strong ellipsis={{ tooltip: String(v ?? "") }}>{String(v ?? "")}</Typography.Text>
         </div>
       ),

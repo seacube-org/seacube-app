@@ -98,6 +98,16 @@ export function typeColor(t: ContactType): string {
   }
 }
 
+/** Up to two uppercase initials from a name, for avatars. */
+export function initials(name: string): string {
+  return name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join("") || "?";
+}
+
+/** Avatar background for a contact type — vendors stand out (purple), else primary. */
+export function avatarColor(type: ContactType, primary: string): string {
+  return typeColor(type) === "purple" ? "#722ed1" : primary;
+}
+
 const ADDRESS_KEYS: (keyof ContactAddress)[] = [
   "address_line1",
   "address_line2",

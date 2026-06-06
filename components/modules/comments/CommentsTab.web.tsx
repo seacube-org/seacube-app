@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { List, Input, Button, Radio, Space, Typography, Tag, Avatar, Spin, theme } from 'antd';
+import { useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
+import { Input, Button, Radio, Space, Typography, Tag, Avatar, Spin, theme } from 'antd';
 import { UserOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import { useDataService } from '@/hooks/core/useDataService';
 import i18n from '@/locale/i18n';
@@ -46,6 +46,20 @@ function summarizeChanges(changes: Record<string, { old: unknown; new: unknown }
   return Object.entries(changes)
     .map(([k, v]) => `${k}: ${String(v.old)} → ${String(v.new)}`)
     .join(', ');
+}
+
+// Avatar + (title above description) row — replaces the deprecated antd
+// List.Item.Meta with a plain flex layout.
+function MetaRow({ avatar, title, description }: { avatar: ReactNode; title: ReactNode; description: ReactNode }) {
+  return (
+    <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '8px 0' }}>
+      {avatar}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        {title}
+        <div style={{ marginTop: 2 }}>{description}</div>
+      </div>
+    </div>
+  );
 }
 
 type Props = { contentTypeId: number; objectId: number | string };
@@ -110,71 +124,60 @@ export default function CommentsTab({ contentTypeId, objectId }: Props) {
       ) : entries.length === 0 ? (
         <Typography.Text type="secondary">{i18n.t('comment.noActivity')}</Typography.Text>
       ) : (
-        <List
-          dataSource={entries}
-          size="small"
-          renderItem={(entry) => {
-            if (entry._type === 'comment') {
-              return (
-                <List.Item style={{ alignItems: 'flex-start', border: 0, padding: '8px 0' }}>
-                  <List.Item.Meta
-                    avatar={<Avatar icon={<UserOutlined />} size={28} />}
-                    title={
-                      <Space size={4}>
-                        <Typography.Text strong style={{ fontSize: 13 }}>
-                          {authorName(entry.author_display)}
-                        </Typography.Text>
-                        {entry.visibility === 'external' && (
-                          <Tag color="blue" style={{ fontSize: 11 }}>{i18n.t('comment.external')}</Tag>
-                        )}
-                        {entry.is_edited && (
-                          <Typography.Text type="secondary" style={{ fontSize: 11 }}>
-                            ({i18n.t('comment.edited')})
-                          </Typography.Text>
-                        )}
-                        <Typography.Text type="secondary" style={{ fontSize: 11 }}>
-                          {formatTime(entry.created_at)}
-                        </Typography.Text>
-                      </Space>
-                    }
-                    description={
-                      <Typography.Text style={{ whiteSpace: 'pre-wrap' }}>{entry.body}</Typography.Text>
-                    }
-                  />
-                </List.Item>
-              );
-            }
-            return (
-              <List.Item style={{ alignItems: 'flex-start', border: 0, padding: '8px 0' }}>
-                <List.Item.Meta
-                  avatar={
-                    <Avatar
-                      icon={<InfoCircleOutlined />}
-                      size={28}
-                      style={{ backgroundColor: token.colorFillSecondary, color: token.colorTextSecondary }}
-                    />
-                  }
-                  title={
-                    <Space size={4}>
-                      <Typography.Text type="secondary" style={{ fontSize: 13 }}>
-                        {authorName(entry.user_display)}
-                      </Typography.Text>
-                      <Typography.Text type="secondary" style={{ fontSize: 11 }}>
-                        {formatTime(entry.timestamp)}
-                      </Typography.Text>
-                    </Space>
-                  }
-                  description={
-                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                      {entry.action}
-                      {Object.keys(entry.changes).length > 0 && ` — ${summarizeChanges(entry.changes)}`}
+        <div>
+          {entries.map((entry) => (entry._type === 'comment' ? (
+            <MetaRow
+              key={`comment-${entry.id}`}
+              avatar={<Avatar icon={<UserOutlined />} size={28} />}
+              title={
+                <Space size={4}>
+                  <Typography.Text strong style={{ fontSize: 13 }}>
+                    {authorName(entry.author_display)}
+                  </Typography.Text>
+                  {entry.visibility === 'external' && (
+                    <Tag color="blue" style={{ fontSize: 11 }}>{i18n.t('comment.external')}</Tag>
+                  )}
+                  {entry.is_edited && (
+                    <Typography.Text type="secondary" style={{ fontSize: 11 }}>
+                      ({i18n.t('comment.edited')})
                     </Typography.Text>
-                  }
+                  )}
+                  <Typography.Text type="secondary" style={{ fontSize: 11 }}>
+                    {formatTime(entry.created_at)}
+                  </Typography.Text>
+                </Space>
+              }
+              description={<Typography.Text style={{ whiteSpace: 'pre-wrap' }}>{entry.body}</Typography.Text>}
+            />
+          ) : (
+            <MetaRow
+              key={`audit-${entry.id}`}
+              avatar={
+                <Avatar
+                  icon={<InfoCircleOutlined />}
+                  size={28}
+                  style={{ backgroundColor: token.colorFillSecondary, color: token.colorTextSecondary }}
                 />
-              </List.Item>
-            );
-          }}
-        />
+              }
+              title={
+                <Space size={4}>
+                  <Typography.Text type="secondary" style={{ fontSize: 13 }}>
+                    {authorName(entry.user_display)}
+                  </Typography.Text>
+                  <Typography.Text type="secondary" style={{ fontSize: 11 }}>
+                    {formatTime(entry.timestamp)}
+                  </Typography.Text>
+                </Space>
+              }
+              description={
+                <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                  {entry.action}
+                  {Object.keys(entry.changes).length > 0 && ` — ${summarizeChanges(entry.changes)}`}
+                </Typography.Text>
+              }
+            />
+          )))}
+        </div>
       )}
 
       <div style={{ marginTop: 16, borderTop: `1px solid ${token.colorBorderSecondary}`, paddingTop: 12 }}>

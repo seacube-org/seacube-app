@@ -109,6 +109,8 @@
     "email": "邮箱",
     "emailInvalid": "邮箱格式不正确",
     "phone": "电话",
+    "website": "网站",
+    "taxId": "税号",
     "currency": "币种",
     "paymentTerms": "付款账期（天）",
     "notes": "备注",

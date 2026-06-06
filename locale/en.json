@@ -109,6 +109,8 @@
     "email": "Email",
     "emailInvalid": "Invalid email format",
     "phone": "Phone",
+    "website": "Website",
+    "taxId": "Tax ID",
     "currency": "Currency",
     "paymentTerms": "Payment Terms (days)",
     "notes": "Notes",

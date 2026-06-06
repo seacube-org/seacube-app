@@ -18,6 +18,8 @@ export type FieldSchema = {
   meta: FieldMetaMap | null;
   loading: boolean;
   field: (name: string) => FieldMeta | undefined;
+  /** Localized field label from OPTIONS, or `fallback` while loading / if absent. */
+  label: (name: string, fallback: string) => string;
   choices: (name: string) => { value: string; label: string }[];
   required: (name: string) => boolean;
   maxLength: (name: string) => number | undefined;
@@ -68,6 +70,7 @@ function buildSchema(meta: FieldMetaMap | null): FieldSchema {
     meta,
     loading: meta === null,
     field: (name) => meta?.[name],
+    label: (name, fallback) => meta?.[name]?.label || fallback,
     choices: (name) => meta?.[name]?.choices ?? [],
     required: (name) => meta?.[name]?.required ?? false,
     maxLength: (name) => meta?.[name]?.max_length,

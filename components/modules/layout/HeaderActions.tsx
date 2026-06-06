@@ -28,8 +28,15 @@ export function HeaderActions({ orgName, displayName, onOrgClick, onUserClick, o
             onClick={onSettings}
             title={i18n.t("nav.settings", { defaultValue: "设置" })}
             style={{
-              width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center",
-              cursor: "pointer", borderRadius: 6, color: "rgba(255,255,255,0.75)", fontSize: 16,
+              width: 36,
+              height: 36,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              borderRadius: 6,
+              color: "rgba(255,255,255,0.75)",
+              fontSize: 16,
               transition: "background 0.15s, color 0.15s",
             }}
             {...hover(
@@ -47,9 +54,15 @@ export function HeaderActions({ orgName, displayName, onOrgClick, onUserClick, o
       <div
         onClick={onOrgClick}
         style={{
-          display: "flex", alignItems: "center", gap: 6,
-          padding: "0 10px", height: 30, borderRadius: 6,
-          background: "transparent", cursor: "pointer", transition: "background 0.15s",
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          padding: "0 10px",
+          height: 30,
+          borderRadius: 6,
+          background: "transparent",
+          cursor: "pointer",
+          transition: "background 0.15s",
         }}
         {...hover({ background: "rgba(255,255,255,0.12)" }, { background: "transparent" })}
       >
@@ -65,12 +78,18 @@ export function HeaderActions({ orgName, displayName, onOrgClick, onUserClick, o
       {/* Avatar */}
       <div
         onClick={onUserClick}
-        style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", padding: "0 8px", height: "100%", borderRadius: 6 }}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          cursor: "pointer",
+          padding: "0 8px",
+          height: "100%",
+          borderRadius: 6,
+        }}
         {...hover({ background: "rgba(255,255,255,0.1)" }, { background: "transparent" })}
       >
-        <Typography.Text style={{ color: "rgba(255,255,255,0.85)", fontSize: 13 }}>
-          {displayName}
-        </Typography.Text>
+        <Typography.Text style={{ color: "rgba(255,255,255,0.85)", fontSize: 13 }}>{displayName}</Typography.Text>
         <Avatar size={28} style={{ background: "rgba(255,255,255,0.2)", color: "#fff", fontWeight: 600, fontSize: 12 }}>
           {displayName[0]?.toUpperCase() ?? "?"}
         </Avatar>

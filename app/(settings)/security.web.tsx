@@ -59,7 +59,9 @@ function PasswordForm({ onDone }: { onDone: () => void }) {
           ({ getFieldValue }) => ({
             validator(_, value) {
               if (!value || getFieldValue("new_password") === value) return Promise.resolve();
-              return Promise.reject(new Error(i18n.t("account.passwordMismatch", { defaultValue: "两次输入的密码不一致" })));
+              return Promise.reject(
+                new Error(i18n.t("account.passwordMismatch", { defaultValue: "两次输入的密码不一致" })),
+              );
             },
           }),
         ]}

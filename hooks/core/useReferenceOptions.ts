@@ -18,14 +18,24 @@ type Target = { url: string; params: Record<string, string>; map: (row: Record<s
 function targetFor(ref: string): Target | null {
   if (ref === "currency") {
     return {
-      url: API_ENDPOINTS.currencies, params: {},
-      map: (r) => ({ value: String(r.code), label: `${r.name} (${r.code})`, meta: { symbol: r.symbol, decimal_places: r.decimal_places } }),
+      url: API_ENDPOINTS.currencies,
+      params: {},
+      map: (r) => ({
+        value: String(r.code),
+        label: `${r.name} (${r.code})`,
+        meta: { symbol: r.symbol, decimal_places: r.decimal_places },
+      }),
     };
   }
   if (ref.startsWith("optionset:")) {
     return {
-      url: API_ENDPOINTS.optionSets, params: { category: ref.slice("optionset:".length) },
-      map: (r) => ({ value: String(r.code), label: String(r.label), meta: (r.meta as Record<string, unknown>) ?? undefined }),
+      url: API_ENDPOINTS.optionSets,
+      params: { category: ref.slice("optionset:".length) },
+      map: (r) => ({
+        value: String(r.code),
+        label: String(r.label),
+        meta: (r.meta as Record<string, unknown>) ?? undefined,
+      }),
     };
   }
   return null;
@@ -43,25 +53,39 @@ export function useReferenceOptions(ref: string): ReferenceOption[] {
   const { getViewSet } = useDataService();
 
   useEffect(() => {
-    if (_cache.has(ref)) { setItems(_cache.get(ref)!); return; }
+    if (_cache.has(ref)) {
+      setItems(_cache.get(ref)!);
+      return;
+    }
     const target = targetFor(ref);
     if (!target) return;
     let active = true;
 
     let p = _inflight.get(ref);
     if (!p) {
-      p = getViewSet(target.url).list({ params: target.params })
+      p = getViewSet(target.url)
+        .list({ params: target.params })
         .then((data) => {
           const out = ((data as Record<string, unknown>[]) ?? []).map(target.map);
           _cache.set(ref, out);
           return out;
         })
-        .catch(() => { const out: ReferenceOption[] = []; _cache.set(ref, out); return out; })
-        .finally(() => { _inflight.delete(ref); });
+        .catch(() => {
+          const out: ReferenceOption[] = [];
+          _cache.set(ref, out);
+          return out;
+        })
+        .finally(() => {
+          _inflight.delete(ref);
+        });
       _inflight.set(ref, p);
     }
-    p.then((out) => { if (active) setItems(out); });
-    return () => { active = false; };
+    p.then((out) => {
+      if (active) setItems(out);
+    });
+    return () => {
+      active = false;
+    };
   }, [ref, getViewSet]);
 
   return items;

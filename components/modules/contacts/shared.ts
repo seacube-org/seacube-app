@@ -100,7 +100,14 @@ export function typeColor(t: ContactType): string {
 
 /** Up to two uppercase initials from a name, for avatars. */
 export function initials(name: string): string {
-  return name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join("") || "?";
+  return (
+    name
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((w) => w[0]?.toUpperCase())
+      .join("") || "?"
+  );
 }
 
 /** Avatar background for a contact type — vendors stand out (purple), else primary. */

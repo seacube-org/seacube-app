@@ -42,7 +42,7 @@ export function useEntityColumns(
           return (v) => {
             if (blank(v)) return dash;
             const o = opts.get(String(v));
-            return <Tag color={o?.color}>{o?.label ?? String(v)}</Tag>;  // color from OptionSet meta, if any
+            return <Tag color={o?.color}>{o?.label ?? String(v)}</Tag>; // color from OptionSet meta, if any
           };
         case "date":
           return (v) => (v ? new Date(String(v)).toLocaleDateString() : dash);

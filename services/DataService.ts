@@ -1,12 +1,19 @@
-import { API_BASE_URL } from '@/constants/Constants';
-import i18n from '@/locale/i18n';
+import { API_BASE_URL } from "@/constants/Constants";
+import i18n from "@/locale/i18n";
 
 export class AuthError extends Error {
-  constructor() { super('Authentication required'); this.name = 'AuthError'; }
+  constructor() {
+    super("Authentication required");
+    this.name = "AuthError";
+  }
 }
 
 export class ApiError extends Error {
-  constructor(public status: number, public data: unknown, message?: string) {
+  constructor(
+    public status: number,
+    public data: unknown,
+    message?: string,
+  ) {
     super(message ?? `API error ${status}`);
   }
 }
@@ -29,14 +36,14 @@ export function configureDataService(store: TokenStore) {
 
 function activeOrgHeader(): Record<string, string> {
   const id = tokenStore?.getActiveOrgId?.() ?? null;
-  return id != null ? { 'X-Organization-Id': String(id) } : {};
+  return id != null ? { "X-Organization-Id": String(id) } : {};
 }
 
 // Sends the active UI locale so Django's LocaleMiddleware returns localized
 // labels/choices (e.g. OPTIONS schema, translated error messages). i18n.locale
 // is the source of truth, kept in sync by localeStore on change.
 function languageHeader(): Record<string, string> {
-  return i18n.locale ? { 'Accept-Language': i18n.locale } : {};
+  return i18n.locale ? { "Accept-Language": i18n.locale } : {};
 }
 
 async function _doRefresh(): Promise<string | null> {
@@ -46,8 +53,8 @@ async function _doRefresh(): Promise<string | null> {
   if (!refresh) return null;
 
   const res = await fetch(`${API_BASE_URL}/api/auth/token/refresh/`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...languageHeader() },
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...languageHeader() },
     body: JSON.stringify({ refresh }),
   });
 
@@ -63,26 +70,24 @@ async function _doRefresh(): Promise<string | null> {
 
 function refreshAccessToken(): Promise<string | null> {
   if (_refreshPromise) return _refreshPromise;
-  _refreshPromise = _doRefresh().finally(() => { _refreshPromise = null; });
+  _refreshPromise = _doRefresh().finally(() => {
+    _refreshPromise = null;
+  });
   return _refreshPromise;
 }
 
-async function request<T>(
-  url: string,
-  options: RequestInit = {},
-  retry = true,
-): Promise<T> {
+async function request<T>(url: string, options: RequestInit = {}, retry = true): Promise<T> {
   const access = tokenStore ? await tokenStore.getAccessToken() : null;
 
   const headers: Record<string, string> = {
-    ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
+    ...(options.body instanceof FormData ? {} : { "Content-Type": "application/json" }),
     ...(access ? { Authorization: `Bearer ${access}` } : {}),
     ...activeOrgHeader(),
     ...languageHeader(),
-    ...(options.headers as Record<string, string> ?? {}),
+    ...((options.headers as Record<string, string>) ?? {}),
   };
 
-  const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
+  const fullUrl = url.startsWith("http") ? url : `${API_BASE_URL}${url}`;
   const res = await fetch(fullUrl, { ...options, headers });
 
   if (res.status === 401 && retry && tokenStore) {
@@ -93,7 +98,11 @@ async function request<T>(
 
   if (!res.ok) {
     let data: unknown;
-    try { data = await res.json(); } catch { data = null; }
+    try {
+      data = await res.json();
+    } catch {
+      data = null;
+    }
     throw new ApiError(res.status, data, `${res.status} ${res.statusText}`);
   }
 
@@ -112,16 +121,22 @@ export type ViewSet = {
   update: (opts: { id: number | string; body: unknown }) => Promise<unknown>;
   delete: (opts: { id: number | string }) => Promise<void>;
   options: () => Promise<unknown>;
-  action: (opts: { id?: number | string; action: string; method?: string; body?: unknown; params?: Record<string, string> }) => Promise<unknown>;
+  action: (opts: {
+    id?: number | string;
+    action: string;
+    method?: string;
+    body?: unknown;
+    params?: Record<string, string>;
+  }) => Promise<unknown>;
 };
 
 function buildQuery(params?: Record<string, string | number | boolean>): string {
-  if (!params) return '';
+  if (!params) return "";
   const qs = Object.entries(params)
-    .filter(([, v]) => v !== undefined && v !== null && v !== '')
+    .filter(([, v]) => v !== undefined && v !== null && v !== "")
     .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`)
-    .join('&');
-  return qs ? `?${qs}` : '';
+    .join("&");
+  return qs ? `?${qs}` : "";
 }
 
 // FormData passes through untouched (multipart, e.g. file uploads); everything
@@ -131,16 +146,16 @@ function serializeBody(body: unknown): BodyInit {
 }
 
 export function getViewSet(baseUrl: string): ViewSet {
-  const base = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+  const base = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
 
   return {
     list: (opts) => request(`${base}${buildQuery(opts?.params)}`),
     retrieve: ({ id, ...opts }) => request(`${base}${id}/${buildQuery(opts?.params)}`),
-    create: ({ body }) => request(base, { method: 'POST', body: serializeBody(body) }),
-    update: ({ id, body }) => request(`${base}${id}/`, { method: 'PATCH', body: serializeBody(body) }),
-    delete: ({ id }) => request(`${base}${id}/`, { method: 'DELETE' }),
-    options: () => request(base, { method: 'OPTIONS' }),
-    action: ({ id, action, method = 'POST', body, params }) => {
+    create: ({ body }) => request(base, { method: "POST", body: serializeBody(body) }),
+    update: ({ id, body }) => request(`${base}${id}/`, { method: "PATCH", body: serializeBody(body) }),
+    delete: ({ id }) => request(`${base}${id}/`, { method: "DELETE" }),
+    options: () => request(base, { method: "OPTIONS" }),
+    action: ({ id, action, method = "POST", body, params }) => {
       const url = id ? `${base}${id}/${action}/${buildQuery(params)}` : `${base}${action}/${buildQuery(params)}`;
       return request(url, { method, ...(body !== undefined ? { body: serializeBody(body) } : {}) });
     },
@@ -148,18 +163,18 @@ export function getViewSet(baseUrl: string): ViewSet {
 }
 
 export async function uploadFormData<T>(url: string, formData: FormData): Promise<T> {
-  return request<T>(url, { method: 'POST', body: formData });
+  return request<T>(url, { method: "POST", body: formData });
 }
 
 export async function downloadBlob(url: string, retry = true): Promise<Blob> {
   const access = tokenStore ? await tokenStore.getAccessToken() : null;
-  const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
+  const fullUrl = url.startsWith("http") ? url : `${API_BASE_URL}${url}`;
   const headers: Record<string, string> = {
     ...(access ? { Authorization: `Bearer ${access}` } : {}),
     ...activeOrgHeader(),
     ...languageHeader(),
   };
-  const res = await fetch(fullUrl, { method: 'POST', headers });
+  const res = await fetch(fullUrl, { method: "POST", headers });
   if (res.status === 401 && retry && tokenStore) {
     const newAccess = await refreshAccessToken();
     if (newAccess) return downloadBlob(url, false);
@@ -172,8 +187,8 @@ export async function downloadBlob(url: string, retry = true): Promise<Blob> {
 export class AuthService {
   static async login(username: string, password: string) {
     const data = await request<{ access: string; refresh: string }>(
-      '/api/auth/token/',
-      { method: 'POST', body: JSON.stringify({ username, password }) },
+      "/api/auth/token/",
+      { method: "POST", body: JSON.stringify({ username, password }) },
       false,
     );
     if (tokenStore) await tokenStore.setTokens(data.access, data.refresh);
@@ -185,14 +200,14 @@ export class AuthService {
   }
 
   static async getMe() {
-    return request('/api/auth/me/');
+    return request("/api/auth/me/");
   }
 
   static async updateMe(body: Record<string, unknown>) {
-    return request('/api/auth/me/', { method: 'PATCH', body: JSON.stringify(body) });
+    return request("/api/auth/me/", { method: "PATCH", body: JSON.stringify(body) });
   }
 
   static async changePassword(body: Record<string, unknown>) {
-    return request('/api/auth/change-password/', { method: 'PUT', body: JSON.stringify(body) });
+    return request("/api/auth/change-password/", { method: "PUT", body: JSON.stringify(body) });
   }
 }

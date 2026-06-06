@@ -1,9 +1,7 @@
 import { Avatar, Button, Dropdown, Space, Tag, Typography, theme } from "antd";
 import { ArrowLeftOutlined, DeleteOutlined, EditOutlined, MoreOutlined } from "@ant-design/icons";
 import i18n from "@/locale/i18n";
-import {
-  avatarColor, initials, typeColor, typeLabel, type ContactDetail,
-} from "@/components/modules/contacts/shared";
+import { avatarColor, initials, typeColor, typeLabel, type ContactDetail } from "@/components/modules/contacts/shared";
 
 type Props = {
   contact: ContactDetail;
@@ -20,8 +18,12 @@ export default function ContactHeader({ contact, canUpdate, canDelete, onBack, o
   return (
     <div
       style={{
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        gap: 12, padding: "16px 24px", borderBottom: `1px solid ${token.colorBorderSecondary}`,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 12,
+        padding: "16px 24px",
+        borderBottom: `1px solid ${token.colorBorderSecondary}`,
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
@@ -31,12 +33,15 @@ export default function ContactHeader({ contact, canUpdate, canDelete, onBack, o
         </Avatar>
         <div style={{ minWidth: 0 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Typography.Title level={4} style={{ margin: 0 }} ellipsis>{contact.name}</Typography.Title>
+            <Typography.Title level={4} style={{ margin: 0 }} ellipsis>
+              {contact.name}
+            </Typography.Title>
             <Tag color={typeColor(contact.type)}>{typeLabel(contact.type)}</Tag>
           </div>
           {contact.created_by_display ? (
             <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-              {i18n.t("contacts.createdBy", { defaultValue: "创建人" })}: {contact.created_by_display.display_name || contact.created_by_display.username}
+              {i18n.t("contacts.createdBy", { defaultValue: "创建人" })}:{" "}
+              {contact.created_by_display.display_name || contact.created_by_display.username}
             </Typography.Text>
           ) : null}
         </div>
@@ -52,8 +57,17 @@ export default function ContactHeader({ contact, canUpdate, canDelete, onBack, o
             trigger={["click"]}
             placement="bottomRight"
             menu={{
-              items: [{ key: "delete", danger: true, icon: <DeleteOutlined />, label: i18n.t("common.delete", { defaultValue: "删除" }) }],
-              onClick: ({ key }) => { if (key === "delete") onDelete(); },
+              items: [
+                {
+                  key: "delete",
+                  danger: true,
+                  icon: <DeleteOutlined />,
+                  label: i18n.t("common.delete", { defaultValue: "删除" }),
+                },
+              ],
+              onClick: ({ key }) => {
+                if (key === "delete") onDelete();
+              },
             }}
           >
             <Button icon={<MoreOutlined />} />

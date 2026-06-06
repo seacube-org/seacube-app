@@ -8,12 +8,12 @@
 
 ## 现状（已实现到哪）
 
-| 维度 | 现状 | 来源 |
-|------|------|------|
-| **哪些列 / 顺序** | ✅ 数据驱动 | `SavedView.columns`（每视图存储）+ ColumnPicker；空则用默认集 |
-| **字段元数据**（label / type / sortable / choices） | ✅ 已有 schema | `/api/preferences/fields/?entity=`（registry `FieldDef`），**已被 FilterPanel 消费** |
-| **列定义**（title / width / sorter / render） | ❌ 硬编码 `baseColumns` | `index.web.tsx`：name(Avatar+链接) / type(彩色 Tag) / email / phone / currency |
-| 列 label | ❌ 前端 `fieldLabel` i18n map | 客户端本地化 |
+| 维度                                                | 现状                          | 来源                                                                                 |
+| --------------------------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------ |
+| **哪些列 / 顺序**                                   | ✅ 数据驱动                   | `SavedView.columns`（每视图存储）+ ColumnPicker；空则用默认集                        |
+| **字段元数据**（label / type / sortable / choices） | ✅ 已有 schema                | `/api/preferences/fields/?entity=`（registry `FieldDef`），**已被 FilterPanel 消费** |
+| **列定义**（title / width / sorter / render）       | ❌ 硬编码 `baseColumns`       | `index.web.tsx`：name(Avatar+链接) / type(彩色 Tag) / email / phone / currency       |
+| 列 label                                            | ❌ 前端 `fieldLabel` i18n map | 客户端本地化                                                                         |
 
 即：**"哪些列"已是数据驱动，但"列怎么定义"仍硬编码**，且 `sortable` / `label` 在 registry（给 filter）和 `baseColumns`（给表格）**各写了一遍 → 漂移点**。
 
@@ -54,6 +54,7 @@ useEntityColumns(fields, {
 ```
 
 每个 `listable` 字段生成一列：
+
 - `title = f.label`、`key/dataIndex = f.name`、`sorter = f.sortable`、`width = override.width ?? f.width ?? 按类型默认`、`align`、`ellipsis = (type==='text')`；
 - `render = override[name]?.render ?? 按类型默认渲染器`。
 
@@ -61,13 +62,13 @@ useEntityColumns(fields, {
 
 ### 按类型默认渲染器
 
-| `type` | 默认渲染 | 备注 |
-|--------|----------|------|
-| `text` | `ellipsis` 文本，空 → `—` | |
-| `choice` | label（`choices` 的 value→label）；可选 `meta.color` → Tag | 见"选项颜色" |
-| `number` | 右对齐、千分位 | |
-| `date` | `toLocaleDateString` | |
-| `boolean` | ✓ / — 图标 | |
+| `type`    | 默认渲染                                                   | 备注         |
+| --------- | ---------------------------------------------------------- | ------------ |
+| `text`    | `ellipsis` 文本，空 → `—`                                  |              |
+| `choice`  | label（`choices` 的 value→label）；可选 `meta.color` → Tag | 见"选项颜色" |
+| `number`  | 右对齐、千分位                                             |              |
+| `date`    | `toLocaleDateString`                                       |              |
+| `boolean` | ✓ / — 图标                                                 |              |
 
 ### 列选择 / 顺序（不变）
 
@@ -100,6 +101,7 @@ useEntityColumns(fields, {
 ## 文件改动
 
 **后端**
+
 - `apps/preferences/registry.py`：`FieldDef` 加 `listable/width/align`。
 - `apps/preferences/views.py`：`SavedViewFieldsView` 返回 `listable/width/align` + `gettext(f.label)`。
 - `apps/contacts/apps.py`：注册补列元数据（width/align/listable）。
@@ -107,6 +109,7 @@ useEntityColumns(fields, {
 - `apps/preferences/tests.py`：`/fields/` 含 listable/width、label 本地化。
 
 **前端**
+
 - `hooks/core/useEntityColumns.tsx`（新）：schema → antd 列 + by-type 渲染器 + override。
 - `app/(app)/(contacts)/index.web.tsx`：删 `baseColumns`/`fieldLabel`，改用 `useEntityColumns`；`allColumnOptions` 来自 schema。
 - `components/modules/views/types.ts`：`FieldDef` 加 `listable/width/align`。

@@ -1,0 +1,11 @@
+# Dependencies / build output / generated — not formatted by Prettier.
+node_modules
+.expo
+dist
+web-build
+build
+coverage
+ios
+android
+package-lock.json
+*.lock

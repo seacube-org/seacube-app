@@ -91,11 +91,7 @@ export function roleTypeLabel(t: RoleType): string {
   }
 }
 
-export const ROLE_TYPE_OPTIONS: { value: RoleType }[] = [
-  { value: "ADMIN" },
-  { value: "MANAGER" },
-  { value: "STAFF" },
-];
+export const ROLE_TYPE_OPTIONS: { value: RoleType }[] = [{ value: "ADMIN" }, { value: "MANAGER" }, { value: "STAFF" }];
 
 /** antd Tag colour by role type — shared by the users + roles tables for consistency. */
 export function roleTypeColor(t: RoleType): string {
@@ -113,8 +109,7 @@ export function roleTypeColor(t: RoleType): string {
 export const roleOptions = (roles: Role[]) =>
   roles.map((r) => ({ value: r.id, label: `${r.name} · ${roleTypeLabel(r.role_type)}` }));
 
-export const profileOptions = (profiles: Profile[]) =>
-  profiles.map((p) => ({ value: p.id, label: p.name }));
+export const profileOptions = (profiles: Profile[]) => profiles.map((p) => ({ value: p.id, label: p.name }));
 
 // Individual permission actions (Bigin-style per-module checkboxes). Canonical
 // order — used to keep stored lists and the summary text stable.
@@ -138,9 +133,7 @@ export function actionLabel(action: string): string {
 /** Comma summary of a module's actions in canonical order (or "无权限" when empty). */
 export function actionsSummary(actions: string[]): string {
   const ordered = PERM_ACTIONS.filter((a) => actions.includes(a));
-  return ordered.length
-    ? ordered.map(actionLabel).join("、")
-    : i18n.t("access.levelNone", { defaultValue: "无权限" });
+  return ordered.length ? ordered.map(actionLabel).join("、") : i18n.t("access.levelNone", { defaultValue: "无权限" });
 }
 
 // Localized labels for the permission manifest (backend ships English labels).

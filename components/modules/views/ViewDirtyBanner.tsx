@@ -18,9 +18,15 @@ export default function ViewDirtyBanner({ viewName, canUpdate, onUpdate, onSaveA
   return (
     <div
       style={{
-        display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
-        padding: "8px 24px", background: "#eef4ff", borderBottom: `1px solid ${token.colorBorderSecondary}`,
-        fontSize: 13, color: token.colorText,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 12,
+        padding: "8px 24px",
+        background: "#eef4ff",
+        borderBottom: `1px solid ${token.colorBorderSecondary}`,
+        fontSize: 13,
+        color: token.colorText,
       }}
     >
       <span>{i18n.t("views.dirtyNotice", { defaultValue: "「{{name}}」有未保存的更改", name: viewName })}</span>
@@ -30,8 +36,12 @@ export default function ViewDirtyBanner({ viewName, canUpdate, onUpdate, onSaveA
             {i18n.t("views.updateView", { defaultValue: "更新视图" })}
           </Button>
         )}
-        <Button size="small" onClick={onSaveAs}>{i18n.t("views.saveAsView", { defaultValue: "另存为视图" })}</Button>
-        <Button size="small" type="text" onClick={onRevert}>{i18n.t("views.reset", { defaultValue: "还原" })}</Button>
+        <Button size="small" onClick={onSaveAs}>
+          {i18n.t("views.saveAsView", { defaultValue: "另存为视图" })}
+        </Button>
+        <Button size="small" type="text" onClick={onRevert}>
+          {i18n.t("views.reset", { defaultValue: "还原" })}
+        </Button>
       </Space>
     </div>
   );

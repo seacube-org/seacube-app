@@ -97,7 +97,8 @@ export default function PhoneInput({ value, onChange, maxLength, ...props }: Pho
   const numberMaxLength = typeof maxLength === "number" ? Math.max(0, maxLength - parsed.code.length - 1) : undefined;
   // Keep the user's exact country pick when its dial code still matches; otherwise
   // resolve the stored dial code to a country (first match for shared codes).
-  const selectedIso = codeForIso(preferredIso) === parsed.code ? preferredIso : (isoForCode(parsed.code) ?? preferredIso);
+  const selectedIso =
+    codeForIso(preferredIso) === parsed.code ? preferredIso : (isoForCode(parsed.code) ?? preferredIso);
 
   const emit = (code: string, number: string) => {
     onChange?.(number.trim() ? `${code} ${number}` : "");

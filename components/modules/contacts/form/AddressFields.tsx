@@ -18,7 +18,12 @@ export default function AddressFields({
   const s = schema.nested(prefix);
   return (
     <div style={FIELD_GRID_STYLE}>
-      <SchemaField schema={s} name="attention" namePath={[prefix, "attention"]} config={{ itemProps: { style: FULL_WIDTH_ITEM_STYLE } }} />
+      <SchemaField
+        schema={s}
+        name="attention"
+        namePath={[prefix, "attention"]}
+        config={{ itemProps: { style: FULL_WIDTH_ITEM_STYLE } }}
+      />
       <SchemaField
         schema={s}
         name="address_line1"
@@ -31,10 +36,30 @@ export default function AddressFields({
         namePath={[prefix, "address_line2"]}
         config={{ itemProps: { style: FULL_WIDTH_ITEM_STYLE } }}
       />
-      <SchemaField schema={s} name="city" namePath={[prefix, "city"]} config={{ itemProps: { style: FIELD_ITEM_STYLE } }} />
-      <SchemaField schema={s} name="state" namePath={[prefix, "state"]} config={{ itemProps: { style: FIELD_ITEM_STYLE } }} />
-      <SchemaField schema={s} name="postal_code" namePath={[prefix, "postal_code"]} config={{ itemProps: { style: FIELD_ITEM_STYLE } }} />
-      <SchemaField schema={s} name="country" namePath={[prefix, "country"]} config={{ itemProps: { style: FIELD_ITEM_STYLE } }} />
+      <SchemaField
+        schema={s}
+        name="city"
+        namePath={[prefix, "city"]}
+        config={{ itemProps: { style: FIELD_ITEM_STYLE } }}
+      />
+      <SchemaField
+        schema={s}
+        name="state"
+        namePath={[prefix, "state"]}
+        config={{ itemProps: { style: FIELD_ITEM_STYLE } }}
+      />
+      <SchemaField
+        schema={s}
+        name="postal_code"
+        namePath={[prefix, "postal_code"]}
+        config={{ itemProps: { style: FIELD_ITEM_STYLE } }}
+      />
+      <SchemaField
+        schema={s}
+        name="country"
+        namePath={[prefix, "country"]}
+        config={{ itemProps: { style: FIELD_ITEM_STYLE } }}
+      />
       <SchemaField
         schema={s}
         name="phone"

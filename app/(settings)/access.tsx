@@ -1,4 +1,4 @@
-import SettingPlaceholder from '@/components/modules/settings/SettingPlaceholder';
+import SettingPlaceholder from "@/components/modules/settings/SettingPlaceholder";
 
 // Native placeholder — the user/role/permission UI is web-only (access.web.tsx).
 export default function AccessSettings() {

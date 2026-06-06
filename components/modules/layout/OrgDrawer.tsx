@@ -38,7 +38,9 @@ export function OrgDrawer({ open, onClose, memberships, activeOrgId, onSwitch, o
         if (active) setLoading(false);
       }
     })();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [open, activeOrgId, orgViewSet, detail?.id]);
 
   return (
@@ -66,16 +68,26 @@ export function OrgDrawer({ open, onClose, memberships, activeOrgId, onSwitch, o
               key={m.id}
               onClick={() => !isActive && onSwitch(m.organization.id)}
               style={{
-                display: "flex", alignItems: "center", gap: 10,
-                padding: "10px 12px", borderRadius: 8,
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "10px 12px",
+                borderRadius: 8,
                 border: `1px solid ${isActive ? colors.primary : "#f0f0f0"}`,
                 background: "transparent",
                 cursor: isActive ? "default" : "pointer",
               }}
             >
-              <Avatar size={32} shape="square" style={{ background: colors.primary, color: "#fff", flexShrink: 0 }} icon={<BankOutlined />} />
+              <Avatar
+                size={32}
+                shape="square"
+                style={{ background: colors.primary, color: "#fff", flexShrink: 0 }}
+                icon={<BankOutlined />}
+              />
               <div style={{ flex: 1, minWidth: 0 }}>
-                <Typography.Text strong style={{ fontSize: 13, display: "block" }}>{m.organization.name}</Typography.Text>
+                <Typography.Text strong style={{ fontSize: 13, display: "block" }}>
+                  {m.organization.name}
+                </Typography.Text>
                 {m.role?.name && <Tag style={{ marginTop: 2 }}>{m.role.name}</Tag>}
               </div>
               {isActive && <CheckOutlined style={{ color: colors.primary }} />}
@@ -84,12 +96,7 @@ export function OrgDrawer({ open, onClose, memberships, activeOrgId, onSwitch, o
         })}
       </div>
 
-      <Button
-        type="link"
-        icon={<PlusOutlined />}
-        onClick={onCreateOrg}
-        style={{ paddingLeft: 0, marginTop: 8 }}
-      >
+      <Button type="link" icon={<PlusOutlined />} onClick={onCreateOrg} style={{ paddingLeft: 0, marginTop: 8 }}>
         {i18n.t("org.new", { defaultValue: "新建机构" })}
       </Button>
 

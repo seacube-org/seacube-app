@@ -7,8 +7,13 @@ import { useSavedViews } from "./useSavedViews";
 import { useUiState } from "./useUiState";
 import type { SaveViewMeta } from "./SaveViewModal";
 import {
-  canEditView, filtersEqual, viewToFilter,
-  type FieldDef, type FilterValue, type SavedView, type Visibility,
+  canEditView,
+  filtersEqual,
+  viewToFilter,
+  type FieldDef,
+  type FilterValue,
+  type SavedView,
+  type Visibility,
 } from "./types";
 
 /** Applied filter + the page size (page size isn't part of the filter shape). */
@@ -34,7 +39,17 @@ export function useListView(entity: string, columnOverrides: Record<string, Colu
   const isAdmin = useIsActiveAdmin();
   const { message } = App.useApp();
 
-  const { views, fields, loading: viewsLoading, reload: reloadViews, createView, updateView, deleteView, setDefault, setFavorite } = useSavedViews(entity);
+  const {
+    views,
+    fields,
+    loading: viewsLoading,
+    reload: reloadViews,
+    createView,
+    updateView,
+    deleteView,
+    setDefault,
+    setFavorite,
+  } = useSavedViews(entity);
   const uiState = useUiState(entity);
 
   // Search is explicit (commit on Enter / search button), not as-you-type:
@@ -59,24 +74,31 @@ export function useListView(entity: string, columnOverrides: Record<string, Colu
 
   // The seeded "All" built-in — fallback when nothing else is selected/resolved.
   const fallbackView = useCallback(
-    () => views.find((v) => v.is_system && v.system_key === "all") ?? views.find((v) => v.is_system) ?? views[0] ?? null,
+    () =>
+      views.find((v) => v.is_system && v.system_key === "all") ?? views.find((v) => v.is_system) ?? views[0] ?? null,
     [views],
   );
 
   // Select a view + persist the choice (and current applied filter) as UI state.
-  const select = useCallback((v: SavedView, app: Applied) => {
-    setActive(v);
-    setApplied(app);
-    uiState.save({ active_view: v.id, active_view_key: "", state: app }).catch(() => {});
-  }, [uiState]);
+  const select = useCallback(
+    (v: SavedView, app: Applied) => {
+      setActive(v);
+      setApplied(app);
+      uiState.save({ active_view: v.id, active_view_key: "", state: app }).catch(() => {});
+    },
+    [uiState],
+  );
 
   const selectView = useCallback((v: SavedView) => select(v, fromSaved(v)), [select]);
 
   // Patch the active view's working filter (ad-hoc tweak: sort, columns, etc.).
   // Re-selects the active view so the change persists and marks it dirty.
-  const patchApplied = useCallback((patch: Partial<Applied>) => {
-    if (active) select(active, { ...applied, ...patch });
-  }, [active, applied, select]);
+  const patchApplied = useCallback(
+    (patch: Partial<Applied>) => {
+      if (active) select(active, { ...applied, ...patch });
+    },
+    [active, applied, select],
+  );
 
   // Restore last session (or default / All) once views have loaded. `hydrated`
   // gates the table so it mounts with the resolved view's filter already in place
@@ -90,9 +112,9 @@ export function useListView(entity: string, columnOverrides: Record<string, Colu
       if (views.length) {
         const saved = await uiState.load().catch(() => null);
         const target =
-          (saved?.active_view != null ? views.find((v) => v.id === saved.active_view) : undefined)
-          ?? views.find((v) => v.is_default)
-          ?? fallbackView();
+          (saved?.active_view != null ? views.find((v) => v.id === saved.active_view) : undefined) ??
+          views.find((v) => v.is_default) ??
+          fallbackView();
         if (target) {
           setActive(target);
           // Overlay persisted ad-hoc filter state only when resuming that same view.
@@ -108,12 +130,17 @@ export function useListView(entity: string, columnOverrides: Record<string, Colu
   // Keep `active` pointing at the freshest row after any reload (e.g. a locale
   // switch re-localizes system names; an edit changes flags) — match by id.
   useEffect(() => {
-    setActive((cur) => (cur ? views.find((v) => v.id === cur.id) ?? cur : cur));
+    setActive((cur) => (cur ? (views.find((v) => v.id === cur.id) ?? cur) : cur));
   }, [views]);
 
   // ---- Filter panel actions ----
   const openPanel = useCallback(() => {
-    setPanelSeed({ match: applied.match, criteria: applied.criteria, columns: applied.columns, ordering: applied.ordering });
+    setPanelSeed({
+      match: applied.match,
+      criteria: applied.criteria,
+      columns: applied.columns,
+      ordering: applied.ordering,
+    });
     setPanelEditing(active && !active.is_system ? active : null);
     setPanelOpen(true);
   }, [applied, active]);
@@ -122,18 +149,24 @@ export function useListView(entity: string, columnOverrides: Record<string, Colu
     setPanelEditing(null);
     setPanelOpen(true);
   }, []);
-  const openEditView = useCallback((v: SavedView) => {
-    selectView(v);
-    setPanelSeed(fromSaved(v));
-    setPanelEditing(v);
-    setPanelOpen(true);
-  }, [selectView]);
+  const openEditView = useCallback(
+    (v: SavedView) => {
+      selectView(v);
+      setPanelSeed(fromSaved(v));
+      setPanelEditing(v);
+      setPanelOpen(true);
+    },
+    [selectView],
+  );
   const closePanel = useCallback(() => setPanelOpen(false), []);
 
-  const applyAdhoc = useCallback((v: FilterValue) => {
-    patchApplied(v); // v carries match/criteria/columns/ordering; pageSize is kept
-    setPanelOpen(false);
-  }, [patchApplied]);
+  const applyAdhoc = useCallback(
+    (v: FilterValue) => {
+      patchApplied(v); // v carries match/criteria/columns/ordering; pageSize is kept
+      setPanelOpen(false);
+    },
+    [patchApplied],
+  );
 
   // Header drag-reorder / sort are ad-hoc tweaks: update the working filter so it
   // marks the view dirty (the banner offers update/save-as). Sort is view-level,
@@ -141,51 +174,81 @@ export function useListView(entity: string, columnOverrides: Record<string, Colu
   const reorderColumns = useCallback((columns: string[]) => patchApplied({ columns }), [patchApplied]);
   const setSort = useCallback((ordering: string) => patchApplied({ ordering }), [patchApplied]);
 
-  const saveAsView = useCallback(async (v: FilterValue, meta: SaveViewMeta) => {
-    try {
-      // Visibility (private/shared) is chosen in the panel's Visibility section.
-      const created = (await createView({ ...v, name: meta.name, is_favorite: meta.is_favorite, visibility: meta.visibility })) as SavedView;
-      await reloadViews();
-      selectView(created);
-      message.success(i18n.t("views.saved", { defaultValue: "已保存视图" }));
-    } catch (e) {
-      message.error(i18n.t("views.saveFailed", { defaultValue: "保存失败，请重试" }));
-      throw e; // keep the save modal / panel open so the user's input isn't lost
-    }
-  }, [createView, reloadViews, selectView, message]);
+  const saveAsView = useCallback(
+    async (v: FilterValue, meta: SaveViewMeta) => {
+      try {
+        // Visibility (private/shared) is chosen in the panel's Visibility section.
+        const created = (await createView({
+          ...v,
+          name: meta.name,
+          is_favorite: meta.is_favorite,
+          visibility: meta.visibility,
+        })) as SavedView;
+        await reloadViews();
+        selectView(created);
+        message.success(i18n.t("views.saved", { defaultValue: "已保存视图" }));
+      } catch (e) {
+        message.error(i18n.t("views.saveFailed", { defaultValue: "保存失败，请重试" }));
+        throw e; // keep the save modal / panel open so the user's input isn't lost
+      }
+    },
+    [createView, reloadViews, selectView, message],
+  );
 
-  const updateActiveView = useCallback(async (v: FilterValue, visibility?: Visibility) => {
-    if (!active || active.is_system) return;
-    try {
-      // visibility is sent only from the panel (the dirty banner keeps the existing one).
-      const updated = (await updateView(active.id, visibility ? { ...v, visibility } : v)) as SavedView;
-      await reloadViews();
-      selectView(updated);
-      setPanelOpen(false);
-      message.success(i18n.t("views.updated", { defaultValue: "视图已更新" }));
-    } catch {
-      message.error(i18n.t("views.saveFailed", { defaultValue: "保存失败，请重试" }));
-    }
-  }, [active, updateView, reloadViews, selectView, message]);
+  const updateActiveView = useCallback(
+    async (v: FilterValue, visibility?: Visibility) => {
+      if (!active || active.is_system) return;
+      try {
+        // visibility is sent only from the panel (the dirty banner keeps the existing one).
+        const updated = (await updateView(active.id, visibility ? { ...v, visibility } : v)) as SavedView;
+        await reloadViews();
+        selectView(updated);
+        setPanelOpen(false);
+        message.success(i18n.t("views.updated", { defaultValue: "视图已更新" }));
+      } catch {
+        message.error(i18n.t("views.saveFailed", { defaultValue: "保存失败，请重试" }));
+      }
+    },
+    [active, updateView, reloadViews, selectView, message],
+  );
 
-  const removeView = useCallback(async (v: SavedView) => {
-    try {
-      await deleteView(v.id);
-      if (active?.id === v.id) { const fb = fallbackView(); if (fb) selectView(fb); }
-      await reloadViews();
-    } catch {
-      message.error(i18n.t("views.deleteFailed", { defaultValue: "删除失败" }));
-    }
-  }, [deleteView, active, fallbackView, selectView, reloadViews, message]);
+  const removeView = useCallback(
+    async (v: SavedView) => {
+      try {
+        await deleteView(v.id);
+        if (active?.id === v.id) {
+          const fb = fallbackView();
+          if (fb) selectView(fb);
+        }
+        await reloadViews();
+      } catch {
+        message.error(i18n.t("views.deleteFailed", { defaultValue: "删除失败" }));
+      }
+    },
+    [deleteView, active, fallbackView, selectView, reloadViews, message],
+  );
 
-  const makeDefault = useCallback(async (v: SavedView) => {
-    try { await setDefault(v.id); await reloadViews(); } catch { /* noop */ }
-  }, [setDefault, reloadViews]);
+  const makeDefault = useCallback(
+    async (v: SavedView) => {
+      try {
+        await setDefault(v.id);
+        await reloadViews();
+      } catch {
+        /* noop */
+      }
+    },
+    [setDefault, reloadViews],
+  );
 
   // Favorite/unfavorite is per-user (backend UiState); works for any view (incl. system).
-  const toggleFavorite = useCallback((v: SavedView) => {
-    setFavorite(v.id, !v.is_favorite).then(() => reloadViews()).catch(() => {});
-  }, [setFavorite, reloadViews]);
+  const toggleFavorite = useCallback(
+    (v: SavedView) => {
+      setFavorite(v.id, !v.is_favorite)
+        .then(() => reloadViews())
+        .catch(() => {});
+    },
+    [setFavorite, reloadViews],
+  );
 
   // ---- Dirty state: applied filter diverges from the active view's definition ----
   const appliedFilter = useMemo<FilterValue>(
@@ -194,7 +257,9 @@ export function useListView(entity: string, columnOverrides: Record<string, Colu
   );
   const isDirty = !!active && !filtersEqual(appliedFilter, viewToFilter(active));
   const canUpdateActive = !!active && !active.is_system && canEditView(active, isAdmin);
-  const revertActive = useCallback(() => { if (active) selectView(active); }, [active, selectView]);
+  const revertActive = useCallback(() => {
+    if (active) selectView(active);
+  }, [active, selectView]);
 
   // ---- Table params / columns ----
   const params = useMemo(() => {
@@ -220,26 +285,32 @@ export function useListView(entity: string, columnOverrides: Record<string, Colu
 
   // Header-menu "Filter": open the panel pre-seeded with a new criterion on this
   // column (uses the field's first operator, awaiting a value).
-  const openColumnFilter = useCallback((field: string) => {
-    const fdef = fields.find((f) => f.name === field);
-    setPanelSeed({
-      match: applied.match,
-      criteria: [...applied.criteria, { field, operator: fdef?.operators[0]?.value ?? "", value: null }],
-      columns: applied.columns,
-      ordering: applied.ordering,
-    });
-    setPanelEditing(active && !active.is_system ? active : null);
-    setPanelOpen(true);
-  }, [fields, applied, active]);
+  const openColumnFilter = useCallback(
+    (field: string) => {
+      const fdef = fields.find((f) => f.name === field);
+      setPanelSeed({
+        match: applied.match,
+        criteria: [...applied.criteria, { field, operator: fdef?.operators[0]?.value ?? "", value: null }],
+        columns: applied.columns,
+        ordering: applied.ordering,
+      });
+      setPanelEditing(active && !active.is_system ? active : null);
+      setPanelOpen(true);
+    },
+    [fields, applied, active],
+  );
 
   // Header-menu "Remove": drop the column from the working set (marks dirty).
-  const removeColumn = useCallback((key: string) => {
-    const current = applied.columns.length ? applied.columns : allColumnOptions.map((o) => o.key);
-    const next = current.filter((k) => k !== key);
-    // Never remove the last column: an empty `columns` array is the "show all"
-    // sentinel, so it would otherwise restore every column instead of hiding one.
-    if (next.length) patchApplied({ columns: next });
-  }, [patchApplied, applied.columns, allColumnOptions]);
+  const removeColumn = useCallback(
+    (key: string) => {
+      const current = applied.columns.length ? applied.columns : allColumnOptions.map((o) => o.key);
+      const next = current.filter((k) => k !== key);
+      // Never remove the last column: an empty `columns` array is the "show all"
+      // sentinel, so it would otherwise restore every column instead of hiding one.
+      if (next.length) patchApplied({ columns: next });
+    },
+    [patchApplied, applied.columns, allColumnOptions],
+  );
 
   // Sort is view-level (controlled), so the table doesn't remount on sort; it
   // only remounts on org switch / page-size / refetch. Widths persist per user+org.
@@ -248,20 +319,50 @@ export function useListView(entity: string, columnOverrides: Record<string, Colu
 
   return {
     // schema + views
-    fields, views, favoriteIds, active, applied, hydrated,
-    visibleColumns, allColumnOptions, fieldLabel,
+    fields,
+    views,
+    favoriteIds,
+    active,
+    applied,
+    hydrated,
+    visibleColumns,
+    allColumnOptions,
+    fieldLabel,
     // search (explicit: setSearch updates the text, submitSearch runs it)
-    search, setSearch, submitSearch,
+    search,
+    setSearch,
+    submitSearch,
     // table
-    params, tableKey, widthStorageKey, refetch,
+    params,
+    tableKey,
+    widthStorageKey,
+    refetch,
     // dirty
-    isDirty, canUpdateActive, appliedFilter,
+    isDirty,
+    canUpdateActive,
+    appliedFilter,
     // view-select actions
-    selectView, openNewView, openEditView, removeView, makeDefault, toggleFavorite, revertActive,
+    selectView,
+    openNewView,
+    openEditView,
+    removeView,
+    makeDefault,
+    toggleFavorite,
+    revertActive,
     // filter panel
-    panelOpen, panelSeed, panelEditing, openPanel, closePanel, applyAdhoc, saveAsView, updateActiveView,
+    panelOpen,
+    panelSeed,
+    panelEditing,
+    openPanel,
+    closePanel,
+    applyAdhoc,
+    saveAsView,
+    updateActiveView,
     // column actions (drag-reorder, header menu)
-    reorderColumns, setSort, openColumnFilter, removeColumn,
+    reorderColumns,
+    setSort,
+    openColumnFilter,
+    removeColumn,
   };
 }
 

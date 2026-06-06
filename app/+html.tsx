@@ -1,5 +1,5 @@
-import { ScrollViewStyleReset } from 'expo-router/html';
-import type { PropsWithChildren } from 'react';
+import { ScrollViewStyleReset } from "expo-router/html";
+import type { PropsWithChildren } from "react";
 
 export default function Root({ children }: PropsWithChildren) {
   return (
@@ -10,7 +10,7 @@ export default function Root({ children }: PropsWithChildren) {
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
         <ScrollViewStyleReset />
         {/* Tailwind preflight is disabled, so clear the browser's default body margin. */}
-        <style dangerouslySetInnerHTML={{ __html: 'body { margin: 0; }' }} />
+        <style dangerouslySetInnerHTML={{ __html: "body { margin: 0; }" }} />
       </head>
       <body>{children}</body>
     </html>

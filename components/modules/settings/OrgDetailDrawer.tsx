@@ -86,7 +86,9 @@ export function OrgDetailDrawer({ open, membership, canEdit, onClose }: Props) {
         }
       })();
     }
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [open, orgId, canEdit, orgViewSet, addressVS, message]);
 
   // Seed the form when entering edit mode (options are already loaded above).
@@ -132,7 +134,10 @@ export function OrgDetailDrawer({ open, membership, canEdit, onClose }: Props) {
     }
   };
 
-  const closeEdit = () => { setEditing(false); setLogoFile(null); };
+  const closeEdit = () => {
+    setEditing(false);
+    setLogoFile(null);
+  };
 
   const footer = editing ? (
     <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
@@ -175,7 +180,10 @@ export function OrgDetailDrawer({ open, membership, canEdit, onClose }: Props) {
               accept="image/*"
               maxCount={1}
               listType="picture"
-              beforeUpload={(file) => { setLogoFile(file as File); return false; }}
+              beforeUpload={(file) => {
+                setLogoFile(file as File);
+                return false;
+              }}
               onRemove={() => setLogoFile(null)}
               fileList={logoFile ? [{ uid: "-1", name: logoFile.name, status: "done" as const }] : []}
             >
@@ -216,7 +224,11 @@ export function OrgDetailDrawer({ open, membership, canEdit, onClose }: Props) {
             <Form.Item name="phone" label={i18n.t("org.phone", { defaultValue: "电话" })}>
               <Input />
             </Form.Item>
-            <Form.Item style={{ gridColumn: "1 / -1" }} name="website" label={i18n.t("org.website", { defaultValue: "网站" })}>
+            <Form.Item
+              style={{ gridColumn: "1 / -1" }}
+              name="website"
+              label={i18n.t("org.website", { defaultValue: "网站" })}
+            >
               <Input />
             </Form.Item>
             <Form.Item
@@ -260,21 +272,61 @@ export function OrgDetailDrawer({ open, membership, canEdit, onClose }: Props) {
           )}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", columnGap: 24 }}>
             <div style={{ gridColumn: "1 / -1" }}>
-              <InfoRow label={i18n.t("org.name", { defaultValue: "机构名称" })} value={detail.name} placeholder={DASH} />
+              <InfoRow
+                label={i18n.t("org.name", { defaultValue: "机构名称" })}
+                value={detail.name}
+                placeholder={DASH}
+              />
             </div>
-            <InfoRow label={i18n.t("org.legalName", { defaultValue: "法定名称" })} value={detail.legal_name} placeholder={DASH} />
+            <InfoRow
+              label={i18n.t("org.legalName", { defaultValue: "法定名称" })}
+              value={detail.legal_name}
+              placeholder={DASH}
+            />
             <InfoRow label={i18n.t("org.slug", { defaultValue: "标识符" })} value={detail.slug} placeholder={DASH} />
-            <InfoRow label={i18n.t("org.taxNumber", { defaultValue: "税号" })} value={detail.tax_number} placeholder={DASH} />
-            <InfoRow label={i18n.t("org.contactEmail", { defaultValue: "联系邮箱" })} value={detail.contact_email} placeholder={DASH} />
+            <InfoRow
+              label={i18n.t("org.taxNumber", { defaultValue: "税号" })}
+              value={detail.tax_number}
+              placeholder={DASH}
+            />
+            <InfoRow
+              label={i18n.t("org.contactEmail", { defaultValue: "联系邮箱" })}
+              value={detail.contact_email}
+              placeholder={DASH}
+            />
             <InfoRow label={i18n.t("org.phone", { defaultValue: "电话" })} value={detail.phone} placeholder={DASH} />
-            <InfoRow label={i18n.t("org.website", { defaultValue: "网站" })} value={detail.website} placeholder={DASH} />
+            <InfoRow
+              label={i18n.t("org.website", { defaultValue: "网站" })}
+              value={detail.website}
+              placeholder={DASH}
+            />
             <div style={{ gridColumn: "1 / -1" }}>
-              <InfoRow label={i18n.t("org.address", { defaultValue: "地址" })} value={formatAddressLine(detail.address_detail)} placeholder={DASH} />
+              <InfoRow
+                label={i18n.t("org.address", { defaultValue: "地址" })}
+                value={formatAddressLine(detail.address_detail)}
+                placeholder={DASH}
+              />
             </div>
-            <InfoRow label={i18n.t("org.currency", { defaultValue: "本位币" })} value={optionLabel(currencyOptions, detail.currency)} placeholder={DASH} />
-            <InfoRow label={i18n.t("org.timezone", { defaultValue: "时区" })} value={optionLabel(TIMEZONE_OPTIONS, detail.timezone)} placeholder={DASH} />
-            <InfoRow label={i18n.t("org.createdAt", { defaultValue: "创建时间" })} value={formatDate(detail.created_at)} placeholder={DASH} />
-            <InfoRow label={i18n.t("org.myRole", { defaultValue: "我的角色" })} value={membership?.role?.name} placeholder={DASH} />
+            <InfoRow
+              label={i18n.t("org.currency", { defaultValue: "本位币" })}
+              value={optionLabel(currencyOptions, detail.currency)}
+              placeholder={DASH}
+            />
+            <InfoRow
+              label={i18n.t("org.timezone", { defaultValue: "时区" })}
+              value={optionLabel(TIMEZONE_OPTIONS, detail.timezone)}
+              placeholder={DASH}
+            />
+            <InfoRow
+              label={i18n.t("org.createdAt", { defaultValue: "创建时间" })}
+              value={formatDate(detail.created_at)}
+              placeholder={DASH}
+            />
+            <InfoRow
+              label={i18n.t("org.myRole", { defaultValue: "我的角色" })}
+              value={membership?.role?.name}
+              placeholder={DASH}
+            />
           </div>
           {!canEdit && (
             <Typography.Text type="secondary" style={{ fontSize: 12, display: "block", marginTop: 12 }}>

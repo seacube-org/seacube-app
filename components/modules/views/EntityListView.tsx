@@ -35,15 +35,30 @@ type Props = {
  * only their cells, toolbar actions and drawers.
  */
 export default function EntityListView({
-  entity, endpoint, columnOverrides, searchPlaceholder,
-  selectable = true, onRowClick, renderSummary, actions, extras,
+  entity,
+  endpoint,
+  columnOverrides,
+  searchPlaceholder,
+  selectable = true,
+  onRowClick,
+  renderSummary,
+  actions,
+  extras,
 }: Props) {
   const { token } = theme.useToken();
   const lv = useListView(entity, columnOverrides);
   const api: ListViewApi = { refetch: lv.refetch };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", width: "100%", background: token.colorBgContainer }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        width: "100%",
+        background: token.colorBgContainer,
+      }}
+    >
       <style>{`
         .seacube-list-toolbar .ant-input-affix-wrapper { height: 32px; background: #f9fbfd; border-color: #d8e1e8; }
       `}</style>
@@ -52,15 +67,30 @@ export default function EntityListView({
       <div
         className="seacube-list-toolbar"
         style={{
-          display: "flex", justifyContent: "space-between", alignItems: "center",
-          gap: 12, minHeight: 56, padding: "0 20px", borderBottom: `1px solid ${token.colorBorderSecondary}`, background: "#fff",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: 12,
+          minHeight: 56,
+          padding: "0 20px",
+          borderBottom: `1px solid ${token.colorBorderSecondary}`,
+          background: "#fff",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
           <Tooltip title={i18n.t("common.filter", { defaultValue: "筛选" })}>
             <Button
-              shape="circle" icon={<FilterOutlined />} onClick={lv.openPanel}
-              style={{ width: 32, height: 32, border: 0, background: lv.applied.criteria.length ? "#1A73E8" : "#eaf2ff", color: lv.applied.criteria.length ? "#fff" : token.colorPrimary, boxShadow: "none" }}
+              shape="circle"
+              icon={<FilterOutlined />}
+              onClick={lv.openPanel}
+              style={{
+                width: 32,
+                height: 32,
+                border: 0,
+                background: lv.applied.criteria.length ? "#1A73E8" : "#eaf2ff",
+                color: lv.applied.criteria.length ? "#fff" : token.colorPrimary,
+                boxShadow: "none",
+              }}
             />
           </Tooltip>
           <ViewSelect

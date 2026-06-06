@@ -48,7 +48,9 @@ export function OrgOnboarding({ onCreated }: Props) {
               strokeLinejoin="round"
             />
           </svg>
-          <Typography.Text strong style={{ fontSize: 18 }}>SeaCube ERP</Typography.Text>
+          <Typography.Text strong style={{ fontSize: 18 }}>
+            SeaCube ERP
+          </Typography.Text>
         </div>
 
         <Typography.Title level={4} style={{ marginTop: 16, marginBottom: 4 }}>
@@ -60,10 +62,7 @@ export function OrgOnboarding({ onCreated }: Props) {
           })}
         </Typography.Paragraph>
 
-        <OrgCreateForm
-          onCreated={onCreated}
-          submitLabel={i18n.t("org.getStarted", { defaultValue: "开始使用" })}
-        />
+        <OrgCreateForm onCreated={onCreated} submitLabel={i18n.t("org.getStarted", { defaultValue: "开始使用" })} />
 
         {/* Escape hatch: a failed setup or wrong account shouldn't trap the user here. */}
         <Divider style={{ margin: "16px 0 8px" }} />
@@ -71,7 +70,14 @@ export function OrgOnboarding({ onCreated }: Props) {
           <Typography.Text type="secondary" style={{ fontSize: 12, wordBreak: "break-all" }}>
             {user?.email || user?.username}
           </Typography.Text>
-          <Button type="link" size="small" danger icon={<LogoutOutlined />} onClick={logout} style={{ paddingRight: 0 }}>
+          <Button
+            type="link"
+            size="small"
+            danger
+            icon={<LogoutOutlined />}
+            onClick={logout}
+            style={{ paddingRight: 0 }}
+          >
             {i18n.t("auth.logout", { defaultValue: "退出登录" })}
           </Button>
         </div>

@@ -48,9 +48,7 @@ export default function OrganizationsSettings() {
               {m.organization.id === activeOrgId && (
                 <Tag color="green">{i18n.t("account.current", { defaultValue: "当前" })}</Tag>
               )}
-              {m.is_default && (
-                <Tag color="blue">{i18n.t("account.default", { defaultValue: "默认" })}</Tag>
-              )}
+              {m.is_default && <Tag color="blue">{i18n.t("account.default", { defaultValue: "默认" })}</Tag>}
               <RightOutlined style={{ color: colors.text.muted, fontSize: 12 }} />
             </span>
           }

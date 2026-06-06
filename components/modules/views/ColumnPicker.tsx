@@ -7,7 +7,7 @@ export type ColumnOption = { key: string; label: string };
 
 type Props = {
   allColumns: ColumnOption[];
-  value: string[];               // ordered selected keys
+  value: string[]; // ordered selected keys
   onChange: (keys: string[]) => void;
 };
 
@@ -50,12 +50,25 @@ export default function ColumnPicker({ allColumns, value, onChange }: Props) {
           <div
             key={key}
             draggable
-            onDragStart={(e) => { setDragIdx(idx); e.dataTransfer.effectAllowed = "move"; }}
-            onDragOver={(e) => { e.preventDefault(); setOverIdx(idx); }}
+            onDragStart={(e) => {
+              setDragIdx(idx);
+              e.dataTransfer.effectAllowed = "move";
+            }}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setOverIdx(idx);
+            }}
             onDrop={onDrop}
-            onDragEnd={() => { setDragIdx(null); setOverIdx(null); }}
+            onDragEnd={() => {
+              setDragIdx(null);
+              setOverIdx(null);
+            }}
             style={{
-              display: "flex", alignItems: "center", gap: 8, padding: "5px 6px", borderRadius: 6,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "5px 6px",
+              borderRadius: 6,
               background: dragIdx === idx ? token.controlItemBgActive : "transparent",
               boxShadow: isOver ? `inset 0 2px 0 ${token.colorPrimary}` : "none",
               opacity: dragIdx === idx ? 0.6 : 1,

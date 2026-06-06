@@ -5,9 +5,14 @@ import { useLocaleStore } from "@/stores/localeStore";
 import i18n from "@/locale/i18n";
 import { applyFieldErrors } from "@/components/modules/settings/formErrors";
 import {
-  useAccessViewSets, PERM_ACTIONS, actionLabel, actionsSummary,
-  sectionLabel, moduleLabel,
-  type Profile, type ManifestModule,
+  useAccessViewSets,
+  PERM_ACTIONS,
+  actionLabel,
+  actionsSummary,
+  sectionLabel,
+  moduleLabel,
+  type Profile,
+  type ManifestModule,
 } from "./shared";
 
 type Section = { section: string; modules: ManifestModule[] };
@@ -18,14 +23,22 @@ function groupSections(manifest: ManifestModule[]): Section[] {
   const index = new Map<string, Section>();
   for (const m of manifest) {
     let s = index.get(m.section);
-    if (!s) { s = { section: m.section, modules: [] }; index.set(m.section, s); out.push(s); }
+    if (!s) {
+      s = { section: m.section, modules: [] };
+      index.set(m.section, s);
+      out.push(s);
+    }
     s.modules.push(m);
   }
   return out;
 }
 
 export default function ProfilePermissionEditor({
-  open, profile, manifest, onClose, onSaved,
+  open,
+  profile,
+  manifest,
+  onClose,
+  onSaved,
 }: {
   open: boolean;
   profile: Profile | null; // null = create
@@ -116,12 +129,16 @@ export default function ProfilePermissionEditor({
       footer={
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           {/* Reset only applies to seeded system profiles; resetting a custom one would clobber it to Staff. */}
-          {isEdit && profile?.is_system
-            ? <Button onClick={resetToDefault}>{i18n.t("access.resetDefault", { defaultValue: "重置为默认" })}</Button>
-            : <span />}
+          {isEdit && profile?.is_system ? (
+            <Button onClick={resetToDefault}>{i18n.t("access.resetDefault", { defaultValue: "重置为默认" })}</Button>
+          ) : (
+            <span />
+          )}
           <Space>
             <Button onClick={onClose}>{i18n.t("common.cancel", { defaultValue: "取消" })}</Button>
-            <Button type="primary" loading={saving} onClick={save}>{i18n.t("account.save", { defaultValue: "保存" })}</Button>
+            <Button type="primary" loading={saving} onClick={save}>
+              {i18n.t("account.save", { defaultValue: "保存" })}
+            </Button>
           </Space>
         </div>
       }
@@ -154,7 +171,10 @@ export default function ProfilePermissionEditor({
             const acts = perms[m.key] ?? [];
             const on = acts.length > 0;
             return (
-              <div key={m.key} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0" }}>
+              <div
+                key={m.key}
+                style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0" }}
+              >
                 <Typography.Text>{moduleLabel(m.key, m.label)}</Typography.Text>
                 <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
                   <Switch size="small" checked={on} onChange={(checked) => toggleModule(m.key, checked)} />
@@ -162,7 +182,15 @@ export default function ProfilePermissionEditor({
                     <Dropdown
                       trigger={["click"]}
                       popupRender={() => (
-                        <div style={{ background: token.colorBgElevated, borderRadius: 8, boxShadow: token.boxShadowSecondary, padding: "10px 14px", minWidth: 140 }}>
+                        <div
+                          style={{
+                            background: token.colorBgElevated,
+                            borderRadius: 8,
+                            boxShadow: token.boxShadowSecondary,
+                            padding: "10px 14px",
+                            minWidth: 140,
+                          }}
+                        >
                           <Checkbox.Group
                             value={acts}
                             options={PERM_ACTIONS.map((a) => ({
@@ -177,7 +205,16 @@ export default function ProfilePermissionEditor({
                         </div>
                       )}
                     >
-                      <span style={{ cursor: "pointer", color: token.colorPrimary, display: "inline-flex", alignItems: "center", gap: 4, fontSize: 13 }}>
+                      <span
+                        style={{
+                          cursor: "pointer",
+                          color: token.colorPrimary,
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 4,
+                          fontSize: 13,
+                        }}
+                      >
                         {actionsSummary(acts)}
                         <DownOutlined style={{ fontSize: 10 }} />
                       </span>

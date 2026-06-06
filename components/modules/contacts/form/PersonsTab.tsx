@@ -25,15 +25,27 @@ export default function PersonsTab({ schema }: { schema: FieldSchema }) {
               onRemove={() => remove(name)}
             >
               <div style={FIELD_GRID_STYLE}>
-                <SchemaField schema={s} name="name" namePath={[name, "name"]} config={{ itemProps: { style: FIELD_ITEM_STYLE } }} />
-                <SchemaField schema={s} name="title" namePath={[name, "title"]} config={{ itemProps: { style: FIELD_ITEM_STYLE } }} />
+                <SchemaField
+                  schema={s}
+                  name="name"
+                  namePath={[name, "name"]}
+                  config={{ itemProps: { style: FIELD_ITEM_STYLE } }}
+                />
+                <SchemaField
+                  schema={s}
+                  name="title"
+                  namePath={[name, "title"]}
+                  config={{ itemProps: { style: FIELD_ITEM_STYLE } }}
+                />
                 <SchemaField
                   schema={s}
                   name="email"
                   namePath={[name, "email"]}
                   config={{
                     itemProps: { style: FIELD_ITEM_STYLE },
-                    rules: [{ type: "email", message: i18n.t("contacts.emailInvalid", { defaultValue: "邮箱格式不正确" }) }],
+                    rules: [
+                      { type: "email", message: i18n.t("contacts.emailInvalid", { defaultValue: "邮箱格式不正确" }) },
+                    ],
                   }}
                 />
                 <SchemaField
@@ -46,7 +58,12 @@ export default function PersonsTab({ schema }: { schema: FieldSchema }) {
                   }}
                 />
               </div>
-              <SchemaField schema={s} name="is_primary" namePath={[name, "is_primary"]} config={{ inputProps: { size: "small" } }} />
+              <SchemaField
+                schema={s}
+                name="is_primary"
+                namePath={[name, "is_primary"]}
+                config={{ inputProps: { size: "small" } }}
+              />
             </NestedItemCard>
           ))}
           <Button type="dashed" block icon={<PlusOutlined />} onClick={() => add({ is_primary: false })}>

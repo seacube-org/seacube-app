@@ -101,7 +101,10 @@ export default function WebAppLayout() {
         displayName={displayName}
         email={user?.email ?? ""}
         username={user?.username}
-        onLogout={() => { setUserDrawerOpen(false); logout(); }}
+        onLogout={() => {
+          setUserDrawerOpen(false);
+          logout();
+        }}
         onSettings={handleSettings}
       />
 
@@ -111,7 +114,10 @@ export default function WebAppLayout() {
         memberships={memberships}
         activeOrgId={activeOrgId}
         onSwitch={handleSwitchOrg}
-        onCreateOrg={() => { setOrgDrawerOpen(false); setCreateOrgOpen(true); }}
+        onCreateOrg={() => {
+          setOrgDrawerOpen(false);
+          setCreateOrgOpen(true);
+        }}
       />
 
       <Modal
@@ -122,7 +128,10 @@ export default function WebAppLayout() {
         title={i18n.t("org.new", { defaultValue: "新建机构" })}
       >
         <OrgCreateForm
-          onCreated={(id) => { setCreateOrgOpen(false); activateOrg(id); }}
+          onCreated={(id) => {
+            setCreateOrgOpen(false);
+            activateOrg(id);
+          }}
         />
       </Modal>
 
@@ -164,7 +173,11 @@ export default function WebAppLayout() {
             <button
               type="button"
               onClick={() => setCollapsed((v) => !v)}
-              title={collapsed ? i18n.t("common.expand", { defaultValue: "展开" }) : i18n.t("common.collapse", { defaultValue: "收起" })}
+              title={
+                collapsed
+                  ? i18n.t("common.expand", { defaultValue: "展开" })
+                  : i18n.t("common.collapse", { defaultValue: "收起" })
+              }
               style={{
                 height: 38,
                 width: "100%",

@@ -20,7 +20,16 @@ import i18n from "@/locale/i18n";
 function CenteredFill({ children }: { children: ReactNode }) {
   const { token } = theme.useToken();
   return (
-    <div style={{ height: "100%", width: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: token.colorBgContainer }}>
+    <div
+      style={{
+        height: "100%",
+        width: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: token.colorBgContainer,
+      }}
+    >
       {children}
     </div>
   );
@@ -51,12 +60,18 @@ export default function ContactDetailScreen() {
       okText: i18n.t("common.confirm", { defaultValue: "确认" }),
       cancelText: i18n.t("common.cancel", { defaultValue: "取消" }),
       okButtonProps: { danger: true },
-      onOk: async () => { if (await remove()) goBack(); },
+      onOk: async () => {
+        if (await remove()) goBack();
+      },
     });
   };
 
   if (loading) {
-    return <CenteredFill><Spin /></CenteredFill>;
+    return (
+      <CenteredFill>
+        <Spin />
+      </CenteredFill>
+    );
   }
 
   // Load failed (deleted / forbidden / bad id) — offer a way back instead of
@@ -76,15 +91,33 @@ export default function ContactDetailScreen() {
   const activityReady = contentTypeId != null && contactId != null;
   const tabSpinner = <Spin style={{ display: "block", margin: "24px auto" }} />;
   const tabs = [
-    { key: "overview", label: i18n.t("contacts.tabOverview", { defaultValue: "概览" }), children: <ContactOverview contact={contact} schema={schema} /> },
-    { key: "timeline", label: i18n.t("contacts.timeline", { defaultValue: "动态" }),
-      children: activityReady ? <CommentsTab contentTypeId={contentTypeId} objectId={contactId} /> : tabSpinner },
-    { key: "files", label: i18n.t("contacts.files", { defaultValue: "文件" }),
-      children: activityReady ? <AttachmentPanel contentTypeId={contentTypeId} objectId={contactId} /> : tabSpinner },
+    {
+      key: "overview",
+      label: i18n.t("contacts.tabOverview", { defaultValue: "概览" }),
+      children: <ContactOverview contact={contact} schema={schema} />,
+    },
+    {
+      key: "timeline",
+      label: i18n.t("contacts.timeline", { defaultValue: "动态" }),
+      children: activityReady ? <CommentsTab contentTypeId={contentTypeId} objectId={contactId} /> : tabSpinner,
+    },
+    {
+      key: "files",
+      label: i18n.t("contacts.files", { defaultValue: "文件" }),
+      children: activityReady ? <AttachmentPanel contentTypeId={contentTypeId} objectId={contactId} /> : tabSpinner,
+    },
   ];
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", width: "100%", background: token.colorBgContainer }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        width: "100%",
+        background: token.colorBgContainer,
+      }}
+    >
       <ContactHeader
         contact={contact}
         canUpdate={canUpdate}
@@ -102,12 +135,7 @@ export default function ContactDetailScreen() {
         </div>
       </div>
 
-      <ContactFormDrawer
-        open={editOpen}
-        contact={contact}
-        onClose={() => setEditOpen(false)}
-        onSaved={reload}
-      />
+      <ContactFormDrawer open={editOpen} contact={contact} onClose={() => setEditOpen(false)} onSaved={reload} />
     </div>
   );
 }

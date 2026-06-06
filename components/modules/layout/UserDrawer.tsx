@@ -24,7 +24,10 @@ export function UserDrawer({ open, onClose, displayName, email, username, onLogo
       styles={{ wrapper: { width: 340 }, body: { display: "flex", flexDirection: "column" } }}
     >
       <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
-        <Avatar size={56} style={{ background: colors.primary, color: "#fff", fontWeight: 700, fontSize: 22, flexShrink: 0 }}>
+        <Avatar
+          size={56}
+          style={{ background: colors.primary, color: "#fff", fontWeight: 700, fontSize: 22, flexShrink: 0 }}
+        >
           {displayName[0]?.toUpperCase() ?? "?"}
         </Avatar>
         <div style={{ minWidth: 0 }}>

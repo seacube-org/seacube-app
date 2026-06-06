@@ -10,13 +10,13 @@ export type FieldDef = {
   name: string;
   label: string;
   type: FieldType;
-  operators: OperatorDef[];        // value + value-arity, server-driven
-  choices?: { value: string; label: string; color?: string }[] | null;  // color: optional Tag color (from OptionSet meta)
+  operators: OperatorDef[]; // value + value-arity, server-driven
+  choices?: { value: string; label: string; color?: string }[] | null; // color: optional Tag color (from OptionSet meta)
   sortable?: boolean;
   searchable?: boolean;
   // List-column metadata (schema-driven table) — see docs/schema-driven-columns.md.
-  listable?: boolean;              // may be a table column (ColumnPicker)
-  width?: number | null;           // default column width (px)
+  listable?: boolean; // may be a table column (ColumnPicker)
+  width?: number | null; // default column width (px)
   align?: "left" | "right" | "center" | null;
 };
 
@@ -44,12 +44,12 @@ export type SavedView = {
   ordering: string;
   page_size: number | null;
   visibility: Visibility;
-  is_shared: boolean;   // read-only convenience derived from visibility
+  is_shared: boolean; // read-only convenience derived from visibility
   is_favorite: boolean;
   is_default: boolean;
   is_mine: boolean;
-  is_system: boolean;   // seeded built-in (All/Customers/...) — non-editable
-  system_key: string;   // stable id for system rows ('all' | 'customers' | ...)
+  is_system: boolean; // seeded built-in (All/Customers/...) — non-editable
+  system_key: string; // stable id for system rows ('all' | 'customers' | ...)
 };
 
 /** What a list page applies to its table: filter criteria + columns + sort. */

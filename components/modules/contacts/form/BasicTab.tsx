@@ -39,13 +39,21 @@ export default function BasicTab({ schema }: { schema: FieldSchema }) {
       <SchemaField schema={schema} name="website" config={{ itemProps: { style: FULL_WIDTH_ITEM_STYLE } }} />
       {/* tax_id is staff-hidden → absent from the schema for STAFF → SchemaField renders null. */}
       <SchemaField schema={schema} name="tax_id" config={{ itemProps: { style: FIELD_ITEM_STYLE } }} />
-      <SchemaField schema={schema} name="currency" config={{ ref: "currency", itemProps: { style: FIELD_ITEM_STYLE } }} />
+      <SchemaField
+        schema={schema}
+        name="currency"
+        config={{ ref: "currency", itemProps: { style: FIELD_ITEM_STYLE } }}
+      />
       <SchemaField
         schema={schema}
         name="payment_terms"
         config={{ inputProps: { min: 0, style: { width: "100%" } }, itemProps: { style: FULL_WIDTH_ITEM_STYLE } }}
       />
-      <SchemaField schema={schema} name="notes" config={{ control: <TextArea rows={4} />, itemProps: { style: FULL_WIDTH_ITEM_STYLE } }} />
+      <SchemaField
+        schema={schema}
+        name="notes"
+        config={{ control: <TextArea rows={4} />, itemProps: { style: FULL_WIDTH_ITEM_STYLE } }}
+      />
     </div>
   );
 }

@@ -69,10 +69,16 @@ export default function CriteriaRow({ fields, value, labelFor, onChange, onRemov
         const arr = (Array.isArray(value.value) ? value.value : [null, null]) as (string | null)[];
         return (
           <Space.Compact style={{ flex: 1 }}>
-            <DatePicker style={{ width: "50%" }} value={arr[0] ? dayjs(arr[0]) : null}
-              onChange={(d) => setValue([d ? d.format("YYYY-MM-DD") : null, arr[1]])} />
-            <DatePicker style={{ width: "50%" }} value={arr[1] ? dayjs(arr[1]) : null}
-              onChange={(d) => setValue([arr[0], d ? d.format("YYYY-MM-DD") : null])} />
+            <DatePicker
+              style={{ width: "50%" }}
+              value={arr[0] ? dayjs(arr[0]) : null}
+              onChange={(d) => setValue([d ? d.format("YYYY-MM-DD") : null, arr[1]])}
+            />
+            <DatePicker
+              style={{ width: "50%" }}
+              value={arr[1] ? dayjs(arr[1]) : null}
+              onChange={(d) => setValue([arr[0], d ? d.format("YYYY-MM-DD") : null])}
+            />
           </Space.Compact>
         );
       }

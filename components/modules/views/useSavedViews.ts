@@ -36,7 +36,9 @@ export function useSavedViews(entity: string) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewsVS, fieldsVS, entity, locale]);
 
-  useEffect(() => { reload(); }, [reload]);
+  useEffect(() => {
+    reload();
+  }, [reload]);
 
   const createView = useCallback(
     (body: Partial<SavedView>) => viewsVS.create({ body: { ...body, entity } }) as Promise<SavedView>,

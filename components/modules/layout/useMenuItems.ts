@@ -14,10 +14,7 @@ import i18n from "@/locale/i18n";
 // module_permissions values are action lists (['view','create','update','delete']).
 export type ModulePermissions = Record<string, string[]>;
 
-function canView(
-  permissions: ModulePermissions | undefined,
-  key: string,
-): boolean {
+function canView(permissions: ModulePermissions | undefined, key: string): boolean {
   return permissions ? (permissions[key] ?? []).includes("view") : false;
 }
 

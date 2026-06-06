@@ -25,7 +25,9 @@ export function useContactDetail(contactId: number | null) {
     }
   }, [contactId, vs, message]);
 
-  useEffect(() => { reload(); }, [reload]);
+  useEffect(() => {
+    reload();
+  }, [reload]);
 
   const remove = useCallback(async (): Promise<boolean> => {
     if (contactId == null) return false;

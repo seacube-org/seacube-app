@@ -43,8 +43,7 @@ export default function LoginScreen() {
         await storageDel(REMEMBER_KEY);
       }
     } catch (e) {
-      if (e instanceof ApiError && e.status === 401)
-        setError(i18n.t("auth.loginError.invalid"));
+      if (e instanceof ApiError && e.status === 401) setError(i18n.t("auth.loginError.invalid"));
       else setError(i18n.t("auth.loginError.generic"));
     } finally {
       setLoading(false);
@@ -103,21 +102,10 @@ export default function LoginScreen() {
         </div>
 
         {error && (
-          <Alert
-            title={error}
-            type="error"
-            showIcon
-            style={{ marginBottom: 20, borderRadius: token.borderRadius }}
-          />
+          <Alert title={error} type="error" showIcon style={{ marginBottom: 20, borderRadius: token.borderRadius }} />
         )}
 
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleLogin}
-          requiredMark={false}
-          size="large"
-        >
+        <Form form={form} layout="vertical" onFinish={handleLogin} requiredMark={false} size="large">
           <Form.Item
             name="username"
             label={i18n.t("auth.username")}
@@ -125,9 +113,7 @@ export default function LoginScreen() {
             style={{ marginBottom: 16 }}
           >
             <Input
-              prefix={
-                <UserOutlined style={{ color: token.colorTextTertiary }} />
-              }
+              prefix={<UserOutlined style={{ color: token.colorTextTertiary }} />}
               placeholder={i18n.t("auth.username")}
               autoComplete="username"
               autoFocus
@@ -141,30 +127,18 @@ export default function LoginScreen() {
             style={{ marginBottom: 16 }}
           >
             <Input.Password
-              prefix={
-                <LockOutlined style={{ color: token.colorTextTertiary }} />
-              }
+              prefix={<LockOutlined style={{ color: token.colorTextTertiary }} />}
               placeholder={i18n.t("auth.password")}
               autoComplete="current-password"
             />
           </Form.Item>
 
-          <Form.Item
-            name="remember"
-            valuePropName="checked"
-            style={{ marginBottom: 24 }}
-          >
+          <Form.Item name="remember" valuePropName="checked" style={{ marginBottom: 24 }}>
             <Checkbox>{i18n.t("auth.rememberMe")}</Checkbox>
           </Form.Item>
 
           <Form.Item style={{ marginBottom: 0 }}>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={loading}
-              block
-              style={{ height: 44, fontSize: 15 }}
-            >
+            <Button type="primary" htmlType="submit" loading={loading} block style={{ height: 44, fontSize: 15 }}>
               {i18n.t("auth.loginButton")}
             </Button>
           </Form.Item>

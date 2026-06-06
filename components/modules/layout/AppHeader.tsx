@@ -50,7 +50,9 @@ export function AppHeader({ collapsed, displayName, orgName, onSettings, onUserC
           />
         </svg>
         {!collapsed && (
-          <Typography.Text style={{ color: "#fff", fontWeight: 700, fontSize: 16, marginLeft: 8, whiteSpace: "nowrap" }}>
+          <Typography.Text
+            style={{ color: "#fff", fontWeight: 700, fontSize: 16, marginLeft: 8, whiteSpace: "nowrap" }}
+          >
             SeaCube ERP
           </Typography.Text>
         )}

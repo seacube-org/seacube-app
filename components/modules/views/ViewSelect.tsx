@@ -1,8 +1,15 @@
 import { useState, type ReactNode } from "react";
 import { Dropdown, Button, Input, Popconfirm, theme } from "antd";
 import {
-  DownOutlined, StarFilled, StarOutlined, EditOutlined, DeleteOutlined, PlusOutlined,
-  PushpinOutlined, PushpinFilled, SearchOutlined,
+  DownOutlined,
+  StarFilled,
+  StarOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  PlusOutlined,
+  PushpinOutlined,
+  PushpinFilled,
+  SearchOutlined,
 } from "@ant-design/icons";
 import i18n from "@/locale/i18n";
 import type { SavedView } from "./types";
@@ -23,7 +30,15 @@ type Props = {
 };
 
 export default function ViewSelect({
-  views, active, favorites, onSelect, onNewView, onEditView, onDeleteView, onSetDefault, onToggleFavorite,
+  views,
+  active,
+  favorites,
+  onSelect,
+  onNewView,
+  onEditView,
+  onDeleteView,
+  onSetDefault,
+  onToggleFavorite,
 }: Props) {
   const { token } = theme.useToken();
   const [open, setOpen] = useState(false);
@@ -38,32 +53,64 @@ export default function ViewSelect({
     <div
       key={v.id}
       className="scb-view-row"
-      style={{ background: active?.id === v.id ? token.controlItemBgActive : undefined, fontWeight: active?.id === v.id ? 600 : 400 }}
-      onClick={() => { onSelect(v); setOpen(false); }}
+      style={{
+        background: active?.id === v.id ? token.controlItemBgActive : undefined,
+        fontWeight: active?.id === v.id ? 600 : 400,
+      }}
+      onClick={() => {
+        onSelect(v);
+        setOpen(false);
+      }}
     >
       <span style={{ width: 22, flexShrink: 0, display: "inline-flex", justifyContent: "center" }}>
         <Button
-          type="text" size="small"
+          type="text"
+          size="small"
           className={favorites.has(v.id) ? "scb-fav" : "scb-fav scb-fav-off"}
           style={{ width: 22, height: 22, minWidth: 0, padding: 0 }}
           title={i18n.t("views.favorite", { defaultValue: "收藏" })}
-          icon={favorites.has(v.id)
-            ? <StarFilled style={{ color: FAV_COLOR }} />
-            : <StarOutlined style={{ color: token.colorTextSecondary }} />}
-          onClick={(e) => { stop(e); onToggleFavorite(v); }}
+          icon={
+            favorites.has(v.id) ? (
+              <StarFilled style={{ color: FAV_COLOR }} />
+            ) : (
+              <StarOutlined style={{ color: token.colorTextSecondary }} />
+            )
+          }
+          onClick={(e) => {
+            stop(e);
+            onToggleFavorite(v);
+          }}
         />
       </span>
       <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{v.name}</span>
       <span className="scb-row-actions" style={{ display: "inline-flex", gap: 0 }}>
         <Button
-          type="text" size="small"
+          type="text"
+          size="small"
           title={i18n.t("views.setDefault", { defaultValue: "设为默认" })}
-          icon={v.is_default ? <PushpinFilled style={{ color: token.colorPrimary }} /> : <PushpinOutlined style={{ color: token.colorTextTertiary }} />}
-          onClick={(e) => { stop(e); onSetDefault(v); }}
+          icon={
+            v.is_default ? (
+              <PushpinFilled style={{ color: token.colorPrimary }} />
+            ) : (
+              <PushpinOutlined style={{ color: token.colorTextTertiary }} />
+            )
+          }
+          onClick={(e) => {
+            stop(e);
+            onSetDefault(v);
+          }}
         />
         {v.is_mine && !v.is_system && (
           <>
-            <Button type="text" size="small" icon={<EditOutlined />} onClick={(e) => { stop(e); onEditView(v); }} />
+            <Button
+              type="text"
+              size="small"
+              icon={<EditOutlined />}
+              onClick={(e) => {
+                stop(e);
+                onEditView(v);
+              }}
+            />
             <Popconfirm
               title={i18n.t("views.deleteConfirm", { defaultValue: "删除该视图？" })}
               okText={i18n.t("common.confirm", { defaultValue: "确认" })}
@@ -95,7 +142,9 @@ export default function ViewSelect({
     <div
       onClick={() => setTab(key)}
       style={{
-        cursor: "pointer", padding: "8px 2px", fontSize: 13,
+        cursor: "pointer",
+        padding: "8px 2px",
+        fontSize: 13,
         fontWeight: tab === key ? 600 : 500,
         color: tab === key ? token.colorPrimary : token.colorTextSecondary,
         borderBottom: `2px solid ${tab === key ? token.colorPrimary : "transparent"}`,
@@ -108,8 +157,12 @@ export default function ViewSelect({
   const panel = (
     <div
       style={{
-        width: 320, background: token.colorBgElevated, borderRadius: 10,
-        boxShadow: token.boxShadowSecondary, border: `1px solid ${token.colorBorderSecondary}`, overflow: "hidden",
+        width: 320,
+        background: token.colorBgElevated,
+        borderRadius: 10,
+        boxShadow: token.boxShadowSecondary,
+        border: `1px solid ${token.colorBorderSecondary}`,
+        overflow: "hidden",
       }}
     >
       <style>{`
@@ -122,7 +175,14 @@ export default function ViewSelect({
         .scb-view-row .scb-fav-off:hover { opacity:1; }
       `}</style>
 
-      <div style={{ display: "flex", gap: 20, padding: "6px 18px 0", borderBottom: `1px solid ${token.colorBorderSecondary}` }}>
+      <div
+        style={{
+          display: "flex",
+          gap: 20,
+          padding: "6px 18px 0",
+          borderBottom: `1px solid ${token.colorBorderSecondary}`,
+        }}
+      >
         {tabBtn("all", i18n.t("views.allViews", { defaultValue: "全部视图" }))}
         {tabBtn("favorites", i18n.t("views.favorites", { defaultValue: "收藏" }))}
       </div>
@@ -147,8 +207,13 @@ export default function ViewSelect({
             <div key={g.label}>
               <div
                 style={{
-                  margin: "6px 8px 2px", padding: "5px 10px", fontSize: 12, fontWeight: 600,
-                  color: token.colorTextSecondary, background: token.colorFillQuaternary, borderRadius: 6,
+                  margin: "6px 8px 2px",
+                  padding: "5px 10px",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: token.colorTextSecondary,
+                  background: token.colorFillQuaternary,
+                  borderRadius: 6,
                 }}
               >
                 {g.label}
@@ -160,11 +225,20 @@ export default function ViewSelect({
       </div>
 
       <div
-        onClick={() => { setOpen(false); onNewView(); }}
+        onClick={() => {
+          setOpen(false);
+          onNewView();
+        }}
         style={{
-          display: "flex", alignItems: "center", gap: 6, padding: "10px 16px",
-          borderTop: `1px solid ${token.colorBorderSecondary}`, color: token.colorPrimary,
-          cursor: "pointer", fontWeight: 500, fontSize: 13.5,
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          padding: "10px 16px",
+          borderTop: `1px solid ${token.colorBorderSecondary}`,
+          color: token.colorPrimary,
+          cursor: "pointer",
+          fontWeight: 500,
+          fontSize: 13.5,
         }}
       >
         <PlusOutlined /> {i18n.t("views.newView", { defaultValue: "新建视图" })}
@@ -176,11 +250,16 @@ export default function ViewSelect({
     <Dropdown trigger={["click"]} open={open} onOpenChange={setOpen} popupRender={() => panel}>
       <Button
         style={{
-          height: 32, borderRadius: 18, fontWeight: 600, paddingInline: 16,
-          borderColor: open ? token.colorPrimary : "#c7d4df", color: token.colorText,
+          height: 32,
+          borderRadius: 18,
+          fontWeight: 600,
+          paddingInline: 16,
+          borderColor: open ? token.colorPrimary : "#c7d4df",
+          color: token.colorText,
         }}
       >
-        {active?.name ?? "—"} <DownOutlined style={{ fontSize: 10, marginInlineStart: 2, color: token.colorTextSecondary }} />
+        {active?.name ?? "—"}{" "}
+        <DownOutlined style={{ fontSize: 10, marginInlineStart: 2, color: token.colorTextSecondary }} />
       </Button>
     </Dropdown>
   );

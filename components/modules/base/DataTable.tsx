@@ -98,7 +98,10 @@ export default function DataTable({
   const isControlledSort = onSortChange != null;
   const ordering = isControlledSort ? defaultOrdering : internalOrdering;
   const applyOrdering = useCallback(
-    (o: string) => { if (onSortChange) onSortChange(o); else setInternalOrdering(o); },
+    (o: string) => {
+      if (onSortChange) onSortChange(o);
+      else setInternalOrdering(o);
+    },
     [onSortChange],
   );
 
@@ -109,32 +112,35 @@ export default function DataTable({
   const paramsKey = useMemo(() => JSON.stringify(params ?? {}), [params]);
   const requestSeq = useRef(0);
 
-  const fetchPage = useCallback(async (p: number) => {
-    const requestId = ++requestSeq.current;
-    setLoading(true);
-    try {
-      const res = (await vs.list({
-        params: {
-          page: p,
-          page_size: pageSize,
-          ...(ordering ? { ordering } : {}),
-          ...(params ?? {}),
-        },
-      })) as { count?: number } | Record<string, unknown>[];
-      if (requestId !== requestSeq.current) return;
-      setData(rows<Record<string, unknown>>(res));
-      setTotal(Array.isArray(res) ? res.length : res.count ?? 0);
-      setSelectedRowKeys([]);
-    } catch {
-      if (requestId === requestSeq.current) {
-        message.error(i18n.t("common.loadFailed", { defaultValue: "加载失败" }));
+  const fetchPage = useCallback(
+    async (p: number) => {
+      const requestId = ++requestSeq.current;
+      setLoading(true);
+      try {
+        const res = (await vs.list({
+          params: {
+            page: p,
+            page_size: pageSize,
+            ...(ordering ? { ordering } : {}),
+            ...(params ?? {}),
+          },
+        })) as { count?: number } | Record<string, unknown>[];
+        if (requestId !== requestSeq.current) return;
+        setData(rows<Record<string, unknown>>(res));
+        setTotal(Array.isArray(res) ? res.length : (res.count ?? 0));
+        setSelectedRowKeys([]);
+      } catch {
+        if (requestId === requestSeq.current) {
+          message.error(i18n.t("common.loadFailed", { defaultValue: "加载失败" }));
+        }
+      } finally {
+        if (requestId === requestSeq.current) setLoading(false);
       }
-    } finally {
-      if (requestId === requestSeq.current) setLoading(false);
-    }
-    // params is captured via paramsKey in the effect below.
+      // params is captured via paramsKey in the effect below.
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [vs, pageSize, ordering, paramsKey, message]);
+    [vs, pageSize, ordering, paramsKey, message],
+  );
 
   // Single fetch path: when filters/sort/pageSize/reloadKey change, reset to page
   // 1 (and let the page change re-trigger the fetch) so we never fetch twice.
@@ -143,7 +149,10 @@ export default function DataTable({
     const key = `${paramsKey}|${ordering}|${pageSize}|${reloadKey ?? ""}`;
     if (key !== depsRef.current) {
       depsRef.current = key;
-      if (page !== 1) { setPage(1); return; }
+      if (page !== 1) {
+        setPage(1);
+        return;
+      }
     }
     fetchPage(page);
   }, [page, paramsKey, ordering, pageSize, reloadKey, fetchPage]);
@@ -164,7 +173,9 @@ export default function DataTable({
             {col.title as ReactNode}
             {order === "ascend" ? <ArrowUpOutlined style={arrowStyle} /> : <ArrowDownOutlined style={arrowStyle} />}
           </span>
-        ) : col.title,
+        ) : (
+          col.title
+        ),
       };
     });
   }, [columns, sort, token]);
@@ -342,11 +353,15 @@ export default function DataTable({
           pagination={false}
           scroll={{ y: scrollY }}
           locale={{ emptyText: centeredEmptyText }}
-          rowSelection={selectable ? {
-            selectedRowKeys,
-            onChange: (keys) => setSelectedRowKeys(keys),
-            columnWidth: 40,
-          } : undefined}
+          rowSelection={
+            selectable
+              ? {
+                  selectedRowKeys,
+                  onChange: (keys) => setSelectedRowKeys(keys),
+                  columnWidth: 40,
+                }
+              : undefined
+          }
           onChange={handleChange}
           onRow={(record) => ({
             onClick: (event) => {
@@ -361,9 +376,16 @@ export default function DataTable({
 
       <div
         style={{
-          display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16,
-          minHeight: 38, padding: "0 24px", borderTop: `1px solid ${token.colorBorderSecondary}`,
-          background: "#fff", fontSize: 13, color: token.colorTextSecondary,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 16,
+          minHeight: 38,
+          padding: "0 24px",
+          borderTop: `1px solid ${token.colorBorderSecondary}`,
+          background: "#fff",
+          fontSize: 13,
+          color: token.colorTextSecondary,
         }}
       >
         <div>{renderSummary?.(total)}</div>
@@ -376,8 +398,17 @@ export default function DataTable({
             showSizeChanger
             pageSizeOptions={pageSizeOptions}
             showTotal={(t, range) =>
-              i18n.t("common.pageRange", { defaultValue: "{{from}}-{{to}} of {{total}}", from: range[0], to: range[1], total: t })}
-            onChange={(p, ps) => { setPage(p); setPageSize(ps); }}
+              i18n.t("common.pageRange", {
+                defaultValue: "{{from}}-{{to}} of {{total}}",
+                from: range[0],
+                to: range[1],
+                total: t,
+              })
+            }
+            onChange={(p, ps) => {
+              setPage(p);
+              setPageSize(ps);
+            }}
           />
         </div>
       </div>

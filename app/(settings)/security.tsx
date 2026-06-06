@@ -1,4 +1,4 @@
-import SettingPlaceholder from '@/components/modules/settings/SettingPlaceholder';
+import SettingPlaceholder from "@/components/modules/settings/SettingPlaceholder";
 
 // Native placeholder — the full security-settings UI is web-only (security.web.tsx).
 export default function SecuritySettings() {

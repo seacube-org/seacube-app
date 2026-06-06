@@ -22,8 +22,18 @@ export default function BankAccountsTab({ schema }: { schema: FieldSchema }) {
               onRemove={() => remove(name)}
             >
               <div style={FIELD_GRID_STYLE}>
-                <SchemaField schema={s} name="bank_name" namePath={[name, "bank_name"]} config={{ itemProps: { style: FIELD_ITEM_STYLE } }} />
-                <SchemaField schema={s} name="account_name" namePath={[name, "account_name"]} config={{ itemProps: { style: FIELD_ITEM_STYLE } }} />
+                <SchemaField
+                  schema={s}
+                  name="bank_name"
+                  namePath={[name, "bank_name"]}
+                  config={{ itemProps: { style: FIELD_ITEM_STYLE } }}
+                />
+                <SchemaField
+                  schema={s}
+                  name="account_name"
+                  namePath={[name, "account_name"]}
+                  config={{ itemProps: { style: FIELD_ITEM_STYLE } }}
+                />
                 <SchemaField
                   schema={s}
                   name="account_number"
@@ -42,7 +52,12 @@ export default function BankAccountsTab({ schema }: { schema: FieldSchema }) {
                   namePath={[name, "routing_number"]}
                   config={{ itemProps: { style: FIELD_ITEM_STYLE } }}
                 />
-                <SchemaField schema={s} name="swift_code" namePath={[name, "swift_code"]} config={{ itemProps: { style: FIELD_ITEM_STYLE } }} />
+                <SchemaField
+                  schema={s}
+                  name="swift_code"
+                  namePath={[name, "swift_code"]}
+                  config={{ itemProps: { style: FIELD_ITEM_STYLE } }}
+                />
                 <SchemaField
                   schema={s}
                   name="bank_address"
@@ -50,10 +65,20 @@ export default function BankAccountsTab({ schema }: { schema: FieldSchema }) {
                   config={{ control: <TextArea rows={2} />, itemProps: { style: FULL_WIDTH_ITEM_STYLE } }}
                 />
               </div>
-              <SchemaField schema={s} name="is_default" namePath={[name, "is_default"]} config={{ inputProps: { size: "small" } }} />
+              <SchemaField
+                schema={s}
+                name="is_default"
+                namePath={[name, "is_default"]}
+                config={{ inputProps: { size: "small" } }}
+              />
             </NestedItemCard>
           ))}
-          <Button type="dashed" block icon={<PlusOutlined />} onClick={() => add({ currency: "CNY", is_default: false })}>
+          <Button
+            type="dashed"
+            block
+            icon={<PlusOutlined />}
+            onClick={() => add({ currency: "CNY", is_default: false })}
+          >
             {i18n.t("contacts.addBank", { defaultValue: "添加银行账户" })}
           </Button>
         </>

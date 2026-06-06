@@ -52,7 +52,11 @@ export function OrgCreateForm({ onCreated, submitLabel }: Props) {
         label={i18n.t("org.name", { defaultValue: "机构名称" })}
         rules={[{ required: true, message: i18n.t("org.nameRequired", { defaultValue: "请输入机构名称" }) }]}
       >
-        <Input size="large" placeholder={i18n.t("org.namePlaceholder", { defaultValue: "例如：海立方贸易有限公司" })} autoFocus />
+        <Input
+          size="large"
+          placeholder={i18n.t("org.namePlaceholder", { defaultValue: "例如：海立方贸易有限公司" })}
+          autoFocus
+        />
       </Form.Item>
 
       <Form.Item name="currency" label={i18n.t("org.currency", { defaultValue: "本位币" })}>

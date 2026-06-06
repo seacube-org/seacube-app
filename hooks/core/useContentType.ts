@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { useDataService } from '@/hooks/core/useDataService';
-import { API_ENDPOINTS } from '@/constants/Constants';
+import { useState, useEffect } from "react";
+import { useDataService } from "@/hooks/core/useDataService";
+import { API_ENDPOINTS } from "@/constants/Constants";
 
 type ContentTypeMap = Record<string, number>;
 
@@ -26,16 +26,22 @@ export function useContentType(modelName: string): number | null {
 
     if (!_inflight) {
       const vs = getViewSet(API_ENDPOINTS.contentTypes);
-      _inflight = vs.list().then((data) => {
-        _cache = data as ContentTypeMap;
-        _failCount = 0;
-        _listeners.forEach((fn) => fn(_cache!));
-      }).catch(() => {
-        if (_failCount < MAX_RETRIES) {
-          _failCount++;
-          setTimeout(() => _retryTriggers.forEach((fn) => fn()), 3000);
-        }
-      }).finally(() => { _inflight = null; });
+      _inflight = vs
+        .list()
+        .then((data) => {
+          _cache = data as ContentTypeMap;
+          _failCount = 0;
+          _listeners.forEach((fn) => fn(_cache!));
+        })
+        .catch(() => {
+          if (_failCount < MAX_RETRIES) {
+            _failCount++;
+            setTimeout(() => _retryTriggers.forEach((fn) => fn()), 3000);
+          }
+        })
+        .finally(() => {
+          _inflight = null;
+        });
     }
 
     return () => {

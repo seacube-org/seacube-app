@@ -1,13 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  Button,
-  Collapse,
-  Drawer,
-  Segmented,
-  Select,
-  Space,
-  Typography,
-} from "antd";
+import { Button, Collapse, Drawer, Segmented, Select, Space, Typography } from "antd";
 import { PlusCircleFilled } from "@ant-design/icons";
 import { useIsActiveAdmin } from "@/stores/authStore";
 import i18n from "@/locale/i18n";
@@ -66,9 +58,7 @@ export default function FilterPanel({
     if (!open) return;
     setMatch(value.match);
     setCriteria(value.criteria.map((c) => ({ ...c })));
-    setColumns(
-      value.columns.length ? [...value.columns] : allColumns.map((c) => c.key),
-    );
+    setColumns(value.columns.length ? [...value.columns] : allColumns.map((c) => c.key));
     setOrdering(value.ordering);
     // Non-admins can't share (canShare={isAdmin}); seed private so a Save As of a
     // shared view never submits visibility:"shared" for them.
@@ -87,15 +77,12 @@ export default function FilterPanel({
         value: null,
       },
     ]);
-  const updateCriterion = (i: number, next: Criterion) =>
-    setCriteria((c) => c.map((x, idx) => (idx === i ? next : x)));
-  const removeCriterion = (i: number) =>
-    setCriteria((c) => c.filter((_, idx) => idx !== i));
+  const updateCriterion = (i: number, next: Criterion) => setCriteria((c) => c.map((x, idx) => (idx === i ? next : x)));
+  const removeCriterion = (i: number) => setCriteria((c) => c.filter((_, idx) => idx !== i));
 
   const sortDesc = ordering.startsWith("-");
   const sortField = ordering.replace(/^-/, "");
-  const setSort = (field: string, desc: boolean) =>
-    setOrdering(field ? (desc ? `-${field}` : field) : "");
+  const setSort = (field: string, desc: boolean) => setOrdering(field ? (desc ? `-${field}` : field) : "");
 
   const canUpdate = activeSavedView && canEditView(activeSavedView, isAdmin);
 
@@ -177,9 +164,7 @@ export default function FilterPanel({
         onChange={(f) => setSort(f, sortDesc)}
         placeholder={i18n.t("views.sortField", { defaultValue: "排序字段" })}
         // Sort options are the *sortable* fields (≠ the listable column set).
-        options={fields
-          .filter((f) => f.sortable !== false)
-          .map((f) => ({ value: f.name, label: labelFor(f) }))}
+        options={fields.filter((f) => f.sortable !== false).map((f) => ({ value: f.name, label: labelFor(f) }))}
       />
       <Segmented
         value={sortDesc ? "desc" : "asc"}
@@ -210,9 +195,7 @@ export default function FilterPanel({
         footer: { padding: 12 },
       }}
       footer={
-        <div
-          style={{ display: "flex", justifyContent: "space-between", gap: 8 }}
-        >
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
           <Button
             onClick={() => {
               setCriteria([]);
@@ -244,9 +227,7 @@ export default function FilterPanel({
         items={[
           {
             key: "filter",
-            label: sectionLabel(
-              i18n.t("views.filterSection", { defaultValue: "筛选条件" }),
-            ),
+            label: sectionLabel(i18n.t("views.filterSection", { defaultValue: "筛选条件" })),
             children: filterSection,
           },
           {
@@ -256,29 +237,13 @@ export default function FilterPanel({
           },
           {
             key: "columns",
-            label: sectionLabel(
-              i18n.t("views.columns", { defaultValue: "列" }),
-            ),
-            children: (
-              <ColumnPicker
-                allColumns={allColumns}
-                value={columns}
-                onChange={setColumns}
-              />
-            ),
+            label: sectionLabel(i18n.t("views.columns", { defaultValue: "列" })),
+            children: <ColumnPicker allColumns={allColumns} value={columns} onChange={setColumns} />,
           },
           {
             key: "visibility",
-            label: sectionLabel(
-              i18n.t("views.visibility", { defaultValue: "可见性" }),
-            ),
-            children: (
-              <VisibilityPicker
-                value={visibility}
-                canShare={isAdmin}
-                onChange={setVisibility}
-              />
-            ),
+            label: sectionLabel(i18n.t("views.visibility", { defaultValue: "可见性" })),
+            children: <VisibilityPicker value={visibility} canShare={isAdmin} onChange={setVisibility} />,
           },
         ]}
       />

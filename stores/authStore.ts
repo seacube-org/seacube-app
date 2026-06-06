@@ -1,8 +1,8 @@
-import { create } from 'zustand';
-import { configureDataService, AuthService } from '@/services/DataService';
-import { storageGet, storageSet, storageDel } from '@/utils/storage';
+import { create } from "zustand";
+import { configureDataService, AuthService } from "@/services/DataService";
+import { storageGet, storageSet, storageDel } from "@/utils/storage";
 
-const TOKEN_KEYS = { access: 'seacube_access', refresh: 'seacube_refresh', activeOrg: 'seacube_active_org' };
+const TOKEN_KEYS = { access: "seacube_access", refresh: "seacube_refresh", activeOrg: "seacube_active_org" };
 
 export type Membership = {
   id: number;
@@ -32,7 +32,7 @@ type AuthState = {
   login: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   fetchMe: () => Promise<void>;
-  updateProfile: (body: Partial<Pick<User, 'email' | 'first_name' | 'last_name' | 'phone'>>) => Promise<void>;
+  updateProfile: (body: Partial<Pick<User, "email" | "first_name" | "last_name" | "phone">>) => Promise<void>;
   setActiveOrg: (id: number) => Promise<void>;
 };
 
@@ -76,7 +76,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
       try {
         const access = await storageGet(TOKEN_KEYS.access);
         if (access) {
-          const user = await AuthService.getMe() as User;
+          const user = (await AuthService.getMe()) as User;
           await applyUser(user);
         }
       } catch {
@@ -87,7 +87,7 @@ export const useAuthStore = create<AuthState>((set, get) => {
     },
 
     login: async (username, password) => {
-      const user = await AuthService.login(username, password) as User;
+      const user = (await AuthService.login(username, password)) as User;
       await applyUser(user);
     },
 
@@ -98,12 +98,12 @@ export const useAuthStore = create<AuthState>((set, get) => {
     },
 
     fetchMe: async () => {
-      const user = await AuthService.getMe() as User;
+      const user = (await AuthService.getMe()) as User;
       await applyUser(user);
     },
 
     updateProfile: async (body) => {
-      const user = await AuthService.updateMe(body) as User;
+      const user = (await AuthService.updateMe(body)) as User;
       await applyUser(user);
     },
 

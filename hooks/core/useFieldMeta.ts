@@ -4,12 +4,12 @@ import { useLocaleStore } from "@/stores/localeStore";
 import { useAuthStore } from "@/stores/authStore";
 
 export type FieldMeta = {
-  type?: string;            // DRF OPTIONS type: string/email/integer/choice/boolean/date/...
+  type?: string; // DRF OPTIONS type: string/email/integer/choice/boolean/date/...
   choices: { value: string; label: string }[];
   required: boolean;
   label?: string;
   max_length?: number;
-  children?: FieldMetaMap;  // nested serializer fields (list item or nested object)
+  children?: FieldMetaMap; // nested serializer fields (list item or nested object)
 };
 type FieldMetaMap = Record<string, FieldMeta>;
 
@@ -35,7 +35,10 @@ const _cache = new Map<string, FieldMetaMap>();
 const _inflight = new Map<string, Promise<FieldMetaMap>>();
 
 type OptionsActionField = {
-  type?: string; required?: boolean; label?: string; max_length?: number;
+  type?: string;
+  required?: boolean;
+  label?: string;
+  max_length?: number;
   choices?: { value: string | number; display_name: string }[];
   // Nested serializers: `child.children` for many=True lists, `children` for a
   // single nested object (DRF SimpleMetadata).
@@ -100,18 +103,36 @@ export function useFieldMeta(endpoint: string): FieldSchema {
   const { getViewSet } = useDataService();
 
   useEffect(() => {
-    if (_cache.has(key)) { setMeta(_cache.get(key)!); return; }
+    if (_cache.has(key)) {
+      setMeta(_cache.get(key)!);
+      return;
+    }
     let active = true;
     let p = _inflight.get(key);
     if (!p) {
-      p = getViewSet(endpoint).options()
-        .then((data) => { const m = parse(data); _cache.set(key, m); return m; })
-        .catch(() => { const m: FieldMetaMap = {}; _cache.set(key, m); return m; })
-        .finally(() => { _inflight.delete(key); });
+      p = getViewSet(endpoint)
+        .options()
+        .then((data) => {
+          const m = parse(data);
+          _cache.set(key, m);
+          return m;
+        })
+        .catch(() => {
+          const m: FieldMetaMap = {};
+          _cache.set(key, m);
+          return m;
+        })
+        .finally(() => {
+          _inflight.delete(key);
+        });
       _inflight.set(key, p);
     }
-    p.then((m) => { if (active) setMeta(m); });
-    return () => { active = false; };
+    p.then((m) => {
+      if (active) setMeta(m);
+    });
+    return () => {
+      active = false;
+    };
   }, [key, endpoint, getViewSet]);
 
   return buildSchema(meta);

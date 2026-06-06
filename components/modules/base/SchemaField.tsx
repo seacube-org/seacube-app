@@ -68,7 +68,8 @@ export default function SchemaField({ schema, name, namePath, config = {} }: Pro
   // only for overrides, humanized name as a cold-load fallback.
   const label = config.label ?? meta?.label ?? humanize(name);
 
-  const isChoice = !config.control && (config.ref || config.options || (meta?.choices.length ?? 0) > 0 || type === "choice");
+  const isChoice =
+    !config.control && (config.ref || config.options || (meta?.choices.length ?? 0) > 0 || type === "choice");
   const isBoolean = !config.control && type === "boolean";
   const valuePropName = config.valuePropName ?? (isBoolean ? "checked" : undefined);
 

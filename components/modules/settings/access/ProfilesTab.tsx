@@ -4,7 +4,15 @@ import { PlusOutlined } from "@ant-design/icons";
 import { useAuthStore } from "@/stores/authStore";
 import { useLocaleStore } from "@/stores/localeStore";
 import i18n from "@/locale/i18n";
-import { useAccessViewSets, rows, fetchManifest, FETCH_ALL, ACCESS_PAGINATION, type Profile, type ManifestModule } from "./shared";
+import {
+  useAccessViewSets,
+  rows,
+  fetchManifest,
+  FETCH_ALL,
+  ACCESS_PAGINATION,
+  type Profile,
+  type ManifestModule,
+} from "./shared";
 import ProfilePermissionEditor from "./ProfilePermissionEditor";
 import { ConfirmDeleteButton } from "./ConfirmDeleteButton";
 
@@ -32,37 +40,62 @@ export default function ProfilesTab() {
 
   useEffect(() => {
     reload();
-    fetchManifest(manifestVS).then(setManifest).catch(() => message.error(i18n.t("access.loadFailed", { defaultValue: "加载失败" })));
+    fetchManifest(manifestVS)
+      .then(setManifest)
+      .catch(() => message.error(i18n.t("access.loadFailed", { defaultValue: "加载失败" })));
   }, [reload, message, manifestVS]);
 
   // Mutations may touch the profile the current user is on, so refresh /me too.
-  const afterMutation = useCallback(() => { reload(); fetchMe(); }, [reload, fetchMe]);
+  const afterMutation = useCallback(() => {
+    reload();
+    fetchMe();
+  }, [reload, fetchMe]);
 
-  const remove = useCallback(async (id: number) => {
-    try {
-      await profilesVS.delete({ id });
-      message.success(i18n.t("access.deleted", { defaultValue: "已删除" }));
-      afterMutation();
-    } catch {
-      message.error(i18n.t("access.deleteFailed", { defaultValue: "删除失败" }));
-    }
-  }, [message, afterMutation, profilesVS]);
+  const remove = useCallback(
+    async (id: number) => {
+      try {
+        await profilesVS.delete({ id });
+        message.success(i18n.t("access.deleted", { defaultValue: "已删除" }));
+        afterMutation();
+      } catch {
+        message.error(i18n.t("access.deleteFailed", { defaultValue: "删除失败" }));
+      }
+    },
+    [message, afterMutation, profilesVS],
+  );
 
   const columns = useMemo(
     () => [
-      { title: i18n.t("access.profileName", { defaultValue: "方案名称" }), key: "name",
+      {
+        title: i18n.t("access.profileName", { defaultValue: "方案名称" }),
+        key: "name",
         render: (_: unknown, p: Profile) => (
           <Space>
             <Typography.Text strong>{p.name}</Typography.Text>
             {p.is_system && <Tag color="gold">{i18n.t("access.system", { defaultValue: "系统" })}</Tag>}
           </Space>
-        ) },
-      { title: i18n.t("access.description", { defaultValue: "描述" }), dataIndex: "description", key: "description",
-        render: (v: string) => v || <Typography.Text type="secondary">—</Typography.Text> },
-      { title: i18n.t("access.actions", { defaultValue: "操作" }), key: "actions", width: 160,
+        ),
+      },
+      {
+        title: i18n.t("access.description", { defaultValue: "描述" }),
+        dataIndex: "description",
+        key: "description",
+        render: (v: string) => v || <Typography.Text type="secondary">—</Typography.Text>,
+      },
+      {
+        title: i18n.t("access.actions", { defaultValue: "操作" }),
+        key: "actions",
+        width: 160,
         render: (_: unknown, p: Profile) => (
           <Space size="small">
-            <Button type="link" style={{ padding: 0 }} onClick={() => { setEditing(p); setEditorOpen(true); }}>
+            <Button
+              type="link"
+              style={{ padding: 0 }}
+              onClick={() => {
+                setEditing(p);
+                setEditorOpen(true);
+              }}
+            >
               {i18n.t("access.editPermissions", { defaultValue: "编辑权限" })}
             </Button>
             {!p.is_system && (
@@ -74,7 +107,8 @@ export default function ProfilesTab() {
               />
             )}
           </Space>
-        ) },
+        ),
+      },
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [locale, remove],
@@ -83,7 +117,14 @@ export default function ProfilesTab() {
   return (
     <>
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => { setEditing(null); setEditorOpen(true); }}>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => {
+            setEditing(null);
+            setEditorOpen(true);
+          }}
+        >
           {i18n.t("access.newProfile", { defaultValue: "新建权限方案" })}
         </Button>
       </div>

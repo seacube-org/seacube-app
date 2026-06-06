@@ -10,7 +10,9 @@ export default function ContactInfoPanel({ contact, schema }: { contact: Contact
   return (
     <div
       style={{
-        width: 320, flexShrink: 0, padding: "20px 24px",
+        width: 320,
+        flexShrink: 0,
+        padding: "20px 24px",
         borderInlineEnd: `1px solid ${token.colorBorderSecondary}`,
       }}
     >
@@ -40,7 +42,8 @@ export default function ContactInfoPanel({ contact, schema }: { contact: Contact
 
       <div style={{ marginTop: 24, paddingTop: 12, borderTop: `1px solid ${token.colorBorderSecondary}` }}>
         <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-          {i18n.t("contacts.lastModified", { defaultValue: "最后修改" })}: {new Date(contact.updated_at).toLocaleString()}
+          {i18n.t("contacts.lastModified", { defaultValue: "最后修改" })}:{" "}
+          {new Date(contact.updated_at).toLocaleString()}
         </Typography.Text>
       </div>
     </div>

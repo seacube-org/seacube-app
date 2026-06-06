@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { List, Upload, Button, Popconfirm, Typography, Space, theme } from 'antd';
-import { UploadOutlined, DeleteOutlined, FileOutlined, PaperClipOutlined } from '@ant-design/icons';
-import type { UploadProps } from 'antd';
-import { useDataService } from '@/hooks/core/useDataService';
-import { uploadFormData } from '@/services/DataService';
-import { API_BASE_URL } from '@/constants/Constants';
-import i18n from '@/locale/i18n';
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { List, Upload, Button, Popconfirm, Typography, Space, theme } from "antd";
+import { UploadOutlined, DeleteOutlined, FileOutlined, PaperClipOutlined } from "@ant-design/icons";
+import type { UploadProps } from "antd";
+import { useDataService } from "@/hooks/core/useDataService";
+import { uploadFormData } from "@/services/DataService";
+import { API_BASE_URL } from "@/constants/Constants";
+import i18n from "@/locale/i18n";
 
 type Attachment = {
   id: number;
@@ -32,28 +32,32 @@ export default function AttachmentPanel({ contentTypeId, objectId }: Props) {
   const { getViewSet, handleError } = useDataService();
   const { token } = theme.useToken();
 
-  const vs = useMemo(() => getViewSet('/api/attachments/'), [getViewSet]);
+  const vs = useMemo(() => getViewSet("/api/attachments/"), [getViewSet]);
 
   const fetchAttachments = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await vs.list({ params: { content_type_id: contentTypeId, object_id: String(objectId), page_size: 1000 } });
+      const data = await vs.list({
+        params: { content_type_id: contentTypeId, object_id: String(objectId), page_size: 1000 },
+      });
       setAttachments((data as { results: Attachment[] }).results ?? (data as Attachment[]));
     } finally {
       setLoading(false);
     }
   }, [vs, contentTypeId, objectId]);
 
-  useEffect(() => { fetchAttachments(); }, [fetchAttachments]);
+  useEffect(() => {
+    fetchAttachments();
+  }, [fetchAttachments]);
 
-  const handleUpload: UploadProps['customRequest'] = async ({ file, onSuccess, onError }) => {
+  const handleUpload: UploadProps["customRequest"] = async ({ file, onSuccess, onError }) => {
     setUploading(true);
     try {
       const formData = new FormData();
-      formData.append('file', file as File);
-      formData.append('content_type_id', String(contentTypeId));
-      formData.append('object_id', String(objectId));
-      await uploadFormData('/api/attachments/', formData);
+      formData.append("file", file as File);
+      formData.append("content_type_id", String(contentTypeId));
+      formData.append("object_id", String(objectId));
+      await uploadFormData("/api/attachments/", formData);
       await fetchAttachments();
       onSuccess?.({});
     } catch (e) {
@@ -75,26 +79,22 @@ export default function AttachmentPanel({ contentTypeId, objectId }: Props) {
   };
 
   return (
-    <div style={{ padding: '16px 0' }}>
+    <div style={{ padding: "16px 0" }}>
       <Space style={{ marginBottom: 12 }} align="center">
         <PaperClipOutlined style={{ color: token.colorPrimary }} />
-        <Typography.Text strong>{i18n.t('attachment.title')}</Typography.Text>
+        <Typography.Text strong>{i18n.t("attachment.title")}</Typography.Text>
       </Space>
 
-      <Upload
-        customRequest={handleUpload}
-        showUploadList={false}
-        multiple
-      >
+      <Upload customRequest={handleUpload} showUploadList={false} multiple>
         <Button icon={<UploadOutlined />} loading={uploading} size="small">
-          {i18n.t('attachment.upload')}
+          {i18n.t("attachment.upload")}
         </Button>
       </Upload>
 
       <List
         loading={loading}
         dataSource={attachments}
-        locale={{ emptyText: i18n.t('attachment.noFiles') }}
+        locale={{ emptyText: i18n.t("attachment.noFiles") }}
         style={{ marginTop: 12 }}
         size="small"
         renderItem={(item) => (
@@ -102,7 +102,7 @@ export default function AttachmentPanel({ contentTypeId, objectId }: Props) {
             actions={[
               <Popconfirm
                 key="del"
-                title={i18n.t('attachment.deleteConfirm')}
+                title={i18n.t("attachment.deleteConfirm")}
                 onConfirm={() => handleDelete(item.id)}
                 okType="danger"
               >
@@ -113,7 +113,10 @@ export default function AttachmentPanel({ contentTypeId, objectId }: Props) {
             <List.Item.Meta
               avatar={<FileOutlined style={{ fontSize: 20, color: token.colorTextSecondary }} />}
               title={
-                <Typography.Link href={item.file.startsWith('http') ? item.file : `${API_BASE_URL}${item.file}`} target="_blank">
+                <Typography.Link
+                  href={item.file.startsWith("http") ? item.file : `${API_BASE_URL}${item.file}`}
+                  target="_blank"
+                >
                   {item.file_name}
                 </Typography.Link>
               }

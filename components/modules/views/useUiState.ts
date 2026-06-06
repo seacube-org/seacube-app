@@ -30,23 +30,30 @@ export function useUiState(entity: string) {
     if (!data || !("active_view_key" in data)) return null;
     const ui = data as UiState;
     // Seed the diff-guard so re-selecting the restored view doesn't write it back.
-    lastSaved.current = JSON.stringify({ active_view: ui.active_view, active_view_key: ui.active_view_key, state: ui.state });
+    lastSaved.current = JSON.stringify({
+      active_view: ui.active_view,
+      active_view_key: ui.active_view_key,
+      state: ui.state,
+    });
     return ui;
   }, [vs, entity]);
 
-  const save = useCallback((body: SaveBody) => {
-    const key = JSON.stringify(body);
-    if (key === lastSaved.current) return Promise.resolve(undefined);
-    // Optimistically set so concurrent identical writes coalesce, but roll back
-    // on failure — callers swallow the error, so a stuck guard would otherwise
-    // prevent ever retrying that state.
-    const prev = lastSaved.current;
-    lastSaved.current = key;
-    return vs.create({ body: { ...body, entity } }).catch((e) => {
-      lastSaved.current = prev;
-      throw e;
-    });
-  }, [vs, entity]);
+  const save = useCallback(
+    (body: SaveBody) => {
+      const key = JSON.stringify(body);
+      if (key === lastSaved.current) return Promise.resolve(undefined);
+      // Optimistically set so concurrent identical writes coalesce, but roll back
+      // on failure — callers swallow the error, so a stuck guard would otherwise
+      // prevent ever retrying that state.
+      const prev = lastSaved.current;
+      lastSaved.current = key;
+      return vs.create({ body: { ...body, entity } }).catch((e) => {
+        lastSaved.current = prev;
+        throw e;
+      });
+    },
+    [vs, entity],
+  );
 
   return { load, save };
 }

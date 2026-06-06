@@ -64,10 +64,15 @@ export default function VisibilityPicker({ value, canShare, onChange }: Props) {
             role="radio"
             aria-checked={selected}
             aria-disabled={disabled}
-            onClick={() => { if (!disabled && c.key !== "users") onChange(c.key as Visibility); }}
+            onClick={() => {
+              if (!disabled && c.key !== "users") onChange(c.key as Visibility);
+            }}
             style={{
-              display: "flex", alignItems: "center", gap: 10,
-              padding: "10px 12px", borderRadius: 8,
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              padding: "10px 12px",
+              borderRadius: 8,
               border: `1.5px solid ${selected ? token.colorPrimary : token.colorBorderSecondary}`,
               background: selected ? token.controlItemBgActive : token.colorBgContainer,
               cursor: disabled ? "not-allowed" : "pointer",
@@ -77,10 +82,16 @@ export default function VisibilityPicker({ value, canShare, onChange }: Props) {
           >
             <span
               style={{
-                width: 30, height: 30, flexShrink: 0, borderRadius: 7,
-                display: "inline-flex", alignItems: "center", justifyContent: "center",
+                width: 30,
+                height: 30,
+                flexShrink: 0,
+                borderRadius: 7,
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
                 background: selected ? token.colorPrimary : token.colorFillTertiary,
-                color: selected ? "#fff" : token.colorTextSecondary, fontSize: 15,
+                color: selected ? "#fff" : token.colorTextSecondary,
+                fontSize: 15,
               }}
             >
               {c.icon}

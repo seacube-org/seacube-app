@@ -1,4 +1,4 @@
-import { View } from 'react-native';
+import { View } from "react-native";
 
 type Props = { contentTypeId: number; objectId: number | string };
 export default function CommentsTab(_props: Props) {

@@ -29,7 +29,9 @@ export function SettingCard({ title, description, extra, children, onClick }: Pr
       }}
       styles={{ body: { padding: "22px 28px" } }}
     >
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, flexWrap: "wrap" }}>
+      <div
+        style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, flexWrap: "wrap" }}
+      >
         <div style={{ minWidth: 0, flex: 1 }}>
           <Typography.Title level={5} style={{ margin: 0 }}>
             {title}

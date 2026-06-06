@@ -8,12 +8,12 @@
 
 ## 现状（已实现到哪）
 
-| 维度 | 现状 | 来源 |
-|------|------|------|
-| **choice 值集** | ✅ 动态 | `type` ← DRF `OPTIONS`（`useFieldMeta`）；`currency` ← `Currency` 表（`useCurrencies`）；`incoterms`/`shipment_type` ← `OptionSet`（registry `ref`，**filter 已用、form 待用**） |
-| `required` / `maxLength` | ❌ 硬编码在 `Form.Item.rules` / `Input` | `useFieldMeta` **已 expose** 但 form 未消费 |
-| `label` | ❌ 硬编码 i18n | 刻意（见下） |
-| 字段集 / 顺序 / 输入类型 / 只读 / 可见性 | ❌ 手写 JSX | — |
+| 维度                                     | 现状                                    | 来源                                                                                                                                                                             |
+| ---------------------------------------- | --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **choice 值集**                          | ✅ 动态                                 | `type` ← DRF `OPTIONS`（`useFieldMeta`）；`currency` ← `Currency` 表（`useCurrencies`）；`incoterms`/`shipment_type` ← `OptionSet`（registry `ref`，**filter 已用、form 待用**） |
+| `required` / `maxLength`                 | ❌ 硬编码在 `Form.Item.rules` / `Input` | `useFieldMeta` **已 expose** 但 form 未消费                                                                                                                                      |
+| `label`                                  | ❌ 硬编码 i18n                          | 刻意（见下）                                                                                                                                                                     |
+| 字段集 / 顺序 / 输入类型 / 只读 / 可见性 | ❌ 手写 JSX                             | —                                                                                                                                                                                |
 
 即：**当前只有 choice 的"值"是 schema/数据驱动的**，其余仍手写。
 
@@ -59,11 +59,11 @@ OptionSet(category, code, label, sort, is_active, meta: JSON)
 type FieldMeta = {
   name: string;
   type: "text" | "number" | "date" | "boolean" | "choice";
-  label?: string;          // schema 标签，仅作 i18n 的 fallback
+  label?: string; // schema 标签，仅作 i18n 的 fallback
   required: boolean;
   read_only: boolean;
   max_length?: number;
-  choices?: { value: string; label: string }[];   // 来自 OPTIONS 或 ref 解析
+  choices?: { value: string; label: string }[]; // 来自 OPTIONS 或 ref 解析
 };
 ```
 
@@ -112,6 +112,7 @@ type FieldMeta = {
 5. **（判据，远期）** 某 `OptionSet` 类目长出强类型列 / FK / 复杂查询（如真要做汇率逻辑），再**提取为专用模型**（与 `Currency` 同级）。
 
 ## 验证
+
 - 后端：`OPTIONS` 返回 contacts 字段的 `required`/`max_length`/`choices`（补测试）；`currencies` / `option-sets` 端点（已测）。
 - 前端：后端把某字段改必填 / 对 STAFF 隐藏某字段 / 新增一个 currency 或 incoterm → 表单自动跟随（手测）；`tsc` + `eslint`。
 

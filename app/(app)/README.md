@@ -24,9 +24,11 @@ app/(app)/
 ```
 
 ### 平台拆分
+
 `.web.tsx` = Web（antd），`.tsx` = Native（RN 原生 + NativeWind）。**当前 Web 优先**，Native 业务页多为占位（`common.comingSoon`）。
 
 ### 导航接线（`components/modules/layout/constants.ts`）
+
 - `ITEM_ROUTES` — 菜单 key → 路由路径（如 `contacts: "/(app)/(contacts)"`）。
 - `PAGE_TO_KEY` — 子页面段 → 菜单 key（用于高亮带子项的模块）。
 - 详情动态段 `[id]` 仍归属父模块：`_layout.web.tsx` 的 `selectedKeys` 对 `page.startsWith("[")` 回退到模块 key，保持父菜单高亮。
@@ -50,18 +52,21 @@ app/(app)/
 新模块页面由三块可复用基建拼成，**不要每页重写**：
 
 ### 1. 列表页（`index.web.tsx`）
+
 - **`DataTable`**（`components/modules/base/DataTable.tsx`）：服务端分页 / 排序、可拖拽列宽、空态居中、底部分页条。传 `endpoint` + `columns` + `params` 即可。
 - **自定义视图 / 筛选**（`components/modules/views/`）：`ViewSelect`（视图下拉：系统视图 + 我的 + 共享，含收藏/默认/编辑）+ `FilterPanel`（左侧滑入：条件构建 + 列选择 + 排序 + 另存为视图）。由后端 `preferences` app 驱动，详见 `seacube-server/apps/preferences/README.md`。
 - 顶部工具栏：筛选按钮 + `ViewSelect` + 搜索框（**防抖 300ms**）+ 视图切换 + 新建按钮。
 - 点击行 `router.push("/(app)/(contacts)/<id>")` 进详情。
 
 ### 2. 全页详情（`[id].web.tsx`）— Bigin 风格
+
 - 头部：返回 + 头像 + 名称/类型 + 编辑 / 删除。
 - 左：固定信息栏（Basic Info + 备注 + 最后修改）。
 - 右：Tabs —— 概览 / 动态（`CommentsTab`：评论 + 审计时间轴）/ 文件（`AttachmentPanel`）。`useContentType(entity)` 解析 contentTypeId 挂载活动面板。
 - 加载失败渲染错误态 + 返回，不卡 spinner。
 
 ### 3. 新建 / 编辑
+
 - 滑入式 `Drawer` 表单（如 `ContactFormDrawer`），保存后 bump 一个 tick 触发 `DataTable` 重取。
 - **字段 schema**：choice 值集来自后端（`type`←OPTIONS、`currency`←Currency 表）；`required`/布局等的 schema 驱动方案与分阶段计划见 [`docs/schema-driven-forms.md`](../../docs/schema-driven-forms.md)。
 
@@ -71,28 +76,33 @@ app/(app)/
 
 列表状态**按数据切片存储，每个存储各自是唯一权威**——不同数据放不同地方，因此没有"双写后对账"的复杂度。
 
-| 数据 | 性质 | 存储（唯一权威） | 写入时机 |
-|------|------|-----------------|---------|
-| **列宽** | 设备相关（屏幕宽度不同）· 高频 | `localStorage`（`seacube:colw:<entity>:<user>:<org>`） | 拖拽结束**防抖 500ms** 写本地 |
-| **恢复态** `active_view` + `state` 快照 | 个人 · 点击级低频 | 服务端 UiState | 选视图 / 应用临时筛选（**diff-guard**） |
-| **默认视图 / 收藏** | 个人 · 跨设备 | 服务端 UiState | `ViewSelect` 的 set_default / favorite action |
-| **视图定义** `criteria`/列/排序 | 命名(可共享)工件 | 服务端 SavedView | **显式**：更新视图 / 另存为 |
+| 数据                                    | 性质                           | 存储（唯一权威）                                       | 写入时机                                      |
+| --------------------------------------- | ------------------------------ | ------------------------------------------------------ | --------------------------------------------- |
+| **列宽**                                | 设备相关（屏幕宽度不同）· 高频 | `localStorage`（`seacube:colw:<entity>:<user>:<org>`） | 拖拽结束**防抖 500ms** 写本地                 |
+| **恢复态** `active_view` + `state` 快照 | 个人 · 点击级低频              | 服务端 UiState                                         | 选视图 / 应用临时筛选（**diff-guard**）       |
+| **默认视图 / 收藏**                     | 个人 · 跨设备                  | 服务端 UiState                                         | `ViewSelect` 的 set_default / favorite action |
+| **视图定义** `criteria`/列/排序         | 命名(可共享)工件               | 服务端 SavedView                                       | **显式**：更新视图 / 另存为                   |
 
 要点：
+
 - **列宽天然属于本地**——不只是降频，更是语义正确（笔记本调的列宽不该同步到手机小屏）。它是唯一高频写源，放本地后服务端只剩点击级低频写。
 - **localStorage 与服务端存的是不同数据**，谁也不覆盖谁，所以挂载时无需 reconcile。
 
 ### 页面状态三件套（职责分明）
+
 - **`active: SavedView | null`** — 当前选中的视图（内建视图也是 `is_system` 的 SavedView 行，故统一一种类型），驱动下拉显示。
 - **`applied: Applied`** — 下发给 `DataTable` 的*物化筛选* `{match, criteria, columns, ordering, pageSize}`。临时筛选（Apply 未保存）后会与 active 的定义分歧。
 - **`search`** — 搜索框，**瞬态 · 防抖 · 不持久化**（刷新即清）。
 
 ### Dirty 态（编辑共享工件的安全确认，对标 Zoho）
+
 当 `active` 是**保存视图**且 `applied` 与其定义有差异（`filtersEqual` 比对）→ 显示 `<ViewDirtyBanner>`：
+
 - **更新视图**（`canEditView` = owner 或 admin 才显示）/ **另存为视图** / **还原**。
 - 列宽改动**不**触发 dirty banner（它是个人态、静默存本地，不是视图工件）——这正是 Zoho 用 banner 管列宽的唠叨，我们刻意避开。
 
 ### 生命周期
+
 ```
 挂载（视图列表 loaded 后，一次性，restored ref 守卫）
   列宽 ← loadColumnWidths(localStorage)        （同步、无闪烁）
@@ -104,30 +114,35 @@ app/(app)/
   拖列宽            → useResizableColumns 防抖写 localStorage（不碰服务端）
   搜索 / 翻页 / 表头排序 → 不写持久化
 ```
+
 - **恢复优先级**：保存的恢复态 > 用户默认视图 > 系统"全部"。
 - **恢复语义差异**（刻意）：选保存视图恢复其*当前定义*（忽略临时改动）；系统视图之上的临时筛选作为 `state` 快照被恢复。
 
 ### 写入策略（控频，而非 write-behind）
+
 - **diff-guard**：`useUiState.save` 记 `lastSaved`，payload 未变则跳过 POST（重复选同一视图、no-op apply 都不写）。**乐观置位 + 失败回滚**——失败时回滚 `lastSaved`，使下次相同状态仍可重试（调用方静默吞错）。
 - **列宽防抖**：拖拽连续触发，仅在停手 500ms 后写一次 localStorage。
 - 不需要 write-behind：移走列宽后服务端写全是点击级低频，diff-guard 足矣。
 - `POST /ui-state/` 是 (user, org, entity) **幂等 upsert**，只写恢复态三字段，绝不碰 `default_view`/`favorites`（后者由 action 单独维护）。
 
 ### 触发矩阵（什么写、写哪）
-| 动作 | 服务端 UiState | localStorage | 服务端 SavedView |
-|------|:--:|:--:|:--:|
-| 选系统/保存视图、应用临时筛选 | ✓(diff-guard) | — | — |
-| set_default / 收藏 | ✓(action) | — | — |
-| 更新视图 / 另存为 | （随后 reselect） | — | ✓ |
-| 拖列宽 | — | ✓(防抖) | — |
-| 搜索输入 / 表头排序 / 翻页 / 改每页条数 | — | — | — |
+
+| 动作                                    |  服务端 UiState   | localStorage | 服务端 SavedView |
+| --------------------------------------- | :---------------: | :----------: | :--------------: |
+| 选系统/保存视图、应用临时筛选           |   ✓(diff-guard)   |      —       |        —         |
+| set_default / 收藏                      |     ✓(action)     |      —       |        —         |
+| 更新视图 / 另存为                       | （随后 reselect） |      —       |        ✓         |
+| 拖列宽                                  |         —         |   ✓(防抖)    |        —         |
+| 搜索输入 / 表头排序 / 翻页 / 改每页条数 |         —         |      —       |        —         |
 
 > 注：表头排序/翻页是 `DataTable` 内部态，目前不回写 `applied`，故不持久化（只有筛选面板里设置并 Apply 的排序才进 `applied`/恢复态）。
 
 ### 作用域与清理
+
 服务端 UiState 按 (用户, 组织, 实体) 唯一；localStorage 列宽 key 含 user+org+entity。切换机构时内容区 `key={activeOrgId}` remount，恢复流程对新组织重跑——**无需手动清理**。
 
 ### 新模块接线（契约）
+
 ```ts
 const ui = useUiState(ENTITY);
 // 挂载：const saved = await ui.load();   // null → default/系统视图回退

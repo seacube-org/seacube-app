@@ -1,11 +1,22 @@
 import {
-  useCallback, useEffect, useMemo, useRef, useState,
-  type HTMLAttributes, type MutableRefObject, type RefObject,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type HTMLAttributes,
+  type MutableRefObject,
+  type RefObject,
 } from "react";
 import { Dropdown, type MenuProps, type TableProps } from "antd";
 import {
-  ArrowDownOutlined, ArrowUpOutlined, ColumnWidthOutlined, DownOutlined,
-  EyeInvisibleOutlined, FilterOutlined, SwapOutlined,
+  ArrowDownOutlined,
+  ArrowUpOutlined,
+  ColumnWidthOutlined,
+  DownOutlined,
+  EyeInvisibleOutlined,
+  FilterOutlined,
+  SwapOutlined,
 } from "@ant-design/icons";
 import i18n from "@/locale/i18n";
 import { loadColumnWidths, saveColumnWidths } from "@/utils/tableWidths";
@@ -52,19 +63,47 @@ function ColumnMenuTrigger({ menu }: { menu: ColumnMenu }) {
   const [open, setOpen] = useState(false);
   // Sort asc/desc nest as a submenu under "Sort".
   const sortChildren: MenuProps["items"] = [
-    ...(menu.onSortAsc ? [{ key: "asc", icon: <ArrowUpOutlined />, label: i18n.t("views.sortAsc", { defaultValue: "升序" }) }] : []),
-    ...(menu.onSortDesc ? [{ key: "desc", icon: <ArrowDownOutlined />, label: i18n.t("views.sortDesc", { defaultValue: "降序" }) }] : []),
+    ...(menu.onSortAsc
+      ? [{ key: "asc", icon: <ArrowUpOutlined />, label: i18n.t("views.sortAsc", { defaultValue: "升序" }) }]
+      : []),
+    ...(menu.onSortDesc
+      ? [{ key: "desc", icon: <ArrowDownOutlined />, label: i18n.t("views.sortDesc", { defaultValue: "降序" }) }]
+      : []),
   ];
   const items: MenuProps["items"] = [
-    ...(sortChildren.length ? [{ key: "sort", icon: <SwapOutlined rotate={90} />, label: i18n.t("views.sort", { defaultValue: "排序" }), children: sortChildren }] : []),
-    ...(menu.onFilter ? [{ key: "filter", icon: <FilterOutlined />, label: i18n.t("common.filter", { defaultValue: "筛选" }) }] : []),
+    ...(sortChildren.length
+      ? [
+          {
+            key: "sort",
+            icon: <SwapOutlined rotate={90} />,
+            label: i18n.t("views.sort", { defaultValue: "排序" }),
+            children: sortChildren,
+          },
+        ]
+      : []),
+    ...(menu.onFilter
+      ? [{ key: "filter", icon: <FilterOutlined />, label: i18n.t("common.filter", { defaultValue: "筛选" }) }]
+      : []),
     { key: "autofit", icon: <ColumnWidthOutlined />, label: i18n.t("views.autoFit", { defaultValue: "自适应列宽" }) },
-    ...(menu.onRemove ? [{ type: "divider" as const }, { key: "remove", icon: <EyeInvisibleOutlined />, label: i18n.t("views.removeColumn", { defaultValue: "移除该列" }) }] : []),
+    ...(menu.onRemove
+      ? [
+          { type: "divider" as const },
+          {
+            key: "remove",
+            icon: <EyeInvisibleOutlined />,
+            label: i18n.t("views.removeColumn", { defaultValue: "移除该列" }),
+          },
+        ]
+      : []),
   ];
   const onClick: MenuProps["onClick"] = ({ key, domEvent }) => {
     domEvent.stopPropagation();
     const actions: Record<string, (() => void) | undefined> = {
-      asc: menu.onSortAsc, desc: menu.onSortDesc, filter: menu.onFilter, autofit: menu.onAutoFit, remove: menu.onRemove,
+      asc: menu.onSortAsc,
+      desc: menu.onSortDesc,
+      filter: menu.onFilter,
+      autofit: menu.onAutoFit,
+      remove: menu.onRemove,
     };
     actions[key]?.();
   };
@@ -78,10 +117,21 @@ function ColumnMenuTrigger({ menu }: { menu: ColumnMenu }) {
         onPointerDown={(e) => e.stopPropagation()}
         onDragStart={(e) => e.preventDefault()}
         style={{
-          position: "absolute", insetInlineEnd: 9, top: "50%", transform: "translateY(-50%)",
-          display: "inline-flex", alignItems: "center", justifyContent: "center",
-          width: 18, height: 18, borderRadius: "50%", background: "#fff", border: "1px solid #dfe7ef",
-          color: "#5b6b7b", cursor: "pointer", zIndex: 4,
+          position: "absolute",
+          insetInlineEnd: 9,
+          top: "50%",
+          transform: "translateY(-50%)",
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: 18,
+          height: 18,
+          borderRadius: "50%",
+          background: "#fff",
+          border: "1px solid #dfe7ef",
+          color: "#5b6b7b",
+          cursor: "pointer",
+          zIndex: 4,
           ...(open ? { opacity: 1 } : null),
         }}
       >
@@ -91,9 +141,7 @@ function ColumnMenuTrigger({ menu }: { menu: ColumnMenu }) {
   );
 }
 
-function ResizableTitle({
-  width, onResize, columnKey, reorder, menu, children, style, ...rest
-}: ResizableHeaderProps) {
+function ResizableTitle({ width, onResize, columnKey, reorder, menu, children, style, ...rest }: ResizableHeaderProps) {
   const draggable = !!reorder && !!columnKey;
 
   const startResize = (e: React.PointerEvent) => {
@@ -119,20 +167,45 @@ function ResizableTitle({
     <th
       {...rest}
       draggable={draggable || undefined}
-      onDragStart={draggable ? (e) => {
-        // Don't start a reorder when the gesture began on the resize handle or the menu caret.
-        if (reorder!.resizingRef.current) { e.preventDefault(); return; }
-        if ((e.target as HTMLElement).closest(".seacube-col-menu")) { e.preventDefault(); return; }
-        e.dataTransfer.effectAllowed = "move";
-        try { e.dataTransfer.setData("text/plain", columnKey!); } catch { /* Safari */ }
-        reorder!.onStart(columnKey!);
-      } : undefined}
-      onDragOver={draggable ? (e) => {
-        e.preventDefault(); // allow drop
-        const rect = e.currentTarget.getBoundingClientRect();
-        reorder!.onOver(columnKey!, e.clientX - rect.left < rect.width / 2 ? "left" : "right");
-      } : undefined}
-      onDrop={draggable ? (e) => { e.preventDefault(); reorder!.onDrop(columnKey!); } : undefined}
+      onDragStart={
+        draggable
+          ? (e) => {
+              // Don't start a reorder when the gesture began on the resize handle or the menu caret.
+              if (reorder!.resizingRef.current) {
+                e.preventDefault();
+                return;
+              }
+              if ((e.target as HTMLElement).closest(".seacube-col-menu")) {
+                e.preventDefault();
+                return;
+              }
+              e.dataTransfer.effectAllowed = "move";
+              try {
+                e.dataTransfer.setData("text/plain", columnKey!);
+              } catch {
+                /* Safari */
+              }
+              reorder!.onStart(columnKey!);
+            }
+          : undefined
+      }
+      onDragOver={
+        draggable
+          ? (e) => {
+              e.preventDefault(); // allow drop
+              const rect = e.currentTarget.getBoundingClientRect();
+              reorder!.onOver(columnKey!, e.clientX - rect.left < rect.width / 2 ? "left" : "right");
+            }
+          : undefined
+      }
+      onDrop={
+        draggable
+          ? (e) => {
+              e.preventDefault();
+              reorder!.onDrop(columnKey!);
+            }
+          : undefined
+      }
       onDragEnd={draggable ? () => reorder!.onEnd() : undefined}
       style={{
         ...style,
@@ -146,8 +219,13 @@ function ResizableTitle({
       {reorder?.indicator && (
         <span
           style={{
-            position: "absolute", top: 0, bottom: 0,
-            width: 2, background: "#1A73E8", zIndex: 2, pointerEvents: "none",
+            position: "absolute",
+            top: 0,
+            bottom: 0,
+            width: 2,
+            background: "#1A73E8",
+            zIndex: 2,
+            pointerEvents: "none",
             ...(reorder.indicator === "left" ? { insetInlineStart: 0 } : { insetInlineEnd: 0 }),
           }}
         />
@@ -161,8 +239,14 @@ function ResizableTitle({
           onDragStart={(e) => e.preventDefault()} // never start an HTML5 drag from the handle
           draggable={false}
           style={{
-            position: "absolute", top: 0, insetInlineEnd: -4, height: "100%", width: 8,
-            cursor: "col-resize", zIndex: 3, touchAction: "none",
+            position: "absolute",
+            top: 0,
+            insetInlineEnd: -4,
+            height: "100%",
+            width: 8,
+            cursor: "col-resize",
+            zIndex: 3,
+            touchAction: "none",
           }}
         />
       )}
@@ -216,33 +300,38 @@ export function useResizableColumns<C extends { key?: React.Key; width?: number;
   // place is unreliable, since the rendered cell is already clamped to the column
   // width and repeated autofits would just keep growing it. Header decorations
   // (the hidden sorter, menu caret and resize handle) are stripped from the clone.
-  const autoFit = useCallback((key: string) => {
-    const root = containerRef?.current;
-    if (!root || typeof document === "undefined") return;
-    const cells = root.querySelectorAll<HTMLElement>(`[data-col-key="${CSS.escape(key)}"]`);
-    if (!cells.length) return;
+  const autoFit = useCallback(
+    (key: string) => {
+      const root = containerRef?.current;
+      if (!root || typeof document === "undefined") return;
+      const cells = root.querySelectorAll<HTMLElement>(`[data-col-key="${CSS.escape(key)}"]`);
+      if (!cells.length) return;
 
-    const probe = document.createElement("div");
-    probe.style.cssText = "position:absolute;visibility:hidden;left:-9999px;top:0;white-space:nowrap;font-size:13px;";
-    document.body.appendChild(probe);
-    let max = 0;
-    cells.forEach((cell) => {
-      const clone = cell.cloneNode(true) as HTMLElement;
-      clone.querySelectorAll(".ant-table-column-sorter, .seacube-col-menu, .seacube-col-resize").forEach((el) => el.remove());
-      clone.style.display = "inline-block";
-      clone.style.width = "auto";
-      clone.style.maxWidth = "none";
-      clone.style.minWidth = "0";
-      probe.appendChild(clone);
-      max = Math.max(max, clone.scrollWidth);
-      probe.removeChild(clone);
-    });
-    document.body.removeChild(probe);
+      const probe = document.createElement("div");
+      probe.style.cssText = "position:absolute;visibility:hidden;left:-9999px;top:0;white-space:nowrap;font-size:13px;";
+      document.body.appendChild(probe);
+      let max = 0;
+      cells.forEach((cell) => {
+        const clone = cell.cloneNode(true) as HTMLElement;
+        clone
+          .querySelectorAll(".ant-table-column-sorter, .seacube-col-menu, .seacube-col-resize")
+          .forEach((el) => el.remove());
+        clone.style.display = "inline-block";
+        clone.style.width = "auto";
+        clone.style.maxWidth = "none";
+        clone.style.minWidth = "0";
+        probe.appendChild(clone);
+        max = Math.max(max, clone.scrollWidth);
+        probe.removeChild(clone);
+      });
+      document.body.removeChild(probe);
 
-    // +24 ≈ the cell's horizontal padding (12px each side), which the scoped
-    // table CSS doesn't apply to the off-DOM clone.
-    if (max > 0) setWidths((prev) => ({ ...prev, [key]: Math.min(Math.max(Math.ceil(max) + 24, 60), 600) }));
-  }, [containerRef]);
+      // +24 ≈ the cell's horizontal padding (12px each side), which the scoped
+      // table CSS doesn't apply to the off-DOM clone.
+      if (max > 0) setWidths((prev) => ({ ...prev, [key]: Math.min(Math.max(Math.ceil(max) + 24, 60), 600) }));
+    },
+    [containerRef],
+  );
 
   // Reorder drag state. resizingRef gates the resize/reorder gesture conflict.
   const resizingRef = useRef(false);
@@ -253,33 +342,43 @@ export function useResizableColumns<C extends { key?: React.Key; width?: number;
 
   const columns = useMemo(() => {
     const keys = baseColumns.map((c) => String(c.key));
-    const reorderApi: ReorderApi | null = onReorder ? {
-      resizingRef,
-      onStart: (k) => setDragKey(k),
-      onOver: (k, side) => setOver((p) => (p && p.key === k && p.side === side ? p : { key: k, side })),
-      onEnd: () => { setDragKey(null); setOver(null); },
-      onDrop: (toKey) => {
-        setDragKey(null);
-        setOver(null);
-        if (!dragKey || dragKey === toKey) return;
-        const side = over?.side ?? "left";
-        const next = keys.filter((k) => k !== dragKey);
-        const ti = next.indexOf(toKey);
-        if (ti < 0) return;
-        next.splice(side === "right" ? ti + 1 : ti, 0, dragKey);
-        if (next.join("|") !== keys.join("|")) onReorder(next);
-      },
-    } : null;
+    const reorderApi: ReorderApi | null = onReorder
+      ? {
+          resizingRef,
+          onStart: (k) => setDragKey(k),
+          onOver: (k, side) => setOver((p) => (p && p.key === k && p.side === side ? p : { key: k, side })),
+          onEnd: () => {
+            setDragKey(null);
+            setOver(null);
+          },
+          onDrop: (toKey) => {
+            setDragKey(null);
+            setOver(null);
+            if (!dragKey || dragKey === toKey) return;
+            const side = over?.side ?? "left";
+            const next = keys.filter((k) => k !== dragKey);
+            const ti = next.indexOf(toKey);
+            if (ti < 0) return;
+            next.splice(side === "right" ? ti + 1 : ti, 0, dragKey);
+            if (next.join("|") !== keys.join("|")) onReorder(next);
+          },
+        }
+      : null;
 
     return baseColumns.map((col) => {
       const key = col.key != null ? String(col.key) : undefined;
-      const width = key ? widths[key] ?? col.width : col.width;
-      const menu: ColumnMenu | undefined = menuOn && key ? {
-        ...(onSort && col.sorter ? { onSortAsc: () => onSort(key, "asc"), onSortDesc: () => onSort(key, "desc") } : {}),
-        ...(onFilterColumn ? { onFilter: () => onFilterColumn(key) } : {}),
-        onAutoFit: () => autoFit(key),
-        ...(onRemoveColumn ? { onRemove: () => onRemoveColumn(key) } : {}),
-      } : undefined;
+      const width = key ? (widths[key] ?? col.width) : col.width;
+      const menu: ColumnMenu | undefined =
+        menuOn && key
+          ? {
+              ...(onSort && col.sorter
+                ? { onSortAsc: () => onSort(key, "asc"), onSortDesc: () => onSort(key, "desc") }
+                : {}),
+              ...(onFilterColumn ? { onFilter: () => onFilterColumn(key) } : {}),
+              onAutoFit: () => autoFit(key),
+              ...(onRemoveColumn ? { onRemove: () => onRemoveColumn(key) } : {}),
+            }
+          : undefined;
       return {
         ...col,
         width,
@@ -290,13 +389,27 @@ export function useResizableColumns<C extends { key?: React.Key; width?: number;
             ? { width, onResize: (w: number) => setWidths((prev) => ({ ...prev, [key]: w })) }
             : {}),
           ...(reorderApi && key
-            ? { columnKey: key, reorder: { ...reorderApi, indicator: over?.key === key ? over.side : null, dragging: dragKey === key } }
+            ? {
+                columnKey: key,
+                reorder: { ...reorderApi, indicator: over?.key === key ? over.side : null, dragging: dragKey === key },
+              }
             : {}),
           ...(menu ? { menu } : {}),
         }),
       };
     });
-  }, [baseColumns, widths, onReorder, onFilterColumn, onRemoveColumn, onSort, menuOn, autoFit, dragKey, over]) as AnyColumns;
+  }, [
+    baseColumns,
+    widths,
+    onReorder,
+    onFilterColumn,
+    onRemoveColumn,
+    onSort,
+    menuOn,
+    autoFit,
+    dragKey,
+    over,
+  ]) as AnyColumns;
 
   const components = { header: { cell: ResizableTitle } } as TableProps<Record<string, unknown>>["components"];
 

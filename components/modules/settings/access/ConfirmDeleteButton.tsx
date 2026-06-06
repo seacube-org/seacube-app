@@ -6,7 +6,11 @@ import i18n from "@/locale/i18n";
  * the access tables (row delete) and the member drawer (remove-from-org).
  */
 export function ConfirmDeleteButton({
-  title, description, onConfirm, label, link,
+  title,
+  description,
+  onConfirm,
+  label,
+  link,
 }: {
   title: string;
   description?: string;

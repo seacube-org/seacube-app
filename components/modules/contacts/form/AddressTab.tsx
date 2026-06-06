@@ -13,9 +13,7 @@ export default function AddressTab({ schema, form }: { schema: FieldSchema; form
       </Typography.Text>
       <AddressFields schema={schema} prefix="billing_address" />
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", margin: "20px 0 12px" }}>
-        <Typography.Text strong>
-          {i18n.t("contacts.shippingAddress", { defaultValue: "收货地址" })}
-        </Typography.Text>
+        <Typography.Text strong>{i18n.t("contacts.shippingAddress", { defaultValue: "收货地址" })}</Typography.Text>
         <Button
           type="link"
           size="small"

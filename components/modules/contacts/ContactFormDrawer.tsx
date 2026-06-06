@@ -3,13 +3,7 @@ import { App, Button, Drawer, Form, Space, Tabs, Tag } from "antd";
 import { applyFieldErrors } from "@/components/modules/settings/formErrors";
 import { useFieldMeta } from "@/hooks/core/useFieldMeta";
 import i18n from "@/locale/i18n";
-import {
-  CONTACTS_URL,
-  typeColor,
-  typeLabel,
-  useContactViewSet,
-  type ContactDetail,
-} from "./shared";
+import { CONTACTS_URL, typeColor, typeLabel, useContactViewSet, type ContactDetail } from "./shared";
 import BasicTab from "./form/BasicTab";
 import AddressTab from "./form/AddressTab";
 import PersonsTab from "./form/PersonsTab";
@@ -27,20 +21,13 @@ type Props = {
  * module under ./form. Field schema (controls, labels, required/visibility) comes
  * from DRF OPTIONS via useFieldMeta. See docs/schema-driven-forms.md (L2).
  */
-export default function ContactFormDrawer({
-  open,
-  contact,
-  onClose,
-  onSaved,
-}: Props) {
+export default function ContactFormDrawer({ open, contact, onClose, onSaved }: Props) {
   const { message } = App.useApp();
   const vs = useContactViewSet();
   // Edit reads the detail endpoint's OPTIONS (carries `PUT`), create reads the
   // collection's (`POST`). Without this, a profile with `update` but not `create`
   // gets an empty schema (collection OPTIONS omits POST) and no fields render.
-  const schema = useFieldMeta(
-    contact ? `${CONTACTS_URL}${contact.id}/` : CONTACTS_URL,
-  );
+  const schema = useFieldMeta(contact ? `${CONTACTS_URL}${contact.id}/` : CONTACTS_URL);
   const [form] = Form.useForm();
   const [saving, setSaving] = useState(false);
   const [tab, setTab] = useState("basic");
@@ -67,9 +54,7 @@ export default function ContactFormDrawer({
       // tax_id / payment_terms are hidden from STAFF by the backend — only seed
       // them when actually present so we don't echo back blocked fields.
       ...(contact?.tax_id !== undefined ? { tax_id: contact.tax_id } : {}),
-      ...(contact?.payment_terms !== undefined
-        ? { payment_terms: contact.payment_terms }
-        : {}),
+      ...(contact?.payment_terms !== undefined ? { payment_terms: contact.payment_terms } : {}),
     });
   }, [open, contact, form]);
 
@@ -88,9 +73,7 @@ export default function ContactFormDrawer({
       onClose();
     } catch (err) {
       if (!applyFieldErrors(form, err)) {
-        message.error(
-          i18n.t("contacts.saveFailed", { defaultValue: "保存失败，请重试" }),
-        );
+        message.error(i18n.t("contacts.saveFailed", { defaultValue: "保存失败，请重试" }));
       }
       // Surface nested-tab validation errors by jumping back to the basic tab.
       setTab("basic");
@@ -142,16 +125,12 @@ export default function ContactFormDrawer({
             ? i18n.t("contacts.edit", { defaultValue: "编辑联系人" })
             : i18n.t("contacts.new", { defaultValue: "新建联系人" })}
           {/* type is derived from documents — read-only badge, not an editable field. */}
-          {contact && (
-            <Tag color={typeColor(contact.type)}>{typeLabel(contact.type)}</Tag>
-          )}
+          {contact && <Tag color={typeColor(contact.type)}>{typeLabel(contact.type)}</Tag>}
         </Space>
       }
       footer={
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
-          <Button onClick={onClose}>
-            {i18n.t("common.cancel", { defaultValue: "取消" })}
-          </Button>
+          <Button onClick={onClose}>{i18n.t("common.cancel", { defaultValue: "取消" })}</Button>
           <Button type="primary" loading={saving} onClick={() => form.submit()}>
             {i18n.t("common.save", { defaultValue: "保存" })}
           </Button>

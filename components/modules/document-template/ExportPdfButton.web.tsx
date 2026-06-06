@@ -1,9 +1,9 @@
-import { useState, useMemo } from 'react';
-import { Button, Modal, List, Tag, Spin, Typography, theme } from 'antd';
-import { FilePdfOutlined, CheckOutlined } from '@ant-design/icons';
-import { useDataService } from '@/hooks/core/useDataService';
-import { downloadBlob } from '@/services/DataService';
-import i18n from '@/locale/i18n';
+import { useState, useMemo } from "react";
+import { Button, Modal, List, Tag, Spin, Typography, theme } from "antd";
+import { FilePdfOutlined, CheckOutlined } from "@ant-design/icons";
+import { useDataService } from "@/hooks/core/useDataService";
+import { downloadBlob } from "@/services/DataService";
+import i18n from "@/locale/i18n";
 
 type Template = {
   id: number;
@@ -22,14 +22,14 @@ export default function ExportPdfButton({ documentType, documentId }: Props) {
   const [downloading, setDownloading] = useState(false);
   const { token } = theme.useToken();
   const { getViewSet, handleError } = useDataService();
-  const templateVs = useMemo(() => getViewSet('/api/document-templates/templates/'), [getViewSet]);
+  const templateVs = useMemo(() => getViewSet("/api/document-templates/templates/"), [getViewSet]);
 
   const openModal = async () => {
     setOpen(true);
     setLoadingTemplates(true);
     try {
       const data = await templateVs.list({ params: { document_type: documentType, page_size: 1000 } });
-      const list: Template[] = ((data as { results?: Template[] }).results ?? data as Template[]);
+      const list: Template[] = (data as { results?: Template[] }).results ?? (data as Template[]);
       setTemplates(list);
       const def = list.find((t) => t.is_default) ?? list[0] ?? null;
       setSelectedId(def?.id ?? null);
@@ -46,7 +46,7 @@ export default function ExportPdfButton({ documentType, documentId }: Props) {
         `/api/document-templates/templates/${selectedId}/render_pdf/?document_id=${documentId}`,
       );
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
       a.download = `${documentType}_${documentId}.pdf`;
       document.body.appendChild(a);
@@ -64,22 +64,26 @@ export default function ExportPdfButton({ documentType, documentId }: Props) {
   return (
     <>
       <Button icon={<FilePdfOutlined />} onClick={openModal} size="small">
-        {i18n.t('template.exportPdf')}
+        {i18n.t("template.exportPdf")}
       </Button>
 
       <Modal
         open={open}
-        title={i18n.t('template.selectTemplate')}
-        onCancel={() => { setOpen(false); setTemplates([]); setSelectedId(null); }}
+        title={i18n.t("template.selectTemplate")}
+        onCancel={() => {
+          setOpen(false);
+          setTemplates([]);
+          setSelectedId(null);
+        }}
         onOk={handleDownload}
-        okText={i18n.t('template.download')}
+        okText={i18n.t("template.download")}
         okButtonProps={{ disabled: selectedId === null, loading: downloading }}
         width={480}
       >
         {loadingTemplates ? (
-          <Spin style={{ display: 'block', margin: '24px auto' }} />
+          <Spin style={{ display: "block", margin: "24px auto" }} />
         ) : templates.length === 0 ? (
-          <Typography.Text type="secondary">{i18n.t('template.noTemplates')}</Typography.Text>
+          <Typography.Text type="secondary">{i18n.t("template.noTemplates")}</Typography.Text>
         ) : (
           <List
             dataSource={templates}
@@ -90,9 +94,9 @@ export default function ExportPdfButton({ documentType, documentId }: Props) {
                 <List.Item
                   onClick={() => setSelectedId(tpl.id)}
                   style={{
-                    cursor: 'pointer',
+                    cursor: "pointer",
                     borderRadius: token.borderRadius,
-                    padding: '8px 12px',
+                    padding: "8px 12px",
                     background: active ? token.colorPrimaryBg : undefined,
                     border: active ? `1px solid ${token.colorPrimary}` : `1px solid transparent`,
                     marginBottom: 6,
@@ -100,16 +104,18 @@ export default function ExportPdfButton({ documentType, documentId }: Props) {
                   extra={active ? <CheckOutlined style={{ color: token.colorPrimary }} /> : null}
                 >
                   <List.Item.Meta
-                    title={
-                      <Typography.Text strong={active}>{tpl.name}</Typography.Text>
-                    }
+                    title={<Typography.Text strong={active}>{tpl.name}</Typography.Text>}
                     description={
                       <span>
                         {tpl.is_default && (
-                          <Tag color="blue" style={{ fontSize: 11 }}>{i18n.t('template.default')}</Tag>
+                          <Tag color="blue" style={{ fontSize: 11 }}>
+                            {i18n.t("template.default")}
+                          </Tag>
                         )}
                         {tpl.is_system && (
-                          <Tag color="default" style={{ fontSize: 11 }}>{i18n.t('template.system')}</Tag>
+                          <Tag color="default" style={{ fontSize: 11 }}>
+                            {i18n.t("template.system")}
+                          </Tag>
                         )}
                       </span>
                     }

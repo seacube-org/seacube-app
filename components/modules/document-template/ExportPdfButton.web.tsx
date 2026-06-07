@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Button, Modal, List, Tag, Spin, Typography, theme } from "antd";
+import { Button, Modal, Tag, Spin, Typography, theme } from "antd";
 import { FilePdfOutlined, CheckOutlined } from "@ant-design/icons";
 import { useDataService } from "@/hooks/core/useDataService";
 import { downloadBlob } from "@/services/DataService";
@@ -85,13 +85,12 @@ export default function ExportPdfButton({ documentType, documentId }: Props) {
         ) : templates.length === 0 ? (
           <Typography.Text type="secondary">{i18n.t("template.noTemplates")}</Typography.Text>
         ) : (
-          <List
-            dataSource={templates}
-            size="small"
-            renderItem={(tpl) => {
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            {templates.map((tpl) => {
               const active = tpl.id === selectedId;
               return (
-                <List.Item
+                <div
+                  key={tpl.id}
                   onClick={() => setSelectedId(tpl.id)}
                   style={{
                     cursor: "pointer",
@@ -99,14 +98,15 @@ export default function ExportPdfButton({ documentType, documentId }: Props) {
                     padding: "8px 12px",
                     background: active ? token.colorPrimaryBg : undefined,
                     border: active ? `1px solid ${token.colorPrimary}` : `1px solid transparent`,
-                    marginBottom: 6,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
                   }}
-                  extra={active ? <CheckOutlined style={{ color: token.colorPrimary }} /> : null}
                 >
-                  <List.Item.Meta
-                    title={<Typography.Text strong={active}>{tpl.name}</Typography.Text>}
-                    description={
-                      <span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <Typography.Text strong={active}>{tpl.name}</Typography.Text>
+                    {(tpl.is_default || tpl.is_system) && (
+                      <div style={{ marginTop: 2, display: "flex", gap: 4 }}>
                         {tpl.is_default && (
                           <Tag color="blue" style={{ fontSize: 11 }}>
                             {i18n.t("template.default")}
@@ -117,13 +117,14 @@ export default function ExportPdfButton({ documentType, documentId }: Props) {
                             {i18n.t("template.system")}
                           </Tag>
                         )}
-                      </span>
-                    }
-                  />
-                </List.Item>
+                      </div>
+                    )}
+                  </div>
+                  {active && <CheckOutlined style={{ color: token.colorPrimary }} />}
+                </div>
               );
-            }}
-          />
+            })}
+          </div>
         )}
       </Modal>
     </>

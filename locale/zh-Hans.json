@@ -65,6 +65,8 @@
     "noData": "暂无数据",
     "confirm": "确认",
     "back": "返回",
+    "close": "关闭",
+    "open": "打开",
     "comingSoon": "敬请期待",
     "notFound": "页面未找到",
     "loadFailed": "加载失败",
@@ -232,7 +234,11 @@
     "upload": "上传文件",
     "uploading": "上传中...",
     "noFiles": "暂无附件",
-    "deleteConfirm": "确认删除此附件？"
+    "deleteConfirm": "确认删除此附件？",
+    "dropHint": "拖拽文件到此处，或",
+    "browse": "浏览上传",
+    "download": "下载",
+    "noPreview": "该文件类型暂不支持预览，请下载后查看。"
   },
   "comment": {
     "title": "评论与历史",

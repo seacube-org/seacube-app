@@ -166,22 +166,56 @@ export async function uploadFormData<T>(url: string, formData: FormData): Promis
   return request<T>(url, { method: "POST", body: formData });
 }
 
-export async function downloadBlob(url: string, retry = true): Promise<Blob> {
+// True only when the (absolute) URL resolves to the API's own origin. Compared
+// by parsed origin rather than string prefix, which a crafted host like
+// `https://api.example.com.evil.test` would otherwise defeat.
+function isApiOrigin(fullUrl: string): boolean {
+  try {
+    return new URL(fullUrl).origin === new URL(API_BASE_URL).origin;
+  } catch {
+    return false;
+  }
+}
+
+// Only attach the app's credentials to same-origin/API requests. A backend-
+// provided file URL could be an absolute CDN/object-storage link; we must never
+// forward the Bearer token or org header to a third-party host.
+async function fileRequestHeaders(fullUrl: string): Promise<Record<string, string>> {
+  if (!isApiOrigin(fullUrl)) return {};
   const access = tokenStore ? await tokenStore.getAccessToken() : null;
-  const fullUrl = url.startsWith("http") ? url : `${API_BASE_URL}${url}`;
-  const headers: Record<string, string> = {
+  return {
     ...(access ? { Authorization: `Bearer ${access}` } : {}),
     ...activeOrgHeader(),
     ...languageHeader(),
   };
-  const res = await fetch(fullUrl, { method: "POST", headers });
-  if (res.status === 401 && retry && tokenStore) {
+}
+
+async function fileRequest(url: string, method: "GET" | "POST", retry = true): Promise<Blob> {
+  const fullUrl = url.startsWith("http") ? url : `${API_BASE_URL}${url}`;
+  const headers = await fileRequestHeaders(fullUrl);
+  const res = await fetch(fullUrl, { method, headers });
+  // Only treat a 401 as our auth failure for same-origin requests; a 401 from a
+  // third-party file host must not refresh our tokens or log the user out.
+  if (res.status === 401 && retry && tokenStore && isApiOrigin(fullUrl)) {
     const newAccess = await refreshAccessToken();
-    if (newAccess) return downloadBlob(url, false);
+    if (newAccess) return fileRequest(url, method, false);
     throw new AuthError();
   }
   if (!res.ok) throw new ApiError(res.status, null, `${res.status} ${res.statusText}`);
   return res.blob();
+}
+
+export function downloadBlob(url: string, retry = true): Promise<Blob> {
+  return fileRequest(url, "POST", retry);
+}
+
+/**
+ * Authenticated GET that returns the response body as a Blob — used to read
+ * permission-checked files (attachments, etc.) that can't be loaded via a plain
+ * <img>/<iframe> src because those can't send the Authorization header.
+ */
+export function fetchFileBlob(url: string, retry = true): Promise<Blob> {
+  return fileRequest(url, "GET", retry);
 }
 
 export class AuthService {

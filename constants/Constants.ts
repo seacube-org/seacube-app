@@ -1,5 +1,22 @@
-// Base API URL — override via .env.development / .env.production
-export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:8000";
+// Base API URL — override via .env.development / .env.production.
+// These files hold only the PUBLIC API URL (EXPO_PUBLIC_* is inlined into the
+// client bundle) — never put secrets here.
+const RAW_API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:8000";
+
+// Fail fast if a production build is pointed at a plaintext HTTP endpoint:
+// JWTs travel in the Authorization header and would be exposed to network MITM.
+// localhost/127.0.0.1 stay allowed so local dev over HTTP keeps working.
+function resolveApiBaseUrl(url: string): string {
+  const isLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/|$)/.test(url);
+  if (!__DEV__ && !url.startsWith("https://") && !isLocalhost) {
+    throw new Error(
+      `Insecure EXPO_PUBLIC_API_URL in a production build: "${url}". Use an https:// URL.`,
+    );
+  }
+  return url;
+}
+
+export const API_BASE_URL = resolveApiBaseUrl(RAW_API_BASE_URL);
 
 // API endpoint mappings (entity name → base URL)
 export const API_ENDPOINTS = {

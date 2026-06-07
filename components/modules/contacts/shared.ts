@@ -39,6 +39,15 @@ export type BankAccount = {
   is_default?: boolean;
 };
 
+// Credit period rule, as embedded read-only in the contact detail response.
+export type CreditPeriodDetail = {
+  id: number;
+  name: string;
+  label: string; // locale-aware display label (system names translated server-side)
+  term_type: string;
+  days: number | null;
+};
+
 // Row shape returned by the list endpoint (ContactListSerializer).
 export type ContactRow = {
   id: number;
@@ -47,7 +56,8 @@ export type ContactRow = {
   email: string;
   phone: string;
   currency: string;
-  payment_terms?: number;
+  credit_period?: number | null; // FK id; staff-hidden
+  payment_terms?: string; // free-text commercial arrangement; staff-hidden
   created_at: string;
 };
 
@@ -57,6 +67,7 @@ type UserDisplay = { id: number; username: string; display_name: string } | null
 export type ContactDetail = ContactRow & {
   website: string;
   tax_id: string;
+  credit_period_detail?: CreditPeriodDetail | null; // read-only display of credit_period
   notes: string;
   billing_address: ContactAddress;
   shipping_address: ContactAddress;

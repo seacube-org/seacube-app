@@ -23,8 +23,12 @@ export default function ContactInfoPanel({ contact, schema }: { contact: Contact
       <InfoRow label={schema.label("tax_id", "税号")} value={contact.tax_id} />
       <InfoRow label={schema.label("currency", "币种")} value={contact.currency} />
       <InfoRow
-        label={schema.label("payment_terms", "付款账期（天）")}
-        value={contact.payment_terms != null ? String(contact.payment_terms) : undefined}
+        label={schema.label("credit_period", i18n.t("contacts.creditPeriod", { defaultValue: "账期" }))}
+        value={contact.credit_period_detail?.label}
+      />
+      <InfoRow
+        label={schema.label("payment_terms", i18n.t("contacts.paymentTerms", { defaultValue: "付款条款" }))}
+        value={contact.payment_terms || undefined}
       />
       <InfoRow
         label={schema.label("billing_address", i18n.t("contacts.billingAddress", { defaultValue: "账单地址" }))}

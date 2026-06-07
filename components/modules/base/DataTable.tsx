@@ -4,6 +4,7 @@ import type { TableProps } from "antd";
 import { ArrowDownOutlined, ArrowUpOutlined } from "@ant-design/icons";
 import { useDataService } from "@/hooks/core/useDataService";
 import { useResizableColumns } from "@/components/modules/base/resizableColumns";
+import { tableSkinCss } from "@/components/modules/base/tableSkin";
 import { rows } from "@/utils/pagination";
 import i18n from "@/locale/i18n";
 
@@ -241,7 +242,6 @@ export default function DataTable({
           height: 100%;
         }
         .seacube-data-table .ant-table {
-          border-radius: 0;
           background: ${token.colorBgContainer};
         }
         /* scroll.y only caps the body's max height, so with a few rows the body
@@ -258,55 +258,11 @@ export default function DataTable({
         .seacube-data-table .ant-table-thead > tr > th:hover .seacube-col-menu {
           opacity: 1;
         }
-        .seacube-data-table .ant-table-container,
-        .seacube-data-table .ant-table-container table,
-        .seacube-data-table .ant-table-thead > tr > th:first-child,
-        .seacube-data-table .ant-table-thead > tr > th:last-child {
-          border-radius: 0 !important;
-        }
         .seacube-data-table .ant-table-container {
           border-top: 1px solid ${token.colorBorderSecondary};
         }
-        .seacube-data-table .ant-table-thead > tr {
-          height: 32px !important;
-        }
-        .seacube-data-table .ant-table-thead > tr > th {
-          height: 32px !important;
-          padding: 0 12px !important;
-          background: #fbfcfd;
-          border-bottom: 1px solid #dfe7ef;
-          border-inline-end: 1px solid #dfe7ef;
-          color: #1f2937;
-          font-size: 12.5px;
-          font-weight: 600;
-          line-height: 32px !important;
-        }
-        .seacube-data-table .ant-table-thead > tr > th::before {
-          display: none;
-        }
-        /* Scope to .ant-table-row only: antd v6 renders a hidden
-           .ant-table-measure-row as the first tbody child (height:0) to size
-           columns. An unscoped child-tr selector + !important would override its
-           inline zero-height and show it as an empty row above the data. */
-        .seacube-data-table .ant-table-tbody > tr.ant-table-row {
-          height: 44px !important;
-        }
-        .seacube-data-table .ant-table-tbody > tr.ant-table-row > td {
-          height: 44px !important;
-          padding: 0 12px !important;
-          border-bottom: 1px solid #edf1f5;
-          border-inline-end: 1px solid #edf1f5;
-          color: #2f3542;
-          font-size: 13px;
-          line-height: 44px !important;
-          vertical-align: middle;
-        }
-        .seacube-data-table .ant-table-tbody > tr.ant-table-row:hover > td {
-          background: #f6fbff;
-        }
-        .seacube-data-table .ant-table-cell-scrollbar,
-        .seacube-data-table .ant-table-thead > tr > th:last-child,
-        .seacube-data-table .ant-table-tbody > tr.ant-table-row > td:last-child {
+        ${tableSkinCss("seacube-data-table")}
+        .seacube-data-table .ant-table-cell-scrollbar {
           border-inline-end: 0;
         }
         .seacube-data-table .ant-table-selection-column {

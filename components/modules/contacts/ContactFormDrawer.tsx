@@ -51,10 +51,12 @@ export default function ContactFormDrawer({ open, contact, onClose, onSaved }: P
       shipping_address: contact?.shipping_address ?? {},
       persons: contact?.persons ?? [],
       bank_accounts: contact?.bank_accounts ?? [],
-      // tax_id / payment_terms are hidden from STAFF by the backend — only seed
-      // them when actually present so we don't echo back blocked fields.
+      // tax_id / credit_period / payment_terms are hidden from STAFF by the
+      // backend — only seed them when present so we don't echo back blocked fields.
       ...(contact?.tax_id !== undefined ? { tax_id: contact.tax_id } : {}),
       ...(contact?.payment_terms !== undefined ? { payment_terms: contact.payment_terms } : {}),
+      // credit_period is an FK id; the selector's option values are strings.
+      ...(contact?.credit_period != null ? { credit_period: String(contact.credit_period) } : {}),
     });
   }, [open, contact, form]);
 
@@ -64,6 +66,11 @@ export default function ContactFormDrawer({ open, contact, onClose, onSaved }: P
     const body = { ...values };
     if (body.tax_id === "" || body.tax_id == null) delete body.tax_id;
     if (body.payment_terms == null) delete body.payment_terms;
+    // credit_period is a nullable FK (unset → fall back to the org default). When
+    // it's in the schema (admin/manager) send its value, coercing a cleared
+    // selection to null so it can be unset; STAFF never see it, so omit it.
+    if (schema.has("credit_period")) body.credit_period = body.credit_period ?? null;
+    else delete body.credit_period;
     setSaving(true);
     try {
       if (isEdit) await vs.update({ id: contact.id, body });

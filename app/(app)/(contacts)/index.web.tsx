@@ -32,8 +32,8 @@ export default function ContactsPage() {
         render: (v, r) => (
           <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
             <Avatar
-              size={30}
-              style={{ background: avatarColor((r as ContactRow).type, token.colorPrimary), flexShrink: 0 }}
+              size={24}
+              style={{ background: avatarColor((r as ContactRow).type, token.colorPrimary), flexShrink: 0, fontSize: 11 }}
             >
               {initials(String(v ?? ""))}
             </Avatar>

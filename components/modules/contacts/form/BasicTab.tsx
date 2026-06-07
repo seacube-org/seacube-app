@@ -44,10 +44,24 @@ export default function BasicTab({ schema }: { schema: FieldSchema }) {
         name="currency"
         config={{ ref: "currency", itemProps: { style: FIELD_ITEM_STYLE } }}
       />
+      {/* Credit period (账期): configurable rule that drives invoice/bill due dates.
+          Full-width on its own row — it would otherwise sit alone (currency pairs
+          with tax_id, and payment_terms below is full-width). */}
+      <SchemaField
+        schema={schema}
+        name="credit_period"
+        config={{
+          ref: "credit_period",
+          // Optional FK — clearing it falls the contact back to the org default.
+          inputProps: { allowClear: true },
+          itemProps: { style: FULL_WIDTH_ITEM_STYLE },
+        }}
+      />
+      {/* Payment terms: free-text commercial arrangement, e.g. "30% adv, 70% balance". */}
       <SchemaField
         schema={schema}
         name="payment_terms"
-        config={{ inputProps: { min: 0, style: { width: "100%" } }, itemProps: { style: FULL_WIDTH_ITEM_STYLE } }}
+        config={{ control: <TextArea rows={2} />, itemProps: { style: FULL_WIDTH_ITEM_STYLE } }}
       />
       <SchemaField
         schema={schema}

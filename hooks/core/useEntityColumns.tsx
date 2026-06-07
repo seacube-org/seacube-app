@@ -36,7 +36,9 @@ export function useEntityColumns(
     const blank = (v: unknown) => v == null || v === "";
 
     const byType = (f: FieldDef): ((v: unknown) => ReactNode) => {
-      const opts = new Map((f.choices ?? []).map((c) => [c.value, c]));
+      // Key by String(value): choice values may be strings (currency code) or
+      // numbers (credit_period FK id), and lookup below normalizes with String(v).
+      const opts = new Map((f.choices ?? []).map((c) => [String(c.value), c]));
       switch (f.type) {
         case "choice":
           return (v) => {

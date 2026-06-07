@@ -33,6 +33,7 @@ export const API_ENDPOINTS = {
   contentTypes: "/api/core/content-types/",
   currencies: "/api/core/currencies/",
   optionSets: "/api/core/option-sets/",
+  creditPeriods: "/api/core/credit-periods/",
 
   // Infrastructure
   attachments: "/api/attachments/",

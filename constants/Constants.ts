@@ -40,6 +40,7 @@ export const API_ENDPOINTS = {
   comments: "/api/comments/",
   auditLogs: "/api/audit/logs/",
   documentTemplates: "/api/document-templates/templates/",
+  dataTransferJobs: "/api/data-transfer/jobs/",
 
   // Accounting
   accounts: "/api/accounting/accounts/",

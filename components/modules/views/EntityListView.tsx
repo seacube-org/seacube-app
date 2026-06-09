@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
 import { Button, Input, Space, Tooltip, theme } from "antd";
 import { FilterOutlined, SearchOutlined } from "@ant-design/icons";
 import i18n from "@/locale/i18n";
@@ -7,10 +7,11 @@ import type { ColumnOverride } from "@/hooks/core/useEntityColumns";
 import ViewSelect from "./ViewSelect";
 import FilterPanel from "./FilterPanel";
 import ViewDirtyBanner from "./ViewDirtyBanner";
+import ListActionsMenu from "./ListActionsMenu";
 import { useListView } from "./useListView";
 
 /** Handle passed to the entity-specific slots (actions / extras). */
-export type ListViewApi = { refetch: () => void };
+export type ListViewApi = { refetch: () => void; resetWidths: () => void };
 
 type Props = {
   entity: string;
@@ -47,7 +48,21 @@ export default function EntityListView({
 }: Props) {
   const { token } = theme.useToken();
   const lv = useListView(entity, columnOverrides);
-  const api: ListViewApi = { refetch: lv.refetch };
+  const api: ListViewApi = useMemo(
+    () => ({ refetch: lv.refetch, resetWidths: lv.resetWidths }),
+    [lv.refetch, lv.resetWidths],
+  );
+
+  // Current-view query for export: the visible columns (in order) + the active
+  // filter/search (lv.params) + ordering — the same params the list request uses.
+  const exportParams: Record<string, string> = useMemo(
+    () => ({
+      ...lv.params,
+      ...(lv.applied.ordering ? { ordering: lv.applied.ordering } : {}),
+      columns: lv.visibleColumns.map((c) => String(c.key)).join(","),
+    }),
+    [lv.params, lv.applied.ordering, lv.visibleColumns],
+  );
 
   return (
     <div
@@ -128,7 +143,17 @@ export default function EntityListView({
           </Space.Compact>
         </div>
 
-        {actions && <div style={{ display: "flex", alignItems: "center", gap: 8 }}>{actions(api)}</div>}
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {actions?.(api)}
+          {/* Shared overflow menu: Export (current view) / 导出历史 / Refresh / Reset widths. */}
+          <ListActionsMenu
+            endpoint={endpoint}
+            entity={entity}
+            exportParams={exportParams}
+            onRefresh={lv.refetch}
+            onResetWidths={lv.resetWidths}
+          />
+        </div>
       </div>
 
       {/* The active view has unsaved tweaks (Zoho-style). System views can't be

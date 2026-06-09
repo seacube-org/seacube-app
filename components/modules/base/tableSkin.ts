@@ -1,6 +1,6 @@
 // Shared "Bigin/CRM" table skin — header tint, fixed row height, thin grid
 // borders and row hover — scoped to a root class so the server-side list
-// {@link DataTable} and the detail-page {@link DetailTable} stay in visual sync.
+// {@link DataTable} and the client-side {@link BasicTable} stay in visual sync.
 // Both render the returned string inside a <style>{...}</style>; DataTable layers
 // its list-only extras (column menu, resize, selection, pagination) on top.
 

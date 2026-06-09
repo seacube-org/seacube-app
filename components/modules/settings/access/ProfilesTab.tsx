@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { App, Button, Space, Table, Tag, Typography } from "antd";
+import { App, Button, Space, Tag, Typography } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useAuthStore } from "@/stores/authStore";
 import { useLocaleStore } from "@/stores/localeStore";
 import i18n from "@/locale/i18n";
+import BasicTable from "@/components/modules/base/BasicTable";
 import {
   useAccessViewSets,
   rows,
@@ -128,7 +129,7 @@ export default function ProfilesTab() {
           {i18n.t("access.newProfile", { defaultValue: "新建权限方案" })}
         </Button>
       </div>
-      <Table rowKey="id" loading={loading} columns={columns} dataSource={profiles} pagination={ACCESS_PAGINATION} />
+      <BasicTable rowKey="id" loading={loading} columns={columns} dataSource={profiles} pagination={ACCESS_PAGINATION} />
       <ProfilePermissionEditor
         open={editorOpen}
         profile={editing}

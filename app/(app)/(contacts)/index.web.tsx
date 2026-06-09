@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "expo-router";
 import type { Href } from "expo-router";
 import { Avatar, Button, Tag, Typography, theme } from "antd";
-import { AppstoreOutlined, MoreOutlined, PlusOutlined, UnorderedListOutlined } from "@ant-design/icons";
+import { AppstoreOutlined, PlusOutlined, UnorderedListOutlined } from "@ant-design/icons";
 import { useCan } from "@/stores/authStore";
 import i18n from "@/locale/i18n";
 import EntityListView from "@/components/modules/views/EntityListView";
@@ -100,18 +100,8 @@ export default function ContactsPage() {
               {i18n.t("contacts.new", { defaultValue: "新建联系人" })}
             </Button>
           )}
-          <Button
-            shape="circle"
-            icon={<MoreOutlined />}
-            style={{
-              width: 32,
-              height: 32,
-              border: 0,
-              background: "#eaf2ff",
-              color: token.colorPrimary,
-              boxShadow: "none",
-            }}
-          />
+          {/* The "..." overflow menu (export/refresh/reset widths) now lives in
+              the shared EntityListView toolbar, so it's no longer rendered here. */}
         </>
       )}
       extras={({ refetch }) => (

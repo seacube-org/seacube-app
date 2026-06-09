@@ -3,6 +3,7 @@ import { App } from "antd";
 import { useAuthStore, useIsActiveAdmin } from "@/stores/authStore";
 import { useEntityColumns, type ColumnOverride } from "@/hooks/core/useEntityColumns";
 import i18n from "@/locale/i18n";
+import { saveColumnWidths } from "@/utils/tableWidths";
 import { useSavedViews } from "./useSavedViews";
 import { useUiState } from "./useUiState";
 import type { SaveViewMeta } from "./SaveViewModal";
@@ -317,6 +318,13 @@ export function useListView(entity: string, columnOverrides: Record<string, Colu
   const tableKey = `${activeOrgId ?? "0"}-${applied.pageSize}-${tick}`;
   const widthStorageKey = `${entity}:${userId ?? 0}:${activeOrgId ?? 0}`;
 
+  // Clear the stored per-column widths and remount the table (via tick → tableKey)
+  // so it re-hydrates to the schema's default widths.
+  const resetWidths = useCallback(() => {
+    saveColumnWidths(widthStorageKey, {});
+    setTick((t) => t + 1);
+  }, [widthStorageKey]);
+
   return {
     // schema + views
     fields,
@@ -337,6 +345,7 @@ export function useListView(entity: string, columnOverrides: Record<string, Colu
     tableKey,
     widthStorageKey,
     refetch,
+    resetWidths,
     // dirty
     isDirty,
     canUpdateActive,

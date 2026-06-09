@@ -1,7 +1,7 @@
 import { Empty, Space, Tag } from "antd";
 import i18n from "@/locale/i18n";
 import type { FieldSchema } from "@/hooks/core/useFieldMeta";
-import DetailTable from "@/components/modules/base/DetailTable";
+import BasicTable from "@/components/modules/base/BasicTable";
 import { type BankAccount, type ContactDetail, type ContactPerson } from "@/components/modules/contacts/shared";
 import { AddressCard, SectionLabel } from "./sections";
 
@@ -79,7 +79,7 @@ export default function ContactOverview({ contact, schema }: { contact: ContactD
       </div>
 
       <SectionLabel>{i18n.t("contacts.tabPersons", { defaultValue: "联系人" })}</SectionLabel>
-      <DetailTable<ContactPerson>
+      <BasicTable<ContactPerson>
         rowKey={(r) => String(r.id)}
         columns={personColumns}
         dataSource={contact.persons}
@@ -87,7 +87,7 @@ export default function ContactOverview({ contact, schema }: { contact: ContactD
       />
 
       <SectionLabel>{i18n.t("contacts.tabBanks", { defaultValue: "银行账户" })}</SectionLabel>
-      <DetailTable<BankAccount>
+      <BasicTable<BankAccount>
         rowKey={(r) => String(r.id)}
         columns={bankColumns}
         dataSource={contact.bank_accounts}

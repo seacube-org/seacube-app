@@ -3,6 +3,7 @@ import { Button, Modal, Tag, Spin, Typography, theme } from "antd";
 import { FilePdfOutlined, CheckOutlined } from "@ant-design/icons";
 import { useDataService } from "@/hooks/core/useDataService";
 import { downloadBlob } from "@/services/DataService";
+import { saveBlob } from "@/utils/download";
 import i18n from "@/locale/i18n";
 
 type Template = {
@@ -45,14 +46,7 @@ export default function ExportPdfButton({ documentType, documentId }: Props) {
       const blob = await downloadBlob(
         `/api/document-templates/templates/${selectedId}/render_pdf/?document_id=${documentId}`,
       );
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${documentType}_${documentId}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(url), 100);
+      saveBlob(blob, `${documentType}_${documentId}.pdf`);
       setOpen(false);
     } catch (e) {
       void handleError(e).catch(() => {});

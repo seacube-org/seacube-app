@@ -29,7 +29,7 @@ export const ITEM_ROUTES: Record<string, string> = {
   bills: "/(app)/(purchases)/bills",
   vendorPayments: "/(app)/(purchases)/vendor-payments",
   vendorCredits: "/(app)/(purchases)/vendor-credits",
-  contacts: "/(app)/(contacts)",
+  contacts: "/(app)/contacts",
   products: "/(app)/(inventory)/products",
   warehouses: "/(app)/(inventory)/warehouses",
   adjustments: "/(app)/(inventory)/adjustments",

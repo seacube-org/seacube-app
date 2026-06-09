@@ -56,7 +56,7 @@ export default function WebAppLayout() {
     const mod = segs[1]?.replace(/[()]/g, "");
     const page = segs[2];
     if (!mod) return { selectedKeys: ["dashboard"], activeModule: null };
-    // A dynamic detail segment (e.g. (contacts)/[id]) still belongs to its module,
+    // A dynamic detail segment (e.g. contacts/[id]) still belongs to its module,
     // so keep the parent menu item highlighted instead of de-selecting everything.
     if (!page || page.startsWith("[")) return { selectedKeys: [mod], activeModule: mod };
     return { selectedKeys: [PAGE_TO_KEY[page] ?? page], activeModule: mod };

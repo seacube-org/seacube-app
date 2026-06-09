@@ -9,12 +9,15 @@ import {
   ReloadOutlined,
 } from "@ant-design/icons";
 import i18n from "@/locale/i18n";
+import { useCan } from "@/stores/authStore";
 import ExportDialog from "./ExportDialog";
 import ExportHistoryDrawer from "./ExportHistoryDrawer";
 
 type Props = {
   endpoint: string;
   entity: string;
+  /** Permission module key (e.g. "contacts") — gates the export entries. */
+  moduleKey: string;
   /** Current-view query for export (columns + filter/search/ordering). */
   exportParams: Record<string, string>;
   onRefresh: () => void;
@@ -22,19 +25,26 @@ type Props = {
 };
 
 /** Shared list "..." overflow menu — Export (current view) / 导出历史 / Refresh / Reset widths. */
-export default function ListActionsMenu({ endpoint, entity, exportParams, onRefresh, onResetWidths }: Props) {
+export default function ListActionsMenu({ endpoint, entity, moduleKey, exportParams, onRefresh, onResetWidths }: Props) {
   const { token } = theme.useToken();
   const [exportOpen, setExportOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const [open, setOpen] = useState(false);
+  // Export + history are hidden for users without the module's 'export' action —
+  // mirrors the backend, which gates the export endpoint (and history) on 'export'.
+  const canExport = useCan(moduleKey, "export");
 
-  const items: MenuProps["items"] = [
-    { key: "export", icon: <ExportOutlined />, label: i18n.t("listMenu.export", { defaultValue: "导出" }) },
-    { key: "history", icon: <HistoryOutlined />, label: i18n.t("listMenu.exportHistory", { defaultValue: "导出历史" }) },
-    { type: "divider" },
+  const items = [
+    canExport && { key: "export", icon: <ExportOutlined />, label: i18n.t("listMenu.export", { defaultValue: "导出" }) },
+    canExport && {
+      key: "history",
+      icon: <HistoryOutlined />,
+      label: i18n.t("listMenu.exportHistory", { defaultValue: "导出历史" }),
+    },
+    canExport && { type: "divider" },
     { key: "refresh", icon: <ReloadOutlined />, label: i18n.t("listMenu.refresh", { defaultValue: "刷新列表" }) },
     { key: "reset", icon: <ColumnWidthOutlined />, label: i18n.t("listMenu.resetWidths", { defaultValue: "重置列宽" }) },
-  ];
+  ].filter(Boolean) as NonNullable<MenuProps["items"]>;
 
   const onClick: MenuProps["onClick"] = ({ key }) => {
     if (key === "export") setExportOpen(true);
@@ -105,13 +115,19 @@ export default function ListActionsMenu({ endpoint, entity, exportParams, onRefr
           />
         </Tooltip>
       </Dropdown>
-      <ExportDialog
-        open={exportOpen}
-        onClose={() => setExportOpen(false)}
-        endpoint={endpoint}
-        exportParams={exportParams}
-      />
-      <ExportHistoryDrawer open={historyOpen} onClose={() => setHistoryOpen(false)} entity={entity} />
+      {/* Only mounted when the export entries are reachable — keeps the export
+          dialog/history drawer out of the tree entirely for non-exporters. */}
+      {canExport && (
+        <>
+          <ExportDialog
+            open={exportOpen}
+            onClose={() => setExportOpen(false)}
+            endpoint={endpoint}
+            exportParams={exportParams}
+          />
+          <ExportHistoryDrawer open={historyOpen} onClose={() => setHistoryOpen(false)} entity={entity} />
+        </>
+      )}
     </>
   );
 }

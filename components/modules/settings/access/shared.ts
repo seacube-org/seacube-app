@@ -112,8 +112,9 @@ export const roleOptions = (roles: Role[]) =>
 export const profileOptions = (profiles: Profile[]) => profiles.map((p) => ({ value: p.id, label: p.name }));
 
 // Individual permission actions (Bigin-style per-module checkboxes). Canonical
-// order — used to keep stored lists and the summary text stable.
-export const PERM_ACTIONS = ["view", "create", "update", "delete"] as const;
+// order — used to keep stored lists and the summary text stable. 'export' gates
+// bulk CSV/XLSX data export (mirrors the backend manifest's ALL_ACTIONS).
+export const PERM_ACTIONS = ["view", "create", "update", "delete", "export"] as const;
 
 export function actionLabel(action: string): string {
   switch (action) {
@@ -125,6 +126,8 @@ export function actionLabel(action: string): string {
       return i18n.t("access.actUpdate", { defaultValue: "编辑" });
     case "delete":
       return i18n.t("access.actDelete", { defaultValue: "删除" });
+    case "export":
+      return i18n.t("access.actExport", { defaultValue: "导出" });
     default:
       return action;
   }

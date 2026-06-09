@@ -53,9 +53,10 @@ export default function ContactsPage() {
     <EntityListView
       entity="contact"
       endpoint={CONTACTS_URL}
+      moduleKey="contacts"
       columnOverrides={columnOverrides}
       searchPlaceholder={i18n.t("contacts.searchPlaceholder", { defaultValue: "搜索名称、邮箱或电话" })}
-      onRowClick={(r) => router.push(`/(app)/(contacts)/${r.id}` as Href)}
+      onRowClick={(r) => router.push(`/(app)/contacts/${r.id}` as Href)}
       renderSummary={(total) => (
         <span>
           {i18n.t("contacts.total", { defaultValue: "联系人总数" })} · <b style={{ color: token.colorText }}>{total}</b>

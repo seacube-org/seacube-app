@@ -17,6 +17,8 @@ type Props = {
   entity: string;
   /** ViewSet base URL (e.g. "/api/contacts/contacts/"). */
   endpoint: string;
+  /** Permission module key (e.g. "contacts") — gates the export entries. */
+  moduleKey: string;
   /** Per-field cell overrides for the schema-driven columns (stable / memoized). */
   columnOverrides?: Record<string, ColumnOverride>;
   searchPlaceholder?: string;
@@ -38,6 +40,7 @@ type Props = {
 export default function EntityListView({
   entity,
   endpoint,
+  moduleKey,
   columnOverrides,
   searchPlaceholder,
   selectable = true,
@@ -149,6 +152,7 @@ export default function EntityListView({
           <ListActionsMenu
             endpoint={endpoint}
             entity={entity}
+            moduleKey={moduleKey}
             exportParams={exportParams}
             onRefresh={lv.refetch}
             onResetWidths={lv.resetWidths}

@@ -70,9 +70,10 @@ export default function ProfilePermissionEditor({
   const setModuleActions = (key: string, vals: string[]) =>
     setPerms((prev) => {
       const set = new Set(vals);
-      // 'view' is implied by any write action — the menu only exposes view-able
-      // modules, so write-without-view would be unreachable yet over-permissive.
-      if (set.has("create") || set.has("update") || set.has("delete")) set.add("view");
+      // 'view' is implied by any write/export action — the menu only exposes
+      // view-able modules, and exporting data you can't view is meaningless, so
+      // any-without-view would be unreachable yet over-permissive.
+      if (set.has("create") || set.has("update") || set.has("delete") || set.has("export")) set.add("view");
       return { ...prev, [key]: PERM_ACTIONS.filter((a) => set.has(a)) };
     });
 

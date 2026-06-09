@@ -51,7 +51,7 @@ export default function ContactDetailScreen() {
 
   const goBack = () => {
     if (router.canGoBack()) router.back();
-    else router.replace("/(app)/(contacts)" as Href);
+    else router.replace("/(app)/contacts" as Href);
   };
 
   const confirmDelete = () => {

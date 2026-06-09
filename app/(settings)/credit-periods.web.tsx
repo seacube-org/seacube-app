@@ -83,7 +83,9 @@ export default function CreditPeriodsSettings() {
         key: "name",
         render: (_: unknown, r: CreditPeriod) => (
           <Space size={6}>
-            <Typography.Text strong>{r.label}</Typography.Text>
+            <Typography.Text strong style={{ fontSize: 13 }}>
+              {r.label}
+            </Typography.Text>
             {r.is_default && <Tag color="blue">{i18n.t("creditPeriod.default", { defaultValue: "默认" })}</Tag>}
             {r.is_system && <Tag>{i18n.t("creditPeriod.system", { defaultValue: "系统" })}</Tag>}
           </Space>
@@ -161,7 +163,12 @@ export default function CreditPeriodsSettings() {
         </div>
       )}
       <BasicTable rowKey="id" loading={loading} columns={columns} dataSource={periods} pagination={ACCESS_PAGINATION} />
-      <CreditPeriodDrawer open={drawerOpen} period={editing} onClose={() => setDrawerOpen(false)} onSaved={afterMutation} />
+      <CreditPeriodDrawer
+        open={drawerOpen}
+        period={editing}
+        onClose={() => setDrawerOpen(false)}
+        onSaved={afterMutation}
+      />
     </SettingsSection>
   );
 }

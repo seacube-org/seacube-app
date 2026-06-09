@@ -7,6 +7,7 @@ export default function AppLayout() {
   return (
     <Tabs>
       <Tabs.Screen name="index" options={{ title: i18n.t("nav.dashboard") }} />
+      <Tabs.Screen name="products" options={{ title: i18n.t("nav.products"), href: null }} />
       <Tabs.Screen name="(sales)" options={{ title: i18n.t("nav.sales"), href: null }} />
       <Tabs.Screen name="(purchases)" options={{ title: i18n.t("nav.purchases"), href: null }} />
       <Tabs.Screen name="contacts" options={{ title: i18n.t("nav.contacts"), href: null }} />

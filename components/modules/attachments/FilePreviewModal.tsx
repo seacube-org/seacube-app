@@ -79,8 +79,9 @@ export default function FilePreviewModal({ files, openIndex, onClose }: Props) {
         if (cancelled) return;
         // 401 after a failed refresh: route through the app error path so tokens
         // are cleared and the user is redirected to login, like other API calls.
+        // handleError rethrows, so swallow the rejection to avoid an unhandled promise.
         if (err instanceof AuthError) {
-          handleError(err);
+          void handleError(err).catch(() => {});
           return;
         }
         setBlobState("error");
@@ -155,7 +156,13 @@ export default function FilePreviewModal({ files, openIndex, onClose }: Props) {
         <iframe
           src={blobUrl!}
           title={file.fileName}
-          style={{ width: "100%", height: "100%", border: "none", background: "#fff", borderRadius: token.borderRadius }}
+          style={{
+            width: "100%",
+            height: "100%",
+            border: "none",
+            background: "#fff",
+            borderRadius: token.borderRadius,
+          }}
         />
       );
     }
@@ -286,7 +293,12 @@ export default function FilePreviewModal({ files, openIndex, onClose }: Props) {
               style={toolBtnStyle}
             />
             <div style={{ width: 1, height: 16, background: "rgba(255,255,255,0.3)", margin: "0 4px" }} />
-            <Button type="text" icon={<RotateRightOutlined />} onClick={() => setRotate((r) => r + 90)} style={toolBtnStyle} />
+            <Button
+              type="text"
+              icon={<RotateRightOutlined />}
+              onClick={() => setRotate((r) => r + 90)}
+              style={toolBtnStyle}
+            />
             <Button
               type="text"
               icon={<ReloadOutlined />}

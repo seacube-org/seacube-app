@@ -5,6 +5,7 @@ import {
   ShoppingOutlined,
   TeamOutlined,
   DatabaseOutlined,
+  TagsOutlined,
   ToolOutlined,
   CarOutlined,
 } from "@ant-design/icons";
@@ -76,11 +77,10 @@ export function useMenuItems(
       },
     ].filter(Boolean) as NonNullable<MenuProps["items"]>;
 
+    // Inventory ("库存") no longer carries Products — products is its own
+    // top-level "Items" module (Zoho Books layout); inventory keeps warehouses
+    // and stock adjustments.
     const inventoryChildren = [
-      can("inventory_products") && {
-        key: "products",
-        label: i18n.t("inventory.products"),
-      },
       can("inventory_warehouses") && {
         key: "warehouses",
         label: i18n.t("inventory.warehouses"),
@@ -96,6 +96,12 @@ export function useMenuItems(
         key: "dashboard",
         icon: createElement(HomeOutlined),
         label: i18n.t("nav.dashboard"),
+      },
+      // Products ("Items") — its own top-level module, like Zoho Books "品目".
+      can("inventory_products") && {
+        key: "products",
+        icon: createElement(TagsOutlined),
+        label: i18n.t("nav.products"),
       },
       salesChildren.length > 0 && {
         key: "sales",

@@ -108,7 +108,8 @@ export default function AttachmentPanel({ contentTypeId, objectId }: Props) {
   };
 
   return (
-    <div style={{ padding: "16px 0" }}>
+    // 8px top so the files tab starts level with the overview / comments tabs.
+    <div style={{ padding: "8px 0" }}>
       <Typography.Text strong style={{ display: "block", marginBottom: 12 }}>
         {i18n.t("attachment.title")}
       </Typography.Text>
@@ -156,12 +157,7 @@ export default function AttachmentPanel({ contentTypeId, objectId }: Props) {
               >
                 <Icon style={{ fontSize: 26, color: token.colorTextSecondary, flexShrink: 0 }} />
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <Typography.Link
-                    strong
-                    ellipsis
-                    style={{ display: "block" }}
-                    onClick={() => setPreviewIndex(i)}
-                  >
+                  <Typography.Link strong ellipsis style={{ display: "block" }} onClick={() => setPreviewIndex(i)}>
                     {item.file_name}
                   </Typography.Link>
                   <Typography.Text type="secondary" style={{ fontSize: 12 }}>

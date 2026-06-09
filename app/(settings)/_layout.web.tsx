@@ -8,6 +8,7 @@ import {
   TeamOutlined,
   EnvironmentOutlined,
   FieldTimeOutlined,
+  TagsOutlined,
 } from "@ant-design/icons";
 import { Slot, useRouter, useSegments } from "expo-router";
 import type { Href } from "expo-router";
@@ -56,6 +57,13 @@ const SECTIONS = [
     route: "/(settings)/credit-periods",
     icon: FieldTimeOutlined,
     label: () => i18n.t("settings.creditPeriods", { defaultValue: "账期设置" }),
+  },
+  {
+    key: "product-attributes",
+    route: "/(settings)/product-attributes",
+    icon: TagsOutlined,
+    adminOnly: true,
+    label: () => i18n.t("settings.productAttributes", { defaultValue: "规格属性" }),
   },
   {
     key: "access",

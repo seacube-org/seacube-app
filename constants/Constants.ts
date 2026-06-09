@@ -56,6 +56,7 @@ export const API_ENDPOINTS = {
 
   // Products
   products: "/api/products/products/",
+  productAttributes: "/api/products/attributes/",
 
   // Inventory
   warehouses: "/api/inventory/warehouses/",

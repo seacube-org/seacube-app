@@ -30,7 +30,8 @@ export const ITEM_ROUTES: Record<string, string> = {
   vendorPayments: "/(app)/(purchases)/vendor-payments",
   vendorCredits: "/(app)/(purchases)/vendor-credits",
   contacts: "/(app)/contacts",
-  products: "/(app)/(inventory)/products",
+  // Products ("Items") is its own top-level module in Zoho Books, separate from Inventory.
+  products: "/(app)/products",
   warehouses: "/(app)/(inventory)/warehouses",
   adjustments: "/(app)/(inventory)/adjustments",
   production: "/(app)/(production)",

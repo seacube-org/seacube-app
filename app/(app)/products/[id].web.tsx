@@ -9,6 +9,7 @@ import { useCan } from "@/stores/authStore";
 import CommentsTab from "@/components/modules/comments/CommentsTab";
 import AttachmentPanel from "@/components/modules/attachments/AttachmentPanel";
 import ProductFormDrawer from "@/components/modules/products/ProductFormDrawer";
+import { invalidateProductCatalog } from "@/components/modules/sales/shared/useProductCatalog";
 import { PRODUCTS_URL } from "@/components/modules/products/shared";
 import ProductHeader from "@/components/modules/products/detail/ProductHeader";
 import ProductInfoPanel from "@/components/modules/products/detail/ProductInfoPanel";
@@ -141,7 +142,16 @@ export default function ProductDetailScreen() {
         </div>
       </div>
 
-      <ProductFormDrawer open={editOpen} product={product} onClose={() => setEditOpen(false)} onSaved={reload} />
+      <ProductFormDrawer
+        open={editOpen}
+        product={product}
+        onClose={() => setEditOpen(false)}
+        onSaved={() => {
+          // Sales forms cache the product catalog per org — drop it so they see the change.
+          invalidateProductCatalog();
+          reload();
+        }}
+      />
     </div>
   );
 }

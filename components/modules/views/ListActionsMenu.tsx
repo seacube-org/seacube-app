@@ -1,13 +1,7 @@
 import { useState } from "react";
 import { Button, Dropdown, theme, Tooltip } from "antd";
 import type { MenuProps } from "antd";
-import {
-  ColumnWidthOutlined,
-  ExportOutlined,
-  HistoryOutlined,
-  MoreOutlined,
-  ReloadOutlined,
-} from "@ant-design/icons";
+import { ColumnWidthOutlined, ExportOutlined, HistoryOutlined, MoreOutlined, ReloadOutlined } from "@ant-design/icons";
 import i18n from "@/locale/i18n";
 import { useCan } from "@/stores/authStore";
 import ExportDialog from "./ExportDialog";
@@ -25,7 +19,14 @@ type Props = {
 };
 
 /** Shared list "..." overflow menu — Export (current view) / 导出历史 / Refresh / Reset widths. */
-export default function ListActionsMenu({ endpoint, entity, moduleKey, exportParams, onRefresh, onResetWidths }: Props) {
+export default function ListActionsMenu({
+  endpoint,
+  entity,
+  moduleKey,
+  exportParams,
+  onRefresh,
+  onResetWidths,
+}: Props) {
   const { token } = theme.useToken();
   const [exportOpen, setExportOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -35,7 +36,11 @@ export default function ListActionsMenu({ endpoint, entity, moduleKey, exportPar
   const canExport = useCan(moduleKey, "export");
 
   const items = [
-    canExport && { key: "export", icon: <ExportOutlined />, label: i18n.t("listMenu.export", { defaultValue: "导出" }) },
+    canExport && {
+      key: "export",
+      icon: <ExportOutlined />,
+      label: i18n.t("listMenu.export", { defaultValue: "导出" }),
+    },
     canExport && {
       key: "history",
       icon: <HistoryOutlined />,
@@ -43,7 +48,11 @@ export default function ListActionsMenu({ endpoint, entity, moduleKey, exportPar
     },
     canExport && { type: "divider" },
     { key: "refresh", icon: <ReloadOutlined />, label: i18n.t("listMenu.refresh", { defaultValue: "刷新列表" }) },
-    { key: "reset", icon: <ColumnWidthOutlined />, label: i18n.t("listMenu.resetWidths", { defaultValue: "重置列宽" }) },
+    {
+      key: "reset",
+      icon: <ColumnWidthOutlined />,
+      label: i18n.t("listMenu.resetWidths", { defaultValue: "重置列宽" }),
+    },
   ].filter(Boolean) as NonNullable<MenuProps["items"]>;
 
   const onClick: MenuProps["onClick"] = ({ key }) => {

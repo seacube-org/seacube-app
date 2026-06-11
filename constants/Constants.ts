@@ -68,7 +68,7 @@ export const API_ENDPOINTS = {
   quotes: "/api/sales/quotes/",
   salesOrders: "/api/sales/orders/",
   invoices: "/api/sales/invoices/",
-  paymentsReceived: "/api/sales/payments-received/",
+  paymentsReceived: "/api/sales/payments/",
   creditNotes: "/api/sales/credit-notes/",
 
   // Purchases

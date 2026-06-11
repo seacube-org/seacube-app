@@ -12,7 +12,9 @@ export { initials } from "@/components/modules/contacts/shared";
 export const PRODUCTS_URL = API_ENDPOINTS.products;
 export const PRODUCT_ATTRIBUTES_URL = API_ENDPOINTS.productAttributes;
 
-export type ProductUnit = "KGS" | "LBS" | "CTN" | "PCS";
+// Unit codes come from the backend OptionSet 'unit' category (org-extensible),
+// so this is an open string; unitLabel() pretty-prints the common ones.
+export type ProductUnit = string;
 
 // Global, cross-product attribute definition (admin-managed). The same `glazing`
 // or `size` attribute is reused across many products via assignments.
@@ -52,6 +54,8 @@ export type ProductRow = {
 // Full shape returned by the detail endpoint (ProductDetailSerializer).
 export type ProductDetail = ProductRow & {
   description: string;
+  // Spec→line-description template ("@size 镀冰@glazing"); see renderSpecTemplate.
+  description_template: string;
   attribute_assignments: ProductAttributeAssignment[];
   updated_at: string;
 };

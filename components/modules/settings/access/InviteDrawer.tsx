@@ -86,7 +86,11 @@ export default function InviteDrawer({
               placeholder={i18n.t("access.selectRole", { defaultValue: "选择角色" })}
             />
           </Form.Item>
-          <Form.Item name="profile_id" label={i18n.t("access.profile", { defaultValue: "权限方案" })} style={{ flex: 1 }}>
+          <Form.Item
+            name="profile_id"
+            label={i18n.t("access.profile", { defaultValue: "权限方案" })}
+            style={{ flex: 1 }}
+          >
             <Select
               allowClear
               options={profileOptions(profiles)}

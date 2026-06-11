@@ -107,7 +107,11 @@ export default function AddressDrawer({
           </Form.Item>
         </Space>
         <Space style={{ display: "flex" }} size="middle">
-          <Form.Item name="postal_code" label={i18n.t("address.postalCode", { defaultValue: "邮编" })} style={{ flex: 1 }}>
+          <Form.Item
+            name="postal_code"
+            label={i18n.t("address.postalCode", { defaultValue: "邮编" })}
+            style={{ flex: 1 }}
+          >
             <Input />
           </Form.Item>
           <Form.Item name="country" label={i18n.t("address.country", { defaultValue: "国家" })} style={{ flex: 1 }}>

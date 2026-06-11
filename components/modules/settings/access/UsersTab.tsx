@@ -222,7 +222,13 @@ export default function UsersTab({ orgName }: { orgName: string }) {
             line-height: 1.4 !important;
           }
         `}</style>
-        <BasicTable rowKey="id" loading={loading} columns={columns} dataSource={members} pagination={ACCESS_PAGINATION} />
+        <BasicTable
+          rowKey="id"
+          loading={loading}
+          columns={columns}
+          dataSource={members}
+          pagination={ACCESS_PAGINATION}
+        />
       </div>
       <MemberDrawer
         open={modalOpen}

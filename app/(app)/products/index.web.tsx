@@ -8,6 +8,7 @@ import i18n from "@/locale/i18n";
 import EntityListView from "@/components/modules/views/EntityListView";
 import type { ColumnOverride } from "@/hooks/core/useEntityColumns";
 import ProductFormDrawer from "@/components/modules/products/ProductFormDrawer";
+import { invalidateProductCatalog } from "@/components/modules/sales/shared/useProductCatalog";
 import { PRODUCTS_URL, initials, taxRatePercent, type ProductRow } from "@/components/modules/products/shared";
 
 export default function ProductsPage() {
@@ -86,7 +87,16 @@ export default function ProductsPage() {
         ) : null
       }
       extras={({ refetch }) => (
-        <ProductFormDrawer open={formOpen} product={null} onClose={() => setFormOpen(false)} onSaved={refetch} />
+        <ProductFormDrawer
+          open={formOpen}
+          product={null}
+          onClose={() => setFormOpen(false)}
+          onSaved={() => {
+            // Sales forms cache the product catalog per org — drop it so they see the change.
+            invalidateProductCatalog();
+            refetch();
+          }}
+        />
       )}
     />
   );

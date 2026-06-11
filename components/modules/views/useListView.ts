@@ -285,13 +285,18 @@ export function useListView(entity: string, columnOverrides: Record<string, Colu
   const fieldLabel = useCallback((f: FieldDef) => f.label, []);
 
   // Header-menu "Filter": open the panel pre-seeded with a new criterion on this
-  // column (uses the field's first operator, awaiting a value).
+  // column (uses the field's first operator, awaiting a value). Column-only
+  // fields (no operators, e.g. computed statuses) just open the panel — seeding
+  // a criterion the field picker can't represent would silently no-op.
   const openColumnFilter = useCallback(
     (field: string) => {
       const fdef = fields.find((f) => f.name === field);
+      const filterable = (fdef?.operators.length ?? 0) > 0;
       setPanelSeed({
         match: applied.match,
-        criteria: [...applied.criteria, { field, operator: fdef?.operators[0]?.value ?? "", value: null }],
+        criteria: filterable
+          ? [...applied.criteria, { field, operator: fdef?.operators[0]?.value ?? "", value: null }]
+          : applied.criteria,
         columns: applied.columns,
         ordering: applied.ordering,
       });

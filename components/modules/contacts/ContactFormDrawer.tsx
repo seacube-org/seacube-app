@@ -13,7 +13,8 @@ type Props = {
   open: boolean;
   contact: ContactDetail | null; // null = create
   onClose: () => void;
-  onSaved: () => void;
+  /** Receives the saved record so callers can e.g. auto-select a quick-added contact. */
+  onSaved: (saved: ContactDetail) => void;
 };
 
 /**
@@ -73,10 +74,9 @@ export default function ContactFormDrawer({ open, contact, onClose, onSaved }: P
     else delete body.credit_period;
     setSaving(true);
     try {
-      if (isEdit) await vs.update({ id: contact.id, body });
-      else await vs.create({ body });
+      const saved = (isEdit ? await vs.update({ id: contact.id, body }) : await vs.create({ body })) as ContactDetail;
       message.success(i18n.t("contacts.saved", { defaultValue: "已保存" }));
-      onSaved();
+      onSaved(saved);
       onClose();
     } catch (err) {
       if (!applyFieldErrors(form, err)) {

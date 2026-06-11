@@ -26,6 +26,9 @@ export const useLocaleStore = create<LocaleState>((set) => ({
         set({ locale: stored as Locale });
       } else {
         const matched = SUPPORTED.includes(i18n.locale as Locale) ? (i18n.locale as Locale) : "zh-Hans";
+        // Keep i18n in sync — an unsupported device locale (e.g. "fr") would
+        // otherwise diverge from the store and leak into Accept-Language.
+        i18n.locale = matched;
         set({ locale: matched });
       }
     } finally {

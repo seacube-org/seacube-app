@@ -106,7 +106,9 @@ export default function CriteriaRow({ fields, value, labelFor, onChange, onRemov
       <Select
         value={value.field || undefined}
         onChange={setField}
-        options={fields.map((f) => ({ value: f.name, label: labelFor(f) }))}
+        // Only fields that declare operators are filterable; column-only fields
+        // (e.g. computed statuses) are excluded from the criteria field picker.
+        options={fields.filter((f) => f.operators.length > 0).map((f) => ({ value: f.name, label: labelFor(f) }))}
         placeholder={i18n.t("views.field", { defaultValue: "字段" })}
         style={{ width: 120, flexShrink: 0 }}
         showSearch

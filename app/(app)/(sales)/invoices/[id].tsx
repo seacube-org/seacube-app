@@ -1,0 +1,31 @@
+import { View, Text, StyleSheet } from "react-native";
+import { useLocalSearchParams } from "expo-router";
+import { useLocaleStore } from "@/stores/localeStore";
+import { colors } from "@/constants/theme";
+import i18n from "@/locale/i18n";
+
+// Native placeholder — the invoice detail UI is web-only for now ([id].web.tsx).
+export default function InvoiceDetailScreen() {
+  useLocaleStore((s) => s.locale);
+  const { id } = useLocalSearchParams<{ id: string }>();
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>
+        {i18n.t("sales.invoices", { defaultValue: "发票" })} #{id}
+      </Text>
+      <Text style={styles.subtitle}>{i18n.t("common.comingSoon", { defaultValue: "即将推出" })}</Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: colors.background,
+    padding: 24,
+  },
+  title: { fontSize: 20, fontWeight: "700", color: colors.text.primary },
+  subtitle: { fontSize: 14, color: colors.text.secondary, marginTop: 8 },
+});

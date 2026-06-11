@@ -69,14 +69,12 @@ export default function FilterPanel({
   const current = (): FilterValue => ({ match, criteria, columns, ordering });
 
   const addCriterion = () =>
-    setCriteria((c) => [
-      ...c,
-      {
-        field: fields[0]?.name ?? "",
-        operator: fields[0]?.operators[0]?.value ?? "",
-        value: null,
-      },
-    ]);
+    setCriteria((c) => {
+      // Seed with the first *filterable* field (one that declares operators) —
+      // column-only fields like computed statuses can't be criteria.
+      const first = fields.find((f) => f.operators.length > 0);
+      return [...c, { field: first?.name ?? "", operator: first?.operators[0]?.value ?? "", value: null }];
+    });
   const updateCriterion = (i: number, next: Criterion) => setCriteria((c) => c.map((x, idx) => (idx === i ? next : x)));
   const removeCriterion = (i: number) => setCriteria((c) => c.filter((_, idx) => idx !== i));
 

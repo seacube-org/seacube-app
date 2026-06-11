@@ -8,6 +8,7 @@ import i18n from "@/locale/i18n";
 import EntityListView from "@/components/modules/views/EntityListView";
 import type { ColumnOverride } from "@/hooks/core/useEntityColumns";
 import ContactFormDrawer from "@/components/modules/contacts/ContactFormDrawer";
+import { invalidateContactOptions } from "@/components/modules/sales/shared/ContactSelect";
 import {
   avatarColor,
   CONTACTS_URL,
@@ -33,7 +34,11 @@ export default function ContactsPage() {
           <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
             <Avatar
               size={24}
-              style={{ background: avatarColor((r as ContactRow).type, token.colorPrimary), flexShrink: 0, fontSize: 11 }}
+              style={{
+                background: avatarColor((r as ContactRow).type, token.colorPrimary),
+                flexShrink: 0,
+                fontSize: 11,
+              }}
             >
               {initials(String(v ?? ""))}
             </Avatar>
@@ -106,7 +111,16 @@ export default function ContactsPage() {
         </>
       )}
       extras={({ refetch }) => (
-        <ContactFormDrawer open={formOpen} contact={null} onClose={() => setFormOpen(false)} onSaved={refetch} />
+        <ContactFormDrawer
+          open={formOpen}
+          contact={null}
+          onClose={() => setFormOpen(false)}
+          onSaved={() => {
+            // Sales forms cache contact options per org — drop them so they see the change.
+            invalidateContactOptions();
+            refetch();
+          }}
+        />
       )}
     />
   );

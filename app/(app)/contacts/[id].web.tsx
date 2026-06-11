@@ -9,6 +9,7 @@ import { useCan } from "@/stores/authStore";
 import CommentsTab from "@/components/modules/comments/CommentsTab";
 import AttachmentPanel from "@/components/modules/attachments/AttachmentPanel";
 import ContactFormDrawer from "@/components/modules/contacts/ContactFormDrawer";
+import { invalidateContactOptions } from "@/components/modules/sales/shared/ContactSelect";
 import { CONTACTS_URL } from "@/components/modules/contacts/shared";
 import ContactHeader from "@/components/modules/contacts/detail/ContactHeader";
 import ContactInfoPanel from "@/components/modules/contacts/detail/ContactInfoPanel";
@@ -135,7 +136,16 @@ export default function ContactDetailScreen() {
         </div>
       </div>
 
-      <ContactFormDrawer open={editOpen} contact={contact} onClose={() => setEditOpen(false)} onSaved={reload} />
+      <ContactFormDrawer
+        open={editOpen}
+        contact={contact}
+        onClose={() => setEditOpen(false)}
+        onSaved={() => {
+          // Sales forms cache contact options per org — drop them so they see the change.
+          invalidateContactOptions();
+          reload();
+        }}
+      />
     </div>
   );
 }

@@ -129,7 +129,13 @@ export default function ProfilesTab() {
           {i18n.t("access.newProfile", { defaultValue: "新建权限方案" })}
         </Button>
       </div>
-      <BasicTable rowKey="id" loading={loading} columns={columns} dataSource={profiles} pagination={ACCESS_PAGINATION} />
+      <BasicTable
+        rowKey="id"
+        loading={loading}
+        columns={columns}
+        dataSource={profiles}
+        pagination={ACCESS_PAGINATION}
+      />
       <ProfilePermissionEditor
         open={editorOpen}
         profile={editing}

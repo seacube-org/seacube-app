@@ -11,7 +11,8 @@ type Props = {
   open: boolean;
   product: ProductDetail | null; // null = create
   onClose: () => void;
-  onSaved: () => void;
+  /** Receives the saved record so callers can e.g. auto-select a quick-added product. */
+  onSaved: (saved: ProductDetail) => void;
 };
 
 type FormValues = {
@@ -21,6 +22,7 @@ type FormValues = {
   base_unit?: string;
   default_tax_rate?: number; // percent in the form (e.g. 13), stored as 0.13
   description?: string;
+  description_template?: string;
   is_active?: boolean;
   attribute_assignments?: { id?: number; attribute_id?: number; is_required?: boolean }[];
 };
@@ -62,6 +64,7 @@ export default function ProductFormDrawer({ open, product, onClose, onSaved }: P
       base_unit: product?.base_unit ?? "KGS",
       default_tax_rate: fractionToPercent(product?.default_tax_rate),
       description: product?.description ?? "",
+      description_template: product?.description_template ?? "",
       is_active: product?.is_active ?? true,
       attribute_assignments: (product?.attribute_assignments ?? []).map((a) => ({
         id: a.id,
@@ -80,6 +83,7 @@ export default function ProductFormDrawer({ open, product, onClose, onSaved }: P
       // Form holds a percent; the backend stores a 0-1 decimal fraction.
       default_tax_rate: Number(((values.default_tax_rate ?? 0) / 100).toFixed(4)),
       description: values.description ?? "",
+      description_template: values.description_template ?? "",
       is_active: values.is_active ?? true,
       // sort_order is derived from row order; drop rows without a chosen attribute.
       attribute_assignments: (values.attribute_assignments ?? [])
@@ -93,10 +97,9 @@ export default function ProductFormDrawer({ open, product, onClose, onSaved }: P
     };
     setSaving(true);
     try {
-      if (isEdit) await vs.update({ id: product.id, body });
-      else await vs.create({ body });
+      const saved = (isEdit ? await vs.update({ id: product.id, body }) : await vs.create({ body })) as ProductDetail;
       message.success(i18n.t("products.saved", { defaultValue: "已保存" }));
-      onSaved();
+      onSaved(saved);
       onClose();
     } catch (err) {
       if (!applyFieldErrors(form, err)) {
@@ -118,7 +121,7 @@ export default function ProductFormDrawer({ open, product, onClose, onSaved }: P
       key: "basic",
       label: i18n.t("products.tabBasic", { defaultValue: "基本信息" }),
       forceRender: true,
-      children: <BasicTab schema={schema} />,
+      children: <BasicTab schema={schema} seedAttributes={seedAttributes} />,
     },
     {
       key: "attributes",

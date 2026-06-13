@@ -1,28 +1,9 @@
-import { type ReactNode } from "react";
 import { Card, Typography, theme } from "antd";
 import { EnvironmentOutlined, PhoneOutlined } from "@ant-design/icons";
 import { formatAddress, type ContactAddress } from "@/components/modules/contacts/shared";
 
-/** Bold section heading inside the detail panels. */
-export function SectionLabel({ children }: { children: ReactNode }) {
-  return (
-    <Typography.Text strong style={{ display: "block", fontSize: 13, margin: "18px 0 8px" }}>
-      {children}
-    </Typography.Text>
-  );
-}
-
-/** A labelled value (label above value) in the basic-info panel. */
-export function InfoRow({ label, value }: { label: string; value?: string }) {
-  return (
-    <div style={{ marginBottom: 14 }}>
-      <Typography.Text type="secondary" style={{ display: "block", fontSize: 12, marginBottom: 2 }}>
-        {label}
-      </Typography.Text>
-      {value ? <span style={{ fontSize: 14 }}>{value}</span> : <Typography.Text type="secondary">—</Typography.Text>}
-    </div>
-  );
-}
+// SectionLabel / InfoRow moved to @/components/modules/base/sections — they are
+// shared by every detail page, not just contacts.
 
 /** Card summarizing one address (billing / shipping). */
 export function AddressCard({ title, address }: { title: string; address: ContactAddress | undefined }) {

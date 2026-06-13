@@ -1,6 +1,6 @@
 import { Typography, theme } from "antd";
 import StatusTag from "@/components/ui/StatusTag";
-import { InfoRow, SectionLabel } from "@/components/modules/contacts/detail/sections";
+import { InfoRow, SectionLabel } from "@/components/modules/base/sections";
 import { money } from "@/components/modules/sales/shared/format";
 import i18n from "@/locale/i18n";
 import type { CreditNoteDetail } from "../shared";

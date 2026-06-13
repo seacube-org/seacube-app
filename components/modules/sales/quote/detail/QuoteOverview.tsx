@@ -1,7 +1,7 @@
 import i18n from "@/locale/i18n";
 import LineItemsTable from "@/components/modules/sales/shared/LineItemsTable";
 import DocumentTotals from "@/components/modules/sales/shared/DocumentTotals";
-import { InfoRow, SectionLabel } from "@/components/modules/contacts/detail/sections";
+import { InfoRow, SectionLabel, TAB_PANE_STYLE } from "@/components/modules/base/sections";
 import type { QuoteDetail } from "@/components/modules/sales/quote/shared";
 
 /** Right Overview tab: line items, totals, then a trade-terms summary block. */
@@ -10,7 +10,7 @@ export default function QuoteOverview({ quote }: { quote: QuoteDetail }) {
   const ports = [quote.port_of_loading, quote.port_of_destination].filter((p) => p && p.trim()).join(" → ");
 
   return (
-    <div style={{ padding: "4px 0 24px", maxWidth: 960 }}>
+    <div style={TAB_PANE_STYLE}>
       <SectionLabel>{i18n.t("sales.tabItems", { defaultValue: "行项目" })}</SectionLabel>
       <LineItemsTable items={quote.items} />
       <DocumentTotals

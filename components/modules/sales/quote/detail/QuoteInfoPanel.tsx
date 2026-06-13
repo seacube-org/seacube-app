@@ -2,7 +2,7 @@ import { Typography, theme } from "antd";
 import i18n from "@/locale/i18n";
 import type { FieldSchema } from "@/hooks/core/useFieldMeta";
 import StatusTag from "@/components/ui/StatusTag";
-import { InfoRow, SectionLabel } from "@/components/modules/contacts/detail/sections";
+import { InfoRow, SectionLabel } from "@/components/modules/base/sections";
 import type { QuoteDetail } from "@/components/modules/sales/quote/shared";
 
 /** Left rail: schema-labelled basic info, status, notes, last-modified. */

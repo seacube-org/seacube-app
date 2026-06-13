@@ -2,7 +2,7 @@ import { Typography, theme } from "antd";
 import i18n from "@/locale/i18n";
 import type { FieldSchema } from "@/hooks/core/useFieldMeta";
 import { formatAddress, type ContactDetail } from "@/components/modules/contacts/shared";
-import { InfoRow, SectionLabel } from "./sections";
+import { InfoRow, SectionLabel } from "@/components/modules/base/sections";
 
 /** Left rail: schema-labelled basic info, notes, last-modified. */
 export default function ContactInfoPanel({ contact, schema }: { contact: ContactDetail; schema: FieldSchema }) {

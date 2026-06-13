@@ -1,7 +1,7 @@
 import { Typography } from "antd";
 import i18n from "@/locale/i18n";
 import BasicTable from "@/components/modules/base/BasicTable";
-import { SectionLabel } from "@/components/modules/contacts/detail/sections";
+import { SectionLabel, TAB_PANE_STYLE } from "@/components/modules/base/sections";
 import DocumentTotals from "@/components/modules/sales/shared/DocumentTotals";
 import LineItemsTable from "@/components/modules/sales/shared/LineItemsTable";
 import { amount as fmtAmount } from "@/components/modules/sales/shared/format";
@@ -26,7 +26,7 @@ export default function InvoiceOverview({ invoice }: { invoice: InvoiceDetail })
   ];
 
   return (
-    <div style={{ padding: "4px 0 24px", maxWidth: 960 }}>
+    <div style={TAB_PANE_STYLE}>
       <SectionLabel>{i18n.t("sales.lineItems", { defaultValue: "行项目" })}</SectionLabel>
       <LineItemsTable items={invoice.items} />
 

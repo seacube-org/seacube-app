@@ -3,13 +3,13 @@ import i18n from "@/locale/i18n";
 import type { FieldSchema } from "@/hooks/core/useFieldMeta";
 import LineItemsTable from "@/components/modules/sales/shared/LineItemsTable";
 import DocumentTotals from "@/components/modules/sales/shared/DocumentTotals";
-import { InfoRow, SectionLabel } from "@/components/modules/contacts/detail/sections";
+import { InfoRow, SectionLabel, TAB_PANE_STYLE } from "@/components/modules/base/sections";
 import type { SalesOrderDetail } from "@/components/modules/sales/sales-order/shared";
 
 /** Overview tab: line-item table + document totals + a trade-terms summary. */
 export default function SalesOrderOverview({ order, schema }: { order: SalesOrderDetail; schema: FieldSchema }) {
   return (
-    <div style={{ padding: "4px 0 24px", maxWidth: 960 }}>
+    <div style={TAB_PANE_STYLE}>
       <SectionLabel>{i18n.t("sales.lineItems", { defaultValue: "行项目" })}</SectionLabel>
       <LineItemsTable items={order.items} />
 

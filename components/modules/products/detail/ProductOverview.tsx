@@ -1,18 +1,66 @@
-import { Empty, Tag, Typography } from "antd";
+import { Empty, Tag, Typography, theme } from "antd";
 import i18n from "@/locale/i18n";
+import type { FieldSchema } from "@/hooks/core/useFieldMeta";
 import BasicTable from "@/components/modules/base/BasicTable";
 import TagListCell from "@/components/modules/base/TagListCell";
+import { SectionLabel, TAB_PANE_STYLE } from "@/components/modules/base/sections";
+import { renderSpecTemplate } from "@/components/modules/sales/shared/specTemplate";
 import {
   attributeTypeLabel,
+  sampleSpecValue,
   type ProductAttributeAssignment,
   type ProductDetail,
 } from "@/components/modules/products/shared";
-import { SectionLabel } from "./sections";
 
 const emptyTable = { emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={false} /> };
 
-/** Overview tab: the product's bound spec attributes (name / type / required / choices). */
-export default function ProductOverview({ product }: { product: ProductDetail }) {
+/**
+ * The spec→line-description template, shown raw (monospace) plus a render
+ * against sample values (first choice / 10 / 10%, by attribute type) so viewers
+ * can read it without parsing the @-syntax. Mirrors the form's TemplatePreview —
+ * users without update permission have no other window onto this field.
+ */
+function TemplateSection({ product, schema }: { product: ProductDetail; schema: FieldSchema }) {
+  const { token } = theme.useToken();
+  const template = product.description_template;
+  if (!template.trim()) return null;
+
+  const sample: Record<string, unknown> = {};
+  for (const { attribute } of product.attribute_assignments ?? []) sample[attribute.code] = sampleSpecValue(attribute);
+  const rendered = renderSpecTemplate(template, sample, { unit: product.base_unit, entry_unit: "CTN" });
+
+  return (
+    <>
+      <SectionLabel>
+        {schema.label("description_template", i18n.t("products.descriptionTemplate", { defaultValue: "描述模板" }))}
+      </SectionLabel>
+      <div
+        style={{
+          padding: "8px 12px",
+          background: token.colorFillQuaternary,
+          borderRadius: token.borderRadius,
+          fontFamily: "monospace",
+          fontSize: 13,
+          whiteSpace: "pre-wrap",
+          overflowWrap: "anywhere",
+        }}
+      >
+        {template}
+      </div>
+      <Typography.Text
+        type="secondary"
+        style={{ display: "block", fontSize: 12, marginTop: 6, whiteSpace: "pre-line" }}
+      >
+        {i18n.t("products.templatePreview", { defaultValue: "预览" })}:{" "}
+        {rendered || i18n.t("products.templatePreviewEmpty", { defaultValue: "(空)" })}
+      </Typography.Text>
+    </>
+  );
+}
+
+/** Overview tab: the product's bound spec attributes (name / type / required /
+ *  choices) and its spec→description template. */
+export default function ProductOverview({ product, schema }: { product: ProductDetail; schema: FieldSchema }) {
   const columns = [
     {
       title: i18n.t("products.attribute", { defaultValue: "规格属性" }),
@@ -80,8 +128,7 @@ export default function ProductOverview({ product }: { product: ProductDetail })
   const data = product.attribute_assignments ?? [];
 
   return (
-    // 8px top matches the comments / files tabs so all three tab panes start level.
-    <div style={{ padding: "8px 0 24px", maxWidth: 960 }}>
+    <div style={TAB_PANE_STYLE}>
       <SectionLabel first>{i18n.t("products.tabAttributes", { defaultValue: "规格属性" })}</SectionLabel>
       <BasicTable<ProductAttributeAssignment>
         rowKey={(r) => String(r.id ?? r.attribute.id)}
@@ -89,6 +136,7 @@ export default function ProductOverview({ product }: { product: ProductDetail })
         dataSource={data}
         locale={emptyTable}
       />
+      <TemplateSection product={product} schema={schema} />
     </div>
   );
 }

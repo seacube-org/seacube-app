@@ -5,6 +5,7 @@ import type { UploadProps } from "antd";
 import { useDataService } from "@/hooks/core/useDataService";
 import { uploadFormData } from "@/services/DataService";
 import i18n from "@/locale/i18n";
+import { SectionLabel, TAB_PANE_STYLE } from "@/components/modules/base/sections";
 import FilePreviewModal, { type PreviewFile } from "./FilePreviewModal";
 import { fileTypeIcon } from "./shared";
 
@@ -108,11 +109,8 @@ export default function AttachmentPanel({ contentTypeId, objectId }: Props) {
   };
 
   return (
-    // 8px top so the files tab starts level with the overview / comments tabs.
-    <div style={{ padding: "8px 0" }}>
-      <Typography.Text strong style={{ display: "block", marginBottom: 12 }}>
-        {i18n.t("attachment.title")}
-      </Typography.Text>
+    <div style={TAB_PANE_STYLE}>
+      <SectionLabel first>{i18n.t("attachment.title")}</SectionLabel>
 
       <Dragger
         customRequest={handleUpload}

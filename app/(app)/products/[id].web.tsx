@@ -96,7 +96,7 @@ export default function ProductDetailScreen() {
     {
       key: "overview",
       label: i18n.t("products.tabOverview", { defaultValue: "概览" }),
-      children: <ProductOverview product={product} />,
+      children: <ProductOverview product={product} schema={schema} />,
     },
     {
       key: "gallery",

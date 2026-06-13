@@ -2,7 +2,7 @@ import { Typography, theme } from "antd";
 import i18n from "@/locale/i18n";
 import type { FieldSchema } from "@/hooks/core/useFieldMeta";
 import StatusTag from "@/components/ui/StatusTag";
-import { InfoRow, SectionLabel } from "@/components/modules/contacts/detail/sections";
+import { InfoRow, SectionLabel } from "@/components/modules/base/sections";
 import type { SalesOrderDetail } from "@/components/modules/sales/sales-order/shared";
 
 /** A labelled row whose value is a StatusTag (for the derived status fields). */

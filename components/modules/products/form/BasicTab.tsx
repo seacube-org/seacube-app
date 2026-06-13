@@ -7,7 +7,7 @@ import {
   renderSpecTemplate,
   templateCodes,
 } from "@/components/modules/sales/shared/specTemplate";
-import { useProductAttributes, type ProductAttribute } from "../shared";
+import { sampleSpecValue, useProductAttributes, type ProductAttribute } from "../shared";
 import { FIELD_GRID_STYLE, FIELD_ITEM_STYLE, FULL_WIDTH_ITEM_STYLE } from "./layout";
 
 const { TextArea } = Input;
@@ -16,23 +16,6 @@ const { TextArea } = Input;
 // ":percent" tail. Anything else (e.g. "/", ",", literal text) ends the
 // mention session immediately instead of leaving an empty dropdown open.
 const MENTION_QUERY = /^[A-Za-z0-9_]*(?::[a-z]*)?$/;
-
-/** A plausible spec value for previewing the template, by attribute type. */
-function sampleValue(attr: ProductAttribute): unknown {
-  switch (attr.data_type) {
-    case "choice":
-    case "choice_or_custom":
-      return attr.choices?.[0] ?? attr.name;
-    case "percent":
-      return 0.1;
-    case "decimal":
-      return 10;
-    case "boolean":
-      return true;
-    default:
-      return attr.name;
-  }
-}
 
 /** The product's currently assigned attributes, resolved against the catalog
  * (seed attributes cover non-admin editors, whose catalog fetch is forbidden). */
@@ -100,7 +83,7 @@ function TemplatePreview({ seedAttributes }: { seedAttributes: ProductAttribute[
   if (!template?.trim()) return null;
 
   const sample: Record<string, unknown> = {};
-  for (const attr of assigned) sample[attr.code] = sampleValue(attr);
+  for (const attr of assigned) sample[attr.code] = sampleSpecValue(attr);
   // Builtin samples: @unit previews as the product's base unit, @entry_unit
   // as a carton (the typical two-level entry).
   const rendered = renderSpecTemplate(template, sample, { unit: baseUnit ?? "KGS", entry_unit: "CTN" });

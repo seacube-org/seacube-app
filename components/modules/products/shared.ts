@@ -161,6 +161,24 @@ export function taxRatePercent(raw: string | number | null | undefined): string 
   return `${Number((n * 100).toFixed(2))}%`;
 }
 
+/** A plausible spec value for previewing a description template, by attribute
+ *  type. Shared by the form's live preview and the detail page's template section. */
+export function sampleSpecValue(attr: ProductAttribute): unknown {
+  switch (attr.data_type) {
+    case "choice":
+    case "choice_or_custom":
+      return attr.choices?.[0] ?? attr.name;
+    case "percent":
+      return 0.1;
+    case "decimal":
+      return 10;
+    case "boolean":
+      return true;
+    default:
+      return attr.name;
+  }
+}
+
 /** Localized label for an attribute's data type — the single source for both the
  *  product detail table and the settings catalog (re-exported there). */
 export function attributeTypeLabel(t: ProductAttributeDataType): string {

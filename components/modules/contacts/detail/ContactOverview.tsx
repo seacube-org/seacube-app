@@ -3,7 +3,8 @@ import i18n from "@/locale/i18n";
 import type { FieldSchema } from "@/hooks/core/useFieldMeta";
 import BasicTable from "@/components/modules/base/BasicTable";
 import { type BankAccount, type ContactDetail, type ContactPerson } from "@/components/modules/contacts/shared";
-import { AddressCard, SectionLabel } from "./sections";
+import { SectionLabel, TAB_PANE_STYLE } from "@/components/modules/base/sections";
+import { AddressCard } from "./sections";
 
 const emptyTable = { emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={false} /> };
 
@@ -65,7 +66,7 @@ export default function ContactOverview({ contact, schema }: { contact: ContactD
   ];
 
   return (
-    <div style={{ padding: "4px 0 24px", maxWidth: 960 }}>
+    <div style={TAB_PANE_STYLE}>
       <SectionLabel>{i18n.t("contacts.addresses", { defaultValue: "地址" })}</SectionLabel>
       <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
         <AddressCard

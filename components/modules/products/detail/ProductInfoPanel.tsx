@@ -2,7 +2,7 @@ import { Typography, theme } from "antd";
 import i18n from "@/locale/i18n";
 import type { FieldSchema } from "@/hooks/core/useFieldMeta";
 import { taxRatePercent, unitLabel, type ProductDetail } from "@/components/modules/products/shared";
-import { InfoRow, SectionLabel } from "./sections";
+import { InfoRow, SectionLabel } from "@/components/modules/base/sections";
 
 /** Left rail: schema-labelled basic info, description, last-modified. */
 export default function ProductInfoPanel({ product, schema }: { product: ProductDetail; schema: FieldSchema }) {

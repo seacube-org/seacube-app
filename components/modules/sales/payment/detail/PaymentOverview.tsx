@@ -1,7 +1,7 @@
 import { Empty, Typography } from "antd";
 import i18n from "@/locale/i18n";
 import BasicTable from "@/components/modules/base/BasicTable";
-import { SectionLabel } from "@/components/modules/contacts/detail/sections";
+import { SectionLabel, TAB_PANE_STYLE } from "@/components/modules/base/sections";
 import { amount as fmtAmount } from "@/components/modules/sales/shared/format";
 import { type PaymentAllocation, type PaymentDetail } from "@/components/modules/sales/payment/shared";
 
@@ -27,7 +27,7 @@ export default function PaymentOverview({ payment }: { payment: PaymentDetail })
   ];
 
   return (
-    <div style={{ padding: "4px 0 24px", maxWidth: 720 }}>
+    <div style={{ ...TAB_PANE_STYLE, maxWidth: 720 }}>
       <SectionLabel>{i18n.t("sales.allocations", { defaultValue: "核销明细" })}</SectionLabel>
       <BasicTable<PaymentAllocation>
         rowKey={(r) => String(r.id)}

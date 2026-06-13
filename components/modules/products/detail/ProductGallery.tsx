@@ -8,7 +8,7 @@ import { rows } from "@/utils/pagination";
 import i18n from "@/locale/i18n";
 import AuthImage from "@/components/modules/base/AuthImage";
 import FilePreviewModal, { type PreviewFile } from "@/components/modules/attachments/FilePreviewModal";
-import { SectionLabel } from "./sections";
+import { SectionLabel, TAB_PANE_STYLE } from "@/components/modules/base/sections";
 
 // Mirrors MAX_IMAGES_PER_PRODUCT on the backend (enforced server-side too).
 const MAX_IMAGES = 15;
@@ -106,7 +106,7 @@ export default function ProductGallery({ productId, canEdit }: { productId: numb
   };
 
   return (
-    <div style={{ padding: "8px 0 24px", maxWidth: 960 }}>
+    <div style={TAB_PANE_STYLE}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <SectionLabel first>{i18n.t("products.gallery", { defaultValue: "产品图册" })}</SectionLabel>
         <Typography.Text type="secondary" style={{ fontSize: 12 }}>

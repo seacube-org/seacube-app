@@ -1,5 +1,5 @@
 import { Typography, theme } from "antd";
-import { InfoRow, SectionLabel } from "@/components/modules/contacts/detail/sections";
+import { InfoRow, SectionLabel, TAB_PANE_STYLE } from "@/components/modules/base/sections";
 import { money } from "@/components/modules/sales/shared/format";
 import i18n from "@/locale/i18n";
 import type { CreditNoteDetail } from "../shared";
@@ -12,7 +12,7 @@ import type { CreditNoteDetail } from "../shared";
 export default function CreditNoteOverview({ data }: { data: CreditNoteDetail }) {
   const { token } = theme.useToken();
   return (
-    <div style={{ padding: "4px 0 24px", maxWidth: 960 }}>
+    <div style={TAB_PANE_STYLE}>
       <SectionLabel>{i18n.t("sales.details", { defaultValue: "明细" })}</SectionLabel>
       <InfoRow label={i18n.t("sales.customer", { defaultValue: "客户" })} value={data.contact_name} />
       <InfoRow

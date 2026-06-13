@@ -163,8 +163,10 @@
     "selectOrAddProduct": "选择或添加产品",
     "spec": "规格",
     "conversionFactorHint": "每录入单位折合的计价单位数；留空为一级计价",
+    "chipApplyHint": "点击填入换算系数 ×{{value}}（跟随规格更新）",
     "chipGross": "毛重",
     "chipNet": "净重",
+    "factorMismatch": "系数与规格毛重/净重不符（{{expected}}）",
     "itemDetails": "品目详情"
   },
   "purchases": {
@@ -336,6 +338,7 @@
     "galleryDeleteConfirm": "删除这张图片？",
     "galleryEmpty": "暂无图片",
     "galleryMax": "最多 {{n}} 张图片",
+    "descriptionTemplate": "描述模板",
     "descriptionTemplateHint": "用 @规格代码 引用规格值;@unit/@entry_unit 引用行的计价/录入单位;:percent 把 0.1 显示为 10%;逗号分隔的片段在其值全为空时整段不渲染",
     "templatePreview": "预览",
     "templatePreviewEmpty": "(空)",

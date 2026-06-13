@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import type { Href } from "expo-router";
 import { App, Button, Col, DatePicker, Form, Input, Row, theme } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
+import SchemaField from "@/components/modules/base/SchemaField";
 import { applyFieldErrors, nestedListError } from "@/components/modules/settings/formErrors";
 import { useFieldMeta } from "@/hooks/core/useFieldMeta";
 import i18n from "@/locale/i18n";
@@ -32,7 +33,7 @@ const TRADE_TERM_KEYS = [
 
 /**
  * Quote create/edit full page — Zoho-style single scrolling form grouped into
- * sections (基本信息 / 行项目 / 贸易条款). Field schema (controls, labels,
+ * sections (基本信息 / 贸易条款 / 行项目). Field schema (controls, labels,
  * required/visibility) comes from DRF OPTIONS via useFieldMeta; line items render
  * as an editable table; notes/terms sit beside a live-computed totals panel.
  * Create navigates to the new quote's detail; edit goes back to where it came
@@ -51,17 +52,6 @@ export default function QuoteFormPage({ quote }: Props) {
   const isEdit = quote != null;
   const currency = (Form.useWatch("currency", form) as string | undefined) || "USD";
   const watchedItems = Form.useWatch("items", form) as LineItemRow[] | undefined;
-
-  // Open the (collapsible) trade-terms section when the quote already has any.
-  const hasTradeTerms = !!(
-    quote &&
-    (quote.incoterms ||
-      quote.incoterms_location ||
-      quote.shipment_type ||
-      quote.port_of_loading ||
-      quote.port_of_destination ||
-      quote.payment_terms)
-  );
 
   const goBack = () => {
     if (router.canGoBack()) router.back();
@@ -175,9 +165,12 @@ export default function QuoteFormPage({ quote }: Props) {
         <div style={{ maxWidth: 1240, margin: "0 auto", padding: "8px 24px 24px" }}>
           <Form form={form} layout="vertical" onFinish={onFinish} scrollToFirstError>
             <Section title={i18n.t("sales.tabBasic", { defaultValue: "基本信息" })}>
-              {/* Row 1: customer alone; row 2: number + reference; row 3: dates. */}
+              {/* One flowing row, responsive to the viewport: ≥xl three fields per
+                  line (customer | number | reference, then dates | currency) so
+                  inputs stay a readable width; md two per line with the customer
+                  full width; xs stacked. */}
               <Row gutter={24}>
-                <Col span={24}>
+                <Col xs={24} md={24} xl={8}>
                   <Form.Item
                     name="contact"
                     label={schema.label("contact", i18n.t("sales.customer", { defaultValue: "客户" }))}
@@ -186,9 +179,7 @@ export default function QuoteFormPage({ quote }: Props) {
                     <ContactSelect />
                   </Form.Item>
                 </Col>
-              </Row>
-              <Row gutter={24}>
-                <Col span={12}>
+                <Col xs={24} md={12} xl={8}>
                   <Form.Item
                     name="quote_number"
                     label={schema.label("quote_number", i18n.t("sales.quoteNumber", { defaultValue: "报价单号" }))}
@@ -197,7 +188,7 @@ export default function QuoteFormPage({ quote }: Props) {
                     <Input maxLength={50} allowClear />
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col xs={24} md={12} xl={8}>
                   <Form.Item
                     name="reference"
                     label={schema.label("reference", i18n.t("sales.reference", { defaultValue: "参考号" }))}
@@ -205,9 +196,7 @@ export default function QuoteFormPage({ quote }: Props) {
                     <Input maxLength={255} allowClear />
                   </Form.Item>
                 </Col>
-              </Row>
-              <Row gutter={24}>
-                <Col span={12}>
+                <Col xs={24} md={12} xl={8}>
                   <Form.Item
                     name="date"
                     label={schema.label("date", i18n.t("sales.date", { defaultValue: "日期" }))}
@@ -216,7 +205,7 @@ export default function QuoteFormPage({ quote }: Props) {
                     <DatePicker style={{ width: "100%" }} />
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col xs={24} md={12} xl={8}>
                   <Form.Item
                     name="expiry_date"
                     label={schema.label("expiry_date", i18n.t("sales.expiryDate", { defaultValue: "有效期至" }))}
@@ -224,7 +213,16 @@ export default function QuoteFormPage({ quote }: Props) {
                     <DatePicker style={{ width: "100%" }} />
                   </Form.Item>
                 </Col>
+                {/* Submitted with the trade terms (TRADE_TERM_KEYS) but surfaced
+                    here — it drives every line amount, not just shipping terms. */}
+                <Col xs={24} md={12} xl={8}>
+                  <SchemaField schema={schema} name="currency" config={{ ref: "currency" }} />
+                </Col>
               </Row>
+            </Section>
+
+            <Section title={i18n.t("sales.tabTerms", { defaultValue: "贸易条款" })} collapsible>
+              <TradeTermsFields schema={schema} responsive showCurrency={false} />
             </Section>
 
             <Section
@@ -237,7 +235,7 @@ export default function QuoteFormPage({ quote }: Props) {
               <LineItemsEditor currency={currency} />
 
               <Row gutter={24} style={{ marginTop: 20 }}>
-                <Col span={12}>
+                <Col xs={24} md={12}>
                   <Form.Item
                     name="notes"
                     label={schema.label("notes", i18n.t("sales.notes", { defaultValue: "备注" }))}
@@ -245,7 +243,7 @@ export default function QuoteFormPage({ quote }: Props) {
                     <Input.TextArea rows={3} />
                   </Form.Item>
                 </Col>
-                <Col span={12}>
+                <Col xs={24} md={12}>
                   <Form.Item
                     name="terms"
                     label={schema.label("terms", i18n.t("sales.terms", { defaultValue: "条款" }))}
@@ -254,14 +252,6 @@ export default function QuoteFormPage({ quote }: Props) {
                   </Form.Item>
                 </Col>
               </Row>
-            </Section>
-
-            <Section
-              title={i18n.t("sales.tabTerms", { defaultValue: "贸易条款" })}
-              collapsible
-              defaultOpen={hasTradeTerms}
-            >
-              <TradeTermsFields schema={schema} />
             </Section>
           </Form>
         </div>

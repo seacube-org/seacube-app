@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AutoComplete, Button, Divider, Form, Input, InputNumber, Select, Switch, Tag, theme } from "antd";
+import { AutoComplete, Button, Divider, Form, Input, InputNumber, Select, Switch, Tooltip, theme } from "antd";
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import i18n from "@/locale/i18n";
 import { useFieldMeta } from "@/hooks/core/useFieldMeta";
@@ -19,15 +19,16 @@ import type { LineItemRow } from "./types";
 
 // Zoho-style flat table: item details (product + auto description + collapsible
 // spec) | entry qty+unit | pricing (factor + unit + preview + weight chips) |
-// price | discount | tax | amount+delete (sticky right). Seven columns sized to
-// fit common viewports without horizontal scrolling.
-const GRID_COLUMNS = "minmax(280px, 1.6fr) 190px 100px 76px 88px 150px";
-const TABLE_MIN_WIDTH = 980;
+// price | discount | tax | amount+delete (sticky right). Price / discount / tax
+// share one width; below TABLE_MIN_WIDTH the row scrolls horizontally under the
+// right-pinned amount column instead of squeezing the inputs.
+const GRID_COLUMNS = "minmax(280px, 1.6fr) 190px 110px 110px 110px 150px";
+const TABLE_MIN_WIDTH = 1050;
 const CELL_GAP = 12;
 
 const cellItemStyle = { margin: 0 } as const;
-// Stacked label+control rows inside the collapsible spec area.
-const specLabelCol = { flex: "0 0 112px" } as const;
+// Weight-chip buttons: compact enough to sit under the qty inputs as a row.
+const chipBtnStyle = { fontSize: 12, height: 22, paddingInline: 8 } as const;
 
 /** Round a float factor to ≤6 decimals (the backend field precision). */
 const round6 = (n: number) => Number(n.toFixed(6));
@@ -38,23 +39,49 @@ const DEFAULT_UNIT = "PCS";
 // kg-based), so applying one defaults the pricing unit to KGS.
 const WEIGHT_PRICING_UNIT = "KGS";
 
-/** Spec entry label: small, single line, ellipsized with a hover title. */
+/** Spec entry label, shown above its input: long attribute names ("Gross
+ *  Weight / Carton") wrap to a second line before clamping (title = fallback). */
 function SpecLabel({ text }: { text: string }) {
   return (
     <span
       title={text}
       style={{
         fontSize: 12,
-        display: "inline-block",
-        maxWidth: 104,
+        lineHeight: 1.3,
+        display: "-webkit-box",
+        WebkitBoxOrient: "vertical",
+        WebkitLineClamp: 2,
         overflow: "hidden",
-        textOverflow: "ellipsis",
-        whiteSpace: "nowrap",
-        verticalAlign: "bottom",
       }}
     >
       {text}
     </span>
+  );
+}
+
+/**
+ * InputNumber for percent attributes: the user types the percentage (10) while
+ * the form keeps the stored fraction (0.1) — the backend, the description
+ * template's :percent modifier and the weight chips all consume fractions.
+ * Converting on value/onChange (not formatter/parser) keeps intermediate
+ * typing like "12." intact. Form.Item injects value/onChange.
+ */
+function PercentInput({
+  value,
+  onChange,
+}: {
+  value?: number | string | null;
+  onChange?: (v: number | null) => void;
+}) {
+  const display = value == null || value === "" ? null : Number((Number(value) * 100).toFixed(6));
+  return (
+    <InputNumber
+      style={{ width: "100%" }}
+      suffix="%"
+      min={0}
+      value={display}
+      onChange={(v) => onChange?.(v == null ? null : Number((Number(v) / 100).toFixed(8)))}
+    />
   );
 }
 
@@ -96,8 +123,10 @@ function SpecAttributeField({
         }}
       />
     );
-  } else if (attr.data_type === "decimal" || attr.data_type === "percent") {
-    control = <InputNumber style={{ width: "100%" }} step={attr.data_type === "percent" ? 0.01 : 1} />;
+  } else if (attr.data_type === "percent") {
+    control = <PercentInput />;
+  } else if (attr.data_type === "decimal") {
+    control = <InputNumber style={{ width: "100%" }} />;
   } else if (attr.data_type === "boolean") {
     control = <Switch />;
   } else {
@@ -106,10 +135,9 @@ function SpecAttributeField({
 
   return (
     <Form.Item
-      layout="horizontal"
+      layout="vertical"
       name={path}
       label={<SpecLabel text={label} />}
-      labelCol={specLabelCol}
       colon={false}
       rules={rules}
       valuePropName={attr.data_type === "boolean" ? "checked" : undefined}
@@ -138,7 +166,10 @@ type Props = {
  * (docs/plans/weight-from-pricing.md, line-items-zoho-simple.md).
  *
  * Weight chips ([毛重]/[净重], computed from the row's gross-weight/glazing spec
- * values) one-shot prefill the factor on weight-priced rows; no follow-through.
+ * values) prefill the factor on weight-priced rows. A chip-written factor stays
+ * linked to the spec — editing gross weight / glazing rewrites it — until the
+ * user types their own value; weight-priced rows whose factor matches neither
+ * weight show a soft mismatch hint.
  */
 export default function LineItemsEditor({ currency, enabled = true }: Props) {
   const { token } = theme.useToken();
@@ -249,6 +280,10 @@ export default function LineItemsEditor({ currency, enabled = true }: Props) {
   // auto-generated value; once the user types their own text it's left alone
   // (clearing the field re-enables generation). Mirrors the backend autofill.
   const lastAutoDesc = useRef(new Map<number, string>());
+  // Factor a chip last wrote per row (+ which weight it was): while the row's
+  // factor still equals it, spec edits rewrite the factor (effect below); a
+  // hand-typed or cleared factor breaks the link.
+  const lastAutoFactor = useRef(new Map<number, { kind: "gross" | "net"; value: number }>());
   const lastRowCount = useRef(0);
   useEffect(() => {
     // The map is keyed by row index; removing a row shifts indices, so reset
@@ -257,6 +292,7 @@ export default function LineItemsEditor({ currency, enabled = true }: Props) {
     if (watched.length !== lastRowCount.current) {
       lastRowCount.current = watched.length;
       lastAutoDesc.current.clear();
+      lastAutoFactor.current.clear(); // chip links are index-keyed too
     }
     watched.forEach((row, idx) => {
       if (row?.product == null) return;
@@ -282,13 +318,42 @@ export default function LineItemsEditor({ currency, enabled = true }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watched, catalog]);
 
-  // One-shot weight chip: fill the factor from the row's spec values; default
-  // the pricing unit to KGS while it's untouched. No follow-through — editing
-  // the spec afterwards does not rewrite the factor.
-  const applyChip = (rowName: number, value: number, row: LineItemRow) => {
+  // Chip-written factors follow the spec: while a row's factor still equals
+  // what the chip wrote, editing gross weight / glazing rewrites it to the
+  // refreshed gross/net figure. Hand-editing or clearing the factor unlinks.
+  useEffect(() => {
+    watched.forEach((row, idx) => {
+      const auto = lastAutoFactor.current.get(idx);
+      if (!auto) return;
+      const current = row?.conversion_factor;
+      if (current == null || current === "" || Math.abs(num(current) - auto.value) > 1e-9) {
+        lastAutoFactor.current.delete(idx);
+        return;
+      }
+      // The link only holds while the row is weight-priced; switching to a
+      // non-weight unit (e.g. PCS) repurposes the factor, so stop following.
+      if (!weightUnits.has(row?.unit ?? "")) {
+        lastAutoFactor.current.delete(idx);
+        return;
+      }
+      const gw = num((row?.spec ?? {}).gross_weight_per_carton);
+      if (!(gw > 0)) return; // weight cleared — keep the factor, resume if it returns
+      const expected = auto.kind === "gross" ? round6(gw) : round6(gw * (1 - num((row?.spec ?? {}).glazing)));
+      if (Math.abs(expected - auto.value) <= 1e-9) return;
+      patchRow(idx, { conversion_factor: expected });
+      lastAutoFactor.current.set(idx, { kind: auto.kind, value: expected });
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [watched]);
+
+  // Weight chip: fill the factor from the row's spec values and record the
+  // chip→factor link for the follow-through effect above; default the pricing
+  // unit to KGS while it's untouched.
+  const applyChip = (rowName: number, kind: "gross" | "net", value: number, row: LineItemRow) => {
     const patch: Partial<LineItemRow> = { conversion_factor: value };
     if (!row.unit || !weightUnits.has(row.unit)) patch.unit = WEIGHT_PRICING_UNIT;
     patchRow(rowName, patch);
+    lastAutoFactor.current.set(rowName, { kind, value });
   };
 
   const toggleSpec = (rowName: number) => {
@@ -418,6 +483,15 @@ export default function LineItemsEditor({ currency, enabled = true }: Props) {
                   const chipGross = gw > 0 ? round6(gw) : 0;
                   const chipNet = gw > 0 ? round6(gw * (1 - glazing)) : 0;
                   const chipsVisible = gw > 0 && (!factorSet || weightUnits.has(row.unit ?? ""));
+                  const factorIs = (v: number) => factorSet && Math.abs(num(row.conversion_factor) - v) <= 1e-9;
+                  // Soft hint, not a blocking rule: a weight-priced row whose
+                  // factor matches neither spec weight is usually stale/mistyped.
+                  const factorMismatch =
+                    factorSet &&
+                    gw > 0 &&
+                    weightUnits.has(row.unit ?? "") &&
+                    !factorIs(chipGross) &&
+                    !factorIs(chipNet);
 
                   return (
                     <div
@@ -493,10 +567,13 @@ export default function LineItemsEditor({ currency, enabled = true }: Props) {
                                 and required-attr validation still runs while collapsed. */}
                             <div
                               style={{
-                                display: expanded ? "flex" : "none",
-                                flexDirection: "column",
-                                gap: 8,
-                                padding: "8px 10px",
+                                display: expanded ? "grid" : "none",
+                                // Label-above fields in an adaptive grid: two columns
+                                // at the cell's usual width, one on narrow viewports.
+                                gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
+                                columnGap: 12,
+                                rowGap: 8,
+                                padding: "10px 12px",
                                 background: token.colorFillQuaternary,
                                 borderRadius: token.borderRadius,
                               }}
@@ -563,20 +640,51 @@ export default function LineItemsEditor({ currency, enabled = true }: Props) {
                         )}
                         {chipsVisible && (
                           <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-                            <Tag
-                              style={{ cursor: "pointer", marginInlineEnd: 0 }}
-                              onClick={() => applyChip(name, chipGross, row)}
+                            {/* Real buttons (hover feedback + tooltip) so the one-click
+                                fill is discoverable; solid primary = factor matches. */}
+                            <Tooltip
+                              title={i18n.t("sales.chipApplyHint", {
+                                defaultValue: "点击填入换算系数 ×{{value}}（跟随规格更新）",
+                                value: trimDecimal(chipGross),
+                              })}
                             >
-                              {i18n.t("sales.chipGross", { defaultValue: "毛重" })} {trimDecimal(chipGross)}
-                            </Tag>
-                            {chipNet !== chipGross && (
-                              <Tag
-                                style={{ cursor: "pointer", marginInlineEnd: 0 }}
-                                onClick={() => applyChip(name, chipNet, row)}
+                              <Button
+                                size="small"
+                                type={factorIs(chipGross) ? "primary" : "default"}
+                                style={chipBtnStyle}
+                                onClick={() => applyChip(name, "gross", chipGross, row)}
                               >
-                                {i18n.t("sales.chipNet", { defaultValue: "净重" })} {trimDecimal(chipNet)}
-                              </Tag>
+                                {i18n.t("sales.chipGross", { defaultValue: "毛重" })} {trimDecimal(chipGross)}
+                              </Button>
+                            </Tooltip>
+                            {chipNet !== chipGross && (
+                              <Tooltip
+                                title={i18n.t("sales.chipApplyHint", {
+                                  defaultValue: "点击填入换算系数 ×{{value}}（跟随规格更新）",
+                                  value: trimDecimal(chipNet),
+                                })}
+                              >
+                                <Button
+                                  size="small"
+                                  type={factorIs(chipNet) ? "primary" : "default"}
+                                  style={chipBtnStyle}
+                                  onClick={() => applyChip(name, "net", chipNet, row)}
+                                >
+                                  {i18n.t("sales.chipNet", { defaultValue: "净重" })} {trimDecimal(chipNet)}
+                                </Button>
+                              </Tooltip>
                             )}
+                          </div>
+                        )}
+                        {factorMismatch && (
+                          <div style={{ fontSize: 12, color: token.colorWarning }}>
+                            {i18n.t("sales.factorMismatch", {
+                              defaultValue: "系数与规格毛重/净重不符（{{expected}}）",
+                              expected:
+                                chipNet !== chipGross
+                                  ? `${trimDecimal(chipGross)} / ${trimDecimal(chipNet)}`
+                                  : trimDecimal(chipGross),
+                            })}
                           </div>
                         )}
                       </div>

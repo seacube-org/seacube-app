@@ -71,6 +71,7 @@ export type ContactRow = {
   currency: string;
   credit_period?: number | null; // FK id; staff-hidden
   payment_terms?: string; // free-text commercial arrangement; staff-hidden
+  is_active: boolean; // soft-archive flag; archived contacts are hidden from default views/selectors
   created_at: string;
 };
 

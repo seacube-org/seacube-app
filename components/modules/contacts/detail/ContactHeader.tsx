@@ -1,5 +1,6 @@
 import { Avatar, Button, Dropdown, Space, Tag, Typography, theme } from "antd";
-import { ArrowLeftOutlined, DeleteOutlined, EditOutlined, MoreOutlined } from "@ant-design/icons";
+import type { MenuProps } from "antd";
+import { ArrowLeftOutlined, DeleteOutlined, EditOutlined, InboxOutlined, MoreOutlined, UndoOutlined } from "@ant-design/icons";
 import i18n from "@/locale/i18n";
 import { avatarColor, initials, typeColor, typeLabel, type ContactDetail } from "@/components/modules/contacts/shared";
 
@@ -10,11 +11,31 @@ type Props = {
   onBack: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onToggleActive: (active: boolean) => void;
 };
 
 /** Detail-page header: back, avatar/name/type, creator, edit + overflow menu. */
-export default function ContactHeader({ contact, canUpdate, canDelete, onBack, onEdit, onDelete }: Props) {
+export default function ContactHeader({ contact, canUpdate, canDelete, onBack, onEdit, onDelete, onToggleActive }: Props) {
   const { token } = theme.useToken();
+
+  // Archive/reactivate (update perm) + delete (delete perm) share one overflow menu.
+  const menuItems: MenuProps["items"] = [
+    ...(canUpdate
+      ? [
+          contact.is_active
+            ? { key: "archive", icon: <InboxOutlined />, label: i18n.t("contacts.archive", { defaultValue: "停用" }) }
+            : { key: "reactivate", icon: <UndoOutlined />, label: i18n.t("contacts.reactivate", { defaultValue: "恢复" }) },
+        ]
+      : []),
+    ...(canDelete
+      ? [{ key: "delete", danger: true, icon: <DeleteOutlined />, label: i18n.t("common.delete", { defaultValue: "删除" }) }]
+      : []),
+  ];
+  const onMenuClick: MenuProps["onClick"] = ({ key }) => {
+    if (key === "delete") onDelete();
+    else if (key === "archive") onToggleActive(false);
+    else if (key === "reactivate") onToggleActive(true);
+  };
   return (
     <div
       style={{
@@ -37,6 +58,7 @@ export default function ContactHeader({ contact, canUpdate, canDelete, onBack, o
               {contact.name}
             </Typography.Title>
             <Tag color={typeColor(contact.type)}>{typeLabel(contact.type)}</Tag>
+            {!contact.is_active && <Tag>{i18n.t("contacts.inactive", { defaultValue: "已停用" })}</Tag>}
           </div>
           {contact.created_by_display ? (
             <Typography.Text type="secondary" style={{ fontSize: 12 }}>
@@ -52,24 +74,8 @@ export default function ContactHeader({ contact, canUpdate, canDelete, onBack, o
             {i18n.t("common.edit", { defaultValue: "编辑" })}
           </Button>
         )}
-        {canDelete && (
-          <Dropdown
-            trigger={["click"]}
-            placement="bottomRight"
-            menu={{
-              items: [
-                {
-                  key: "delete",
-                  danger: true,
-                  icon: <DeleteOutlined />,
-                  label: i18n.t("common.delete", { defaultValue: "删除" }),
-                },
-              ],
-              onClick: ({ key }) => {
-                if (key === "delete") onDelete();
-              },
-            }}
-          >
+        {menuItems.length > 0 && (
+          <Dropdown trigger={["click"]} placement="bottomRight" menu={{ items: menuItems, onClick: onMenuClick }}>
             <Button icon={<MoreOutlined />} />
           </Dropdown>
         )}

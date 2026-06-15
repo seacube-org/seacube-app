@@ -306,7 +306,13 @@
     "deleted": "已删除",
     "deleteFailed": "删除失败",
     "deleteConfirm": "确认删除该联系人？",
-    "loadFailed": "加载失败"
+    "loadFailed": "加载失败",
+    "inactive": "已停用",
+    "archive": "停用",
+    "reactivate": "恢复",
+    "archived": "已停用",
+    "reactivated": "已恢复",
+    "archiveConfirm": "确认停用该联系人？停用后会从默认列表和客户选择器中隐藏，但保留其历史单据。"
   },
   "products": {
     "unitKgs": "千克 (KGS)",

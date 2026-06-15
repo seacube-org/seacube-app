@@ -1,21 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { App } from "antd";
 import { useDataService } from "@/hooks/core/useDataService";
-import { ApiError } from "@/services/DataService";
+import { extractApiErrorMessage } from "@/utils/apiError";
 import i18n from "@/locale/i18n";
 import type { DocAction } from "./types";
-
-/** Pull a human message out of a DRF error payload, if any. */
-function backendDetail(e: unknown): string | null {
-  if (!(e instanceof ApiError) || !e.data) return null;
-  const d = e.data as Record<string, unknown> | string;
-  if (typeof d === "string") return d;
-  if (typeof d.detail === "string") return d.detail;
-  // First field error, e.g. {"line_items": ["..."]} or a bare ["..."].
-  const first = Array.isArray(d) ? d[0] : Object.values(d)[0];
-  if (Array.isArray(first)) return String(first[0]);
-  return typeof first === "string" ? first : null;
-}
 
 /**
  * Generic sales-document detail loader. Loads one record from `endpoint` and
@@ -56,7 +44,7 @@ export function useDocumentDetail<T extends { id: number }>(endpoint: string, id
       message.success(i18n.t("sales.deleted", { defaultValue: "已删除" }));
       return true;
     } catch (e) {
-      message.error(backendDetail(e) ?? i18n.t("sales.deleteFailed", { defaultValue: "删除失败" }));
+      message.error(extractApiErrorMessage(e) ?? i18n.t("sales.deleteFailed", { defaultValue: "删除失败" }));
       return false;
     }
   }, [id, vs, message]);
@@ -71,7 +59,7 @@ export function useDocumentDetail<T extends { id: number }>(endpoint: string, id
         await reload();
         return res;
       } catch (e) {
-        message.error(backendDetail(e) ?? i18n.t("sales.actionFailed", { defaultValue: "操作失败" }));
+        message.error(extractApiErrorMessage(e) ?? i18n.t("sales.actionFailed", { defaultValue: "操作失败" }));
         throw e;
       }
     },

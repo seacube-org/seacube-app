@@ -306,7 +306,13 @@
     "deleted": "Deleted",
     "deleteFailed": "Delete failed",
     "deleteConfirm": "Delete this contact?",
-    "loadFailed": "Failed to load"
+    "loadFailed": "Failed to load",
+    "inactive": "Inactive",
+    "archive": "Mark inactive",
+    "reactivate": "Mark active",
+    "archived": "Marked inactive",
+    "reactivated": "Marked active",
+    "archiveConfirm": "Mark this contact inactive? It will be hidden from default lists and the customer selector, but its documents are kept."
   },
   "products": {
     "active": "Active",

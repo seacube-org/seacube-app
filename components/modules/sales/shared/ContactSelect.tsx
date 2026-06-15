@@ -54,7 +54,9 @@ export function useContactOptions(enabled = true): {
     let p = _inflight.get(orgKey);
     if (!p) {
       p = getViewSet(CONTACTS_URL)
-        .list({ params: { page_size: 1000, ordering: "name" } })
+        // is_active: only offer live contacts — archived ones stay linked to their
+        // history but shouldn't be pickable on new documents.
+        .list({ params: { page_size: 1000, ordering: "name", is_active: true } })
         .then((data) => {
           const out = rows<ContactRow>(data).map(toOption);
           _cache.set(orgKey, out);
@@ -107,7 +109,32 @@ type Props = {
 export default function ContactSelect({ value, onChange, disabled, placeholder }: Props) {
   const { token } = theme.useToken();
   const { options, loading, add } = useContactOptions(true);
+  const { getViewSet } = useDataService();
   const [quickAddOpen, setQuickAddOpen] = useState(false);
+  // The selected contact may not be in the active list (e.g. it was archived after
+  // this document was created). Fetch it once so the field shows its name instead of
+  // a raw id — kept local, NOT pushed into the shared active-options cache, so it
+  // never leaks into other pickers' new-selection dropdowns.
+  const [selectedOption, setSelectedOption] = useState<ContactOption | null>(null);
+  useEffect(() => {
+    if (value == null || options.some((o) => o.value === value)) {
+      setSelectedOption(null);
+      return;
+    }
+    if (selectedOption?.value === value) return; // already fetched
+    let alive = true;
+    getViewSet(CONTACTS_URL)
+      .retrieve({ id: value })
+      .then((c) => alive && setSelectedOption(toOption(c as ContactDetail)))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [value, options, selectedOption, getViewSet]);
+  const mergedOptions =
+    selectedOption && !options.some((o) => o.value === selectedOption.value)
+      ? [selectedOption, ...options]
+      : options;
   // Collection OPTIONS advertises POST only when the user may create contacts —
   // an empty schema means no create permission, so hide the quick-add footer.
   const schema = useFieldMeta(CONTACTS_URL);
@@ -122,7 +149,7 @@ export default function ContactSelect({ value, onChange, disabled, placeholder }
         disabled={disabled}
         value={value ?? undefined}
         onChange={(v) => onChange?.(v ?? null)}
-        options={options}
+        options={mergedOptions}
         filterOption={(input, option) => {
           const q = input.trim().toLowerCase();
           if (!option) return false;

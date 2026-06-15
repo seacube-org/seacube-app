@@ -47,7 +47,7 @@ export default function ContactDetailScreen() {
   const schema = useFieldMeta(CONTACTS_URL);
   const contentTypeId = useContentType("contact");
 
-  const { contact, loading, reload, remove } = useContactDetail(contactId);
+  const { contact, loading, reload, remove, setActive } = useContactDetail(contactId);
   const [editOpen, setEditOpen] = useState(false);
 
   const goBack = () => {
@@ -64,6 +64,27 @@ export default function ContactDetailScreen() {
       onOk: async () => {
         if (await remove()) goBack();
       },
+    });
+  };
+
+  // Reactivate is harmless (apply directly); archiving hides the contact, so confirm.
+  const toggleActive = (active: boolean) => {
+    const apply = async () => {
+      // Drop the sales-form selector cache so an archived contact stops being
+      // offered (and a reactivated one reappears) — same as the save/delete flows.
+      if (await setActive(active)) invalidateContactOptions();
+    };
+    if (active) {
+      apply();
+      return;
+    }
+    modal.confirm({
+      title: i18n.t("contacts.archiveConfirm", {
+        defaultValue: "确认停用该联系人？停用后会从默认列表和客户选择器中隐藏，但保留其历史单据。",
+      }),
+      okText: i18n.t("common.confirm", { defaultValue: "确认" }),
+      cancelText: i18n.t("common.cancel", { defaultValue: "取消" }),
+      onOk: apply,
     });
   };
 
@@ -126,6 +147,7 @@ export default function ContactDetailScreen() {
         onBack={goBack}
         onEdit={() => setEditOpen(true)}
         onDelete={confirmDelete}
+        onToggleActive={toggleActive}
       />
 
       {/* A single scroll on the whole body (not per-column) → one scrollbar. */}

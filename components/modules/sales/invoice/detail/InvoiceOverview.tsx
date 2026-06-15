@@ -4,6 +4,7 @@ import BasicTable from "@/components/modules/base/BasicTable";
 import { SectionLabel, TAB_PANE_STYLE } from "@/components/modules/base/sections";
 import DocumentTotals from "@/components/modules/sales/shared/DocumentTotals";
 import LineItemsTable from "@/components/modules/sales/shared/LineItemsTable";
+import { DocumentAddressDisplay } from "@/components/modules/sales/shared/DocumentAddressSection";
 import { amount as fmtAmount } from "@/components/modules/sales/shared/format";
 import type { InvoiceDetail, PaymentAllocation } from "@/components/modules/sales/invoice/shared";
 
@@ -55,6 +56,8 @@ export default function InvoiceOverview({ invoice }: { invoice: InvoiceDetail })
           />
         </>
       ) : null}
+
+      <DocumentAddressDisplay billing={invoice.billing_address} shipping={invoice.shipping_address} />
 
       {invoice.terms ? (
         <>

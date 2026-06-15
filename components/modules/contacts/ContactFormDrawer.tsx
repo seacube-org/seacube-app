@@ -48,8 +48,7 @@ export default function ContactFormDrawer({ open, contact, onClose, onSaved }: P
       website: contact?.website ?? "",
       currency: contact?.currency ?? "CNY",
       notes: contact?.notes ?? "",
-      billing_address: contact?.billing_address ?? {},
-      shipping_address: contact?.shipping_address ?? {},
+      addresses: contact?.addresses ?? [],
       persons: contact?.persons ?? [],
       bank_accounts: contact?.bank_accounts ?? [],
       // tax_id / credit_period / payment_terms are hidden from STAFF by the
@@ -100,7 +99,7 @@ export default function ContactFormDrawer({ open, contact, onClose, onSaved }: P
       key: "address",
       label: i18n.t("contacts.tabAddress", { defaultValue: "地址" }),
       forceRender: true,
-      children: <AddressTab schema={schema} form={form} />,
+      children: <AddressTab schema={schema} />,
     },
     {
       key: "persons",

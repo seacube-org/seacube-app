@@ -2,10 +2,16 @@ import { useEffect, useState } from "react";
 import { App, Button, DatePicker, Drawer, Form, Input, InputNumber } from "antd";
 import dayjs from "dayjs";
 import { applyFieldErrors } from "@/components/modules/settings/formErrors";
+import { useFieldMeta } from "@/hooks/core/useFieldMeta";
 import ContactSelect from "@/components/modules/sales/shared/ContactSelect";
+import DocumentAddressSection, {
+  documentAddressBody,
+  documentAddressSeed,
+  useContactAddressPrefill,
+} from "@/components/modules/sales/shared/DocumentAddressSection";
 import { fromPicker, toPicker } from "@/components/modules/sales/shared/dates";
 import i18n from "@/locale/i18n";
-import { useCreditNoteViewSet, type CreditNoteDetail } from "./shared";
+import { CREDIT_NOTES_URL, useCreditNoteViewSet, type CreditNoteDetail } from "./shared";
 import InvoiceSelect from "./InvoiceSelect";
 
 type Props = {
@@ -23,6 +29,8 @@ type FormValues = {
   amount?: number | null;
   reason?: string;
   notes?: string;
+  billing_address?: Record<string, unknown>;
+  shipping_address?: Record<string, unknown>;
 };
 
 /**
@@ -34,6 +42,8 @@ type FormValues = {
 export default function CreditNoteFormDrawer({ open, creditNote, onClose, onSaved }: Props) {
   const { message } = App.useApp();
   const vs = useCreditNoteViewSet();
+  const schema = useFieldMeta(creditNote ? `${CREDIT_NOTES_URL}${creditNote.id}/` : CREDIT_NOTES_URL);
+  const prefillAddresses = useContactAddressPrefill();
   const [form] = Form.useForm<FormValues>();
   const [saving, setSaving] = useState(false);
   const isEdit = creditNote != null;
@@ -50,6 +60,7 @@ export default function CreditNoteFormDrawer({ open, creditNote, onClose, onSave
       amount: creditNote?.amount != null ? Number(creditNote.amount) : null,
       reason: creditNote?.reason ?? "",
       notes: creditNote?.notes ?? "",
+      ...documentAddressSeed(creditNote),
     });
   }, [open, creditNote, form]);
 
@@ -61,6 +72,7 @@ export default function CreditNoteFormDrawer({ open, creditNote, onClose, onSave
       amount: values.amount,
       reason: values.reason ?? "",
       notes: values.notes ?? "",
+      ...documentAddressBody(form),
     };
     setSaving(true);
     try {
@@ -102,7 +114,14 @@ export default function CreditNoteFormDrawer({ open, creditNote, onClose, onSave
         </div>
       }
     >
-      <Form form={form} layout="vertical" onFinish={onFinish}>
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={onFinish}
+        onValuesChange={(changed) => {
+          if ("contact" in changed) prefillAddresses(form, changed.contact as number | null);
+        }}
+      >
         <Form.Item
           name="contact"
           label={i18n.t("sales.customer", { defaultValue: "客户" })}
@@ -145,6 +164,8 @@ export default function CreditNoteFormDrawer({ open, creditNote, onClose, onSave
         <Form.Item name="notes" label={i18n.t("sales.notes", { defaultValue: "备注" })}>
           <Input.TextArea rows={3} />
         </Form.Item>
+
+        <DocumentAddressSection schema={schema} />
       </Form>
     </Drawer>
   );

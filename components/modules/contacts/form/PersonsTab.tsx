@@ -5,6 +5,7 @@ import { type FieldSchema } from "@/hooks/core/useFieldMeta";
 import i18n from "@/locale/i18n";
 import NestedItemCard from "./NestedItemCard";
 import PhoneInput from "./PhoneInput";
+import { useSingleDefault } from "./useSingleDefault";
 import { FIELD_GRID_STYLE, FIELD_ITEM_STYLE } from "./layout";
 
 /**
@@ -14,6 +15,8 @@ import { FIELD_GRID_STYLE, FIELD_ITEM_STYLE } from "./layout";
  */
 export default function PersonsTab({ schema }: { schema: FieldSchema }) {
   const s = schema.nested("persons");
+  // Only one person can be the primary contact — keep the switch single-select.
+  const keepSingleDefault = useSingleDefault("persons");
   return (
     <Form.List name="persons">
       {(fields, { add, remove }) => (
@@ -62,7 +65,12 @@ export default function PersonsTab({ schema }: { schema: FieldSchema }) {
                 schema={s}
                 name="is_primary"
                 namePath={[name, "is_primary"]}
-                config={{ inputProps: { size: "small" } }}
+                config={{
+                  inputProps: {
+                    size: "small",
+                    onChange: (checked: boolean) => checked && keepSingleDefault("is_primary", name),
+                  },
+                }}
               />
             </NestedItemCard>
           ))}

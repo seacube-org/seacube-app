@@ -1,6 +1,7 @@
 import i18n from "@/locale/i18n";
 import LineItemsTable from "@/components/modules/sales/shared/LineItemsTable";
 import DocumentTotals from "@/components/modules/sales/shared/DocumentTotals";
+import { DocumentAddressDisplay } from "@/components/modules/sales/shared/DocumentAddressSection";
 import { InfoRow, SectionLabel, TAB_PANE_STYLE } from "@/components/modules/base/sections";
 import type { QuoteDetail } from "@/components/modules/sales/quote/shared";
 
@@ -19,6 +20,8 @@ export default function QuoteOverview({ quote }: { quote: QuoteDetail }) {
         total={quote.total_amount}
         currency={quote.currency}
       />
+
+      <DocumentAddressDisplay billing={quote.billing_address} shipping={quote.shipping_address} />
 
       <SectionLabel>{i18n.t("sales.tabTerms", { defaultValue: "贸易条款" })}</SectionLabel>
       <InfoRow label={i18n.t("sales.incoterms", { defaultValue: "贸易术语" })} value={quote.incoterms || undefined} />

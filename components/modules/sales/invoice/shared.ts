@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useDataService } from "@/hooks/core/useDataService";
 import { API_ENDPOINTS } from "@/constants/Constants";
-import type { LineItemRow, TradeTerms, UserDisplay } from "@/components/modules/sales/shared/types";
+import type { DocumentAddresses, LineItemRow, TradeTerms, UserDisplay } from "@/components/modules/sales/shared/types";
 
 export const INVOICES_URL = API_ENDPOINTS.invoices;
 
@@ -36,7 +36,8 @@ export type InvoiceRow = {
 
 // Full shape returned by the detail endpoint (InvoiceDetailSerializer).
 export type InvoiceDetail = InvoiceRow &
-  TradeTerms & {
+  TradeTerms &
+  DocumentAddresses & {
     sales_order: number | null;
     reference: string;
     notes: string;

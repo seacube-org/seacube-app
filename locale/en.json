@@ -25,6 +25,14 @@
     "settings": "Settings"
   },
   "sales": {
+    "addresses": "Addresses",
+    "billingAddress": "Billing Address",
+    "shippingAddress": "Shipping Address",
+    "pickSavedAddress": "Use a saved address",
+    "noSavedAddress": "No saved addresses for this customer",
+    "addAddress": "New address",
+    "editAddress": "Edit address",
+    "addressRequired": "Please enter an address",
     "actionAccept": "Accept",
     "actionConvertToOrder": "Convert to Sales Order",
     "actionDecline": "Decline",
@@ -196,6 +204,7 @@
     "cancel": "Cancel",
     "delete": "Delete",
     "edit": "Edit",
+    "done": "Done",
     "create": "Create",
     "search": "Search",
     "filter": "Filter",
@@ -240,6 +249,12 @@
     "DELIVERED": "Delivered"
   },
   "contacts": {
+    "address": "Address",
+    "addressLabel": "Label",
+    "addressLabelHint": "e.g. Shanghai WH / HQ",
+    "addAddress": "Add address",
+    "defaultBilling": "Default billing",
+    "defaultShipping": "Default shipping",
     "new": "New Contact",
     "edit": "Edit Contact",
     "name": "Name",

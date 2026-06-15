@@ -4,6 +4,7 @@ import SchemaField from "@/components/modules/base/SchemaField";
 import { type FieldSchema } from "@/hooks/core/useFieldMeta";
 import i18n from "@/locale/i18n";
 import NestedItemCard from "./NestedItemCard";
+import { useSingleDefault } from "./useSingleDefault";
 import { FIELD_GRID_STYLE, FIELD_ITEM_STYLE, FULL_WIDTH_ITEM_STYLE } from "./layout";
 
 const { TextArea } = Input;
@@ -11,6 +12,8 @@ const { TextArea } = Input;
 /** Bank accounts (Form.List). Same nested-schema pattern as PersonsTab. */
 export default function BankAccountsTab({ schema }: { schema: FieldSchema }) {
   const s = schema.nested("bank_accounts");
+  // Only one bank account can be the default — keep the switch single-select.
+  const keepSingleDefault = useSingleDefault("bank_accounts");
   return (
     <Form.List name="bank_accounts">
       {(fields, { add, remove }) => (
@@ -69,7 +72,12 @@ export default function BankAccountsTab({ schema }: { schema: FieldSchema }) {
                 schema={s}
                 name="is_default"
                 namePath={[name, "is_default"]}
-                config={{ inputProps: { size: "small" } }}
+                config={{
+                  inputProps: {
+                    size: "small",
+                    onChange: (checked: boolean) => checked && keepSingleDefault("is_default", name),
+                  },
+                }}
               />
             </NestedItemCard>
           ))}

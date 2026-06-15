@@ -11,7 +11,12 @@ import i18n from "@/locale/i18n";
 import ContactSelect from "@/components/modules/sales/shared/ContactSelect";
 import LineItemsEditor from "@/components/modules/sales/shared/LineItemsEditor";
 import TradeTermsFields from "@/components/modules/sales/shared/TradeTermsFields";
-import { Section } from "@/components/modules/sales/shared/formLayout";
+import DocumentAddressSection, {
+  documentAddressBody,
+  documentAddressSeed,
+  useContactAddressPrefill,
+} from "@/components/modules/sales/shared/DocumentAddressSection";
+import Section from "@/components/ui/Section";
 import { fromPicker, toPicker } from "@/components/modules/sales/shared/dates";
 import type { LineItemRow } from "@/components/modules/sales/shared/types";
 import { QUOTES_URL, useQuoteViewSet, type QuoteDetail } from "./shared";
@@ -44,6 +49,7 @@ export default function QuoteFormPage({ quote }: Props) {
   const { token } = theme.useToken();
   const router = useRouter();
   const vs = useQuoteViewSet();
+  const prefillAddresses = useContactAddressPrefill();
   // Edit reads the detail endpoint's OPTIONS (carries `PUT`), create reads the
   // collection's (`POST`) — so an update-only profile still gets a schema.
   const schema = useFieldMeta(quote ? `${QUOTES_URL}${quote.id}/` : QUOTES_URL);
@@ -72,6 +78,10 @@ export default function QuoteFormPage({ quote }: Props) {
       notes: quote?.notes ?? "",
       terms: quote?.terms ?? "",
       items: quote?.items ?? [],
+      // Address snapshots: seed from the quote (edit) — never reseed from the
+      // contact here, so an edited snapshot survives. Prefill only on a user
+      // contact change (onValuesChange below).
+      ...documentAddressSeed(quote),
       // Trade terms — default currency to USD on create.
       currency: quote?.currency ?? "USD",
       payment_terms: quote?.payment_terms ?? "",
@@ -97,6 +107,7 @@ export default function QuoteFormPage({ quote }: Props) {
       notes: values.notes,
       terms: values.terms,
       items: (values.items as LineItemRow[]) ?? [],
+      ...documentAddressBody(form),
       ...tradeTerms,
     };
     // quote_number is auto-generated when blank — only send a non-empty value
@@ -163,8 +174,19 @@ export default function QuoteFormPage({ quote }: Props) {
       {/* Scrolling form body */}
       <div style={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
         <div style={{ maxWidth: 1240, margin: "0 auto", padding: "8px 24px 24px" }}>
-          <Form form={form} layout="vertical" onFinish={onFinish} scrollToFirstError>
-            <Section title={i18n.t("sales.tabBasic", { defaultValue: "基本信息" })}>
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={onFinish}
+            scrollToFirstError
+            onValuesChange={(changed) => {
+              // Prefill address snapshots from the newly picked customer. Fires
+              // on user input only (not setFieldsValue), so editing an existing
+              // quote keeps its snapshot.
+              if ("contact" in changed) prefillAddresses(form, changed.contact as number | null);
+            }}
+          >
+            <Section first size="md" title={i18n.t("sales.tabBasic", { defaultValue: "基本信息" })}>
               {/* One flowing row, responsive to the viewport: ≥xl three fields per
                   line (customer | number | reference, then dates | currency) so
                   inputs stay a readable width; md two per line with the customer
@@ -221,11 +243,16 @@ export default function QuoteFormPage({ quote }: Props) {
               </Row>
             </Section>
 
-            <Section title={i18n.t("sales.tabTerms", { defaultValue: "贸易条款" })} collapsible>
+            <Section size="md" title={i18n.t("sales.addresses", { defaultValue: "地址" })}>
+              <DocumentAddressSection schema={schema} />
+            </Section>
+
+            <Section size="md" title={i18n.t("sales.tabTerms", { defaultValue: "贸易条款" })} collapsible>
               <TradeTermsFields schema={schema} responsive showCurrency={false} />
             </Section>
 
             <Section
+              size="md"
               title={
                 itemCount > 0
                   ? `${i18n.t("sales.tabItems", { defaultValue: "行项目" })} (${itemCount})`

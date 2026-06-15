@@ -16,6 +16,11 @@ type Props<T extends object> = TableProps<T> & {
    * with `resizable`). Omit for in-memory widths that reset when the table remounts.
    */
   widthStorageKey?: string;
+  /**
+   * Let rows grow to fit multi-line cells instead of the fixed single-line row
+   * height (e.g. tables with clamped two-line text). Off by default.
+   */
+  autoRowHeight?: boolean;
 };
 
 // Stable empty array so the resize hook does no work when `resizable` is off
@@ -35,6 +40,7 @@ const NO_COLUMNS: { key?: Key; width?: number; sorter?: boolean }[] = [];
 export default function BasicTable<T extends object = Record<string, unknown>>({
   resizable = false,
   widthStorageKey,
+  autoRowHeight = false,
   columns,
   components,
   tableLayout,
@@ -56,7 +62,7 @@ export default function BasicTable<T extends object = Record<string, unknown>>({
     <div className="seacube-basic-table">
       <style>{`
         .seacube-basic-table .ant-table { background: transparent; }
-        ${tableSkinCss("seacube-basic-table")}
+        ${tableSkinCss("seacube-basic-table", { autoRowHeight })}
       `}</style>
       <Table
         size="small"

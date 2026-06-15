@@ -6,6 +6,11 @@ import SchemaField from "@/components/modules/base/SchemaField";
 import ContactSelect from "@/components/modules/sales/shared/ContactSelect";
 import LineItemsEditor from "@/components/modules/sales/shared/LineItemsEditor";
 import TradeTermsFields from "@/components/modules/sales/shared/TradeTermsFields";
+import DocumentAddressSection, {
+  documentAddressBody,
+  documentAddressSeed,
+  useContactAddressPrefill,
+} from "@/components/modules/sales/shared/DocumentAddressSection";
 import { fromPicker, toPicker } from "@/components/modules/sales/shared/dates";
 import i18n from "@/locale/i18n";
 import { SO_ORDERS_URL, useSalesOrderViewSet, type SalesOrderDetail } from "./shared";
@@ -27,6 +32,7 @@ type Props = {
 export default function SalesOrderFormDrawer({ open, order, onClose, onSaved }: Props) {
   const { message } = App.useApp();
   const vs = useSalesOrderViewSet();
+  const prefillAddresses = useContactAddressPrefill();
   // Edit reads the detail endpoint's OPTIONS (carries PUT), create reads the
   // collection's (POST) — so an update-only profile still gets a schema.
   const schema = useFieldMeta(order ? `${SO_ORDERS_URL}${order.id}/` : SO_ORDERS_URL);
@@ -61,6 +67,9 @@ export default function SalesOrderFormDrawer({ open, order, onClose, onSaved }: 
       shipment_type: order?.shipment_type ?? undefined,
       port_of_loading: order?.port_of_loading ?? "",
       port_of_destination: order?.port_of_destination ?? "",
+      // Snapshots: seed from the order (edit); prefill from the customer only on a
+      // user contact change (onValuesChange), never on this programmatic seed.
+      ...documentAddressSeed(order),
     });
   }, [open, order, form]);
 
@@ -70,6 +79,7 @@ export default function SalesOrderFormDrawer({ open, order, onClose, onSaved }: 
       ...values,
       date: fromPicker(values.date as Parameters<typeof fromPicker>[0]),
       expected_ship_date: fromPicker(values.expected_ship_date as Parameters<typeof fromPicker>[0]),
+      ...documentAddressBody(form),
     };
     setSaving(true);
     try {
@@ -151,6 +161,9 @@ export default function SalesOrderFormDrawer({ open, order, onClose, onSaved }: 
               }}
             />
           </Col>
+          <Col span={24}>
+            <DocumentAddressSection schema={schema} />
+          </Col>
         </Row>
       ),
     },
@@ -192,7 +205,14 @@ export default function SalesOrderFormDrawer({ open, order, onClose, onSaved }: 
         </div>
       }
     >
-      <Form form={form} layout="vertical" onFinish={onFinish}>
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={onFinish}
+        onValuesChange={(changed) => {
+          if ("contact" in changed) prefillAddresses(form, changed.contact as number | null);
+        }}
+      >
         <Tabs activeKey={tab} onChange={setTab} items={items} />
       </Form>
     </Drawer>

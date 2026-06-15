@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useDataService } from "@/hooks/core/useDataService";
 import { API_ENDPOINTS } from "@/constants/Constants";
-import type { LineItemRow, TradeTerms, UserDisplay } from "@/components/modules/sales/shared/types";
+import type { DocumentAddresses, LineItemRow, TradeTerms, UserDisplay } from "@/components/modules/sales/shared/types";
 
 export const SO_ORDERS_URL = API_ENDPOINTS.salesOrders; // "/api/sales/orders/"
 
@@ -31,7 +31,8 @@ export type SalesOrderRow = {
 
 // Full shape returned by the detail endpoint (SalesOrderDetailSerializer).
 export type SalesOrderDetail = SalesOrderRow &
-  TradeTerms & {
+  TradeTerms &
+  DocumentAddresses & {
     quote: number | null; // FK id (source quote, when converted)
     expected_ship_date: string | null;
     reference: string;

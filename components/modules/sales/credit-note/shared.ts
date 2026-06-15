@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useDataService } from "@/hooks/core/useDataService";
 import { API_ENDPOINTS } from "@/constants/Constants";
-import type { UserDisplay } from "@/components/modules/sales/shared/types";
+import type { DocumentAddresses, UserDisplay } from "@/components/modules/sales/shared/types";
 
 export const CREDIT_NOTES_URL = API_ENDPOINTS.creditNotes;
 
@@ -28,9 +28,10 @@ export type CreditNoteRow = {
 
 // Full shape returned by the detail endpoint (CreditNoteSerializer). Same fields
 // as the row plus the created-by display blob.
-export type CreditNoteDetail = CreditNoteRow & {
-  created_by_display: UserDisplay;
-};
+export type CreditNoteDetail = CreditNoteRow &
+  DocumentAddresses & {
+    created_by_display: UserDisplay;
+  };
 
 /** Auth-aware viewset for credit notes — routed through useDataService so a 401 logs out. */
 export function useCreditNoteViewSet() {

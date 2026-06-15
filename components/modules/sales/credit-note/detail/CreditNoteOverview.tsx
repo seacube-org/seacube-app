@@ -1,5 +1,6 @@
 import { Typography, theme } from "antd";
 import { InfoRow, SectionLabel, TAB_PANE_STYLE } from "@/components/modules/base/sections";
+import { DocumentAddressDisplay } from "@/components/modules/sales/shared/DocumentAddressSection";
 import { money } from "@/components/modules/sales/shared/format";
 import i18n from "@/locale/i18n";
 import type { CreditNoteDetail } from "../shared";
@@ -34,6 +35,8 @@ export default function CreditNoteOverview({ data }: { data: CreditNoteDetail })
           <Typography.Paragraph style={{ whiteSpace: "pre-wrap", marginBottom: 0 }}>{data.notes}</Typography.Paragraph>
         </>
       ) : null}
+
+      <DocumentAddressDisplay billing={data.billing_address} shipping={data.shipping_address} />
 
       <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 16 }}>
         <div

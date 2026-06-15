@@ -3,6 +3,8 @@ import { useDataService } from "@/hooks/core/useDataService";
 import i18n from "@/locale/i18n";
 
 export const CONTACTS_URL = "/api/contacts/contacts/";
+// Standalone CRUD for a contact's address book (Zoho-style "add additional address").
+export const CONTACT_ADDRESSES_URL = "/api/contacts/addresses/";
 
 // Derived server-side from the contact's sales/purchase documents (read-only).
 export type ContactType = "CUSTOMER" | "VENDOR" | "BOTH" | "UNCLASSIFIED";
@@ -16,6 +18,17 @@ export type ContactAddress = {
   postal_code?: string;
   country?: string;
   phone?: string;
+};
+
+// One row in a contact's address book (ContactAddressNestedSerializer): the
+// shared address shape plus a label, default flags and ordering. `id` present on
+// existing rows (diff-by-id sync), absent on new ones.
+export type ContactAddressRow = ContactAddress & {
+  id?: number;
+  label?: string;
+  is_default_billing?: boolean;
+  is_default_shipping?: boolean;
+  sort_order?: number;
 };
 
 export type ContactPerson = {
@@ -69,8 +82,10 @@ export type ContactDetail = ContactRow & {
   tax_id: string;
   credit_period_detail?: CreditPeriodDetail | null; // read-only display of credit_period
   notes: string;
+  // Read-only default-address projections (the editable book is `addresses`).
   billing_address: ContactAddress;
   shipping_address: ContactAddress;
+  addresses: ContactAddressRow[];
   persons: ContactPerson[];
   bank_accounts: BankAccount[];
   updated_at: string;
@@ -141,4 +156,9 @@ export function formatAddress(addr: ContactAddress | undefined): string {
   return ADDRESS_KEYS.map((k) => addr[k])
     .filter((v) => v && String(v).trim())
     .join(", ");
+}
+
+/** True when an address blob has no attention, no location line and no phone. */
+export function isAddressEmpty(addr: ContactAddress | undefined): boolean {
+  return !addr?.attention && !formatAddress(addr) && !addr?.phone;
 }

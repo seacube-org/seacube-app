@@ -25,6 +25,14 @@
     "settings": "设置"
   },
   "sales": {
+    "addresses": "地址",
+    "billingAddress": "账单地址",
+    "shippingAddress": "收货地址",
+    "pickSavedAddress": "选择已有地址",
+    "noSavedAddress": "该客户暂无已保存地址",
+    "addAddress": "新加地址",
+    "editAddress": "编辑地址",
+    "addressRequired": "请填写地址",
     "quotes": "报价单",
     "salesOrders": "销售订单",
     "invoices": "发票",
@@ -196,6 +204,7 @@
     "cancel": "取消",
     "delete": "删除",
     "edit": "编辑",
+    "done": "完成",
     "create": "新建",
     "search": "搜索",
     "filter": "筛选",
@@ -240,6 +249,12 @@
     "DELIVERED": "已签收"
   },
   "contacts": {
+    "address": "地址",
+    "addressLabel": "标签",
+    "addressLabelHint": "如:上海仓 / 总部",
+    "addAddress": "添加地址",
+    "defaultBilling": "默认账单",
+    "defaultShipping": "默认收货",
     "new": "新建联系人",
     "edit": "编辑联系人",
     "name": "名称",

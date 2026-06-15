@@ -7,6 +7,11 @@ import SchemaField from "@/components/modules/base/SchemaField";
 import ContactSelect from "@/components/modules/sales/shared/ContactSelect";
 import LineItemsEditor from "@/components/modules/sales/shared/LineItemsEditor";
 import TradeTermsFields from "@/components/modules/sales/shared/TradeTermsFields";
+import DocumentAddressSection, {
+  documentAddressBody,
+  documentAddressSeed,
+  useContactAddressPrefill,
+} from "@/components/modules/sales/shared/DocumentAddressSection";
 import { fromPicker, toPicker } from "@/components/modules/sales/shared/dates";
 import { INVOICES_URL, useInvoiceViewSet, type InvoiceDetail } from "./shared";
 
@@ -26,6 +31,7 @@ type Props = {
 export default function InvoiceFormDrawer({ open, invoice, onClose, onSaved }: Props) {
   const { message } = App.useApp();
   const vs = useInvoiceViewSet();
+  const prefillAddresses = useContactAddressPrefill();
   // Edit reads the detail endpoint's OPTIONS (carries `PUT`), create reads the
   // collection's (`POST`) — without this an update-only profile gets an empty schema.
   const schema = useFieldMeta(invoice ? `${INVOICES_URL}${invoice.id}/` : INVOICES_URL);
@@ -57,6 +63,9 @@ export default function InvoiceFormDrawer({ open, invoice, onClose, onSaved }: P
       port_of_loading: invoice?.port_of_loading ?? "",
       port_of_destination: invoice?.port_of_destination ?? "",
       items: invoice?.items ?? [],
+      // Snapshots: seed from the invoice (edit); prefill from the customer only on
+      // a user contact change (onValuesChange), never on this programmatic seed.
+      ...documentAddressSeed(invoice),
     });
   }, [open, invoice, form]);
 
@@ -66,6 +75,7 @@ export default function InvoiceFormDrawer({ open, invoice, onClose, onSaved }: P
       ...values,
       date: fromPicker(values.date as Parameters<typeof fromPicker>[0]),
       due_date: fromPicker(values.due_date as Parameters<typeof fromPicker>[0]),
+      ...documentAddressBody(form),
     };
     setSaving(true);
     try {
@@ -131,6 +141,9 @@ export default function InvoiceFormDrawer({ open, invoice, onClose, onSaved }: P
       <Col span={24}>
         <SchemaField schema={schema} name="notes" config={{ control: <Input.TextArea rows={3} /> }} />
       </Col>
+      <Col span={24}>
+        <DocumentAddressSection schema={schema} />
+      </Col>
     </Row>
   );
 
@@ -179,7 +192,14 @@ export default function InvoiceFormDrawer({ open, invoice, onClose, onSaved }: P
         </div>
       }
     >
-      <Form form={form} layout="vertical" onFinish={onFinish}>
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={onFinish}
+        onValuesChange={(changed) => {
+          if ("contact" in changed) prefillAddresses(form, changed.contact as number | null);
+        }}
+      >
         <Tabs activeKey={tab} onChange={setTab} items={items} />
       </Form>
     </Drawer>

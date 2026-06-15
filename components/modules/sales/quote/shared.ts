@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useDataService } from "@/hooks/core/useDataService";
 import { API_ENDPOINTS } from "@/constants/Constants";
-import type { LineItemRow, TradeTerms, UserDisplay } from "@/components/modules/sales/shared/types";
+import type { DocumentAddresses, LineItemRow, TradeTerms, UserDisplay } from "@/components/modules/sales/shared/types";
 
 export const QUOTES_URL = API_ENDPOINTS.quotes;
 
@@ -23,7 +23,8 @@ export type QuoteRow = {
 // trade-terms block, the editable text fields, server-computed totals and the
 // line items.
 export type QuoteDetail = QuoteRow &
-  TradeTerms & {
+  TradeTerms &
+  DocumentAddresses & {
     reference: string;
     notes: string;
     terms: string;

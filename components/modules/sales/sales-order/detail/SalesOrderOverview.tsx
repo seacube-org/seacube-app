@@ -3,6 +3,7 @@ import i18n from "@/locale/i18n";
 import type { FieldSchema } from "@/hooks/core/useFieldMeta";
 import LineItemsTable from "@/components/modules/sales/shared/LineItemsTable";
 import DocumentTotals from "@/components/modules/sales/shared/DocumentTotals";
+import { DocumentAddressDisplay } from "@/components/modules/sales/shared/DocumentAddressSection";
 import { InfoRow, SectionLabel, TAB_PANE_STYLE } from "@/components/modules/base/sections";
 import type { SalesOrderDetail } from "@/components/modules/sales/sales-order/shared";
 
@@ -19,6 +20,8 @@ export default function SalesOrderOverview({ order, schema }: { order: SalesOrde
         total={order.total_amount}
         currency={order.currency}
       />
+
+      <DocumentAddressDisplay billing={order.billing_address} shipping={order.shipping_address} />
 
       <SectionLabel>{i18n.t("sales.tradeTerms", { defaultValue: "贸易条款" })}</SectionLabel>
       <Row gutter={[16, 0]}>

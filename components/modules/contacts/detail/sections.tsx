@@ -1,15 +1,16 @@
+import { type ReactNode } from "react";
 import { Card, Typography, theme } from "antd";
 import { EnvironmentOutlined, PhoneOutlined } from "@ant-design/icons";
-import { formatAddress, type ContactAddress } from "@/components/modules/contacts/shared";
+import { formatAddress, isAddressEmpty, type ContactAddress } from "@/components/modules/contacts/shared";
 
 // SectionLabel / InfoRow moved to @/components/modules/base/sections — they are
 // shared by every detail page, not just contacts.
 
-/** Card summarizing one address (billing / shipping). */
-export function AddressCard({ title, address }: { title: string; address: ContactAddress | undefined }) {
+/** Card summarizing one address (billing / shipping, or a labelled book entry). */
+export function AddressCard({ title, address }: { title: ReactNode; address: ContactAddress | undefined }) {
   const { token } = theme.useToken();
   const line = formatAddress(address);
-  const isEmpty = !address?.attention && !line && !address?.phone;
+  const isEmpty = isAddressEmpty(address);
   return (
     <Card
       size="small"

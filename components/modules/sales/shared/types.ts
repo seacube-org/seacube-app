@@ -2,6 +2,8 @@
 // simpler PaymentReceived / CreditNote records). Field shapes mirror the DRF
 // serializers in apps/sales/serializers.
 
+import type { ContactAddress } from "@/components/modules/contacts/shared";
+
 /**
  * One editable/displayable document line item (QuoteItem / SalesOrderItem /
  * InvoiceItem). Two-level pricing: the user enters entry_qty in entry_unit; an
@@ -45,6 +47,13 @@ export type TradeTerms = {
   currency?: string;
   payment_terms?: string;
   shipment_type?: string;
+};
+
+/** Billing / shipping address SNAPSHOTS on a sales document — frozen copies of
+ *  the contact's defaults at create time (docs/plans/document-addresses.md). */
+export type DocumentAddresses = {
+  billing_address?: ContactAddress;
+  shipping_address?: ContactAddress;
 };
 
 /** A status-transition action button spec for StatusActionBar. */
